@@ -61,12 +61,34 @@ class QuoteRequest(BaseModel):
 
 
 class LineItem(BaseModel):
+    scope: Optional[str] = None  # job_type id (e.g., "slab", "retaining_wall")
     label: str
     detail: str
     qty: float
     unit: str
     unit_cost: float
     total: float
+
+
+class CustomerInfo(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=120)
+    phone: Optional[str] = Field(default=None, max_length=40)
+    email: Optional[EmailStr] = None
+    address: str = Field(..., min_length=4, max_length=240)
+
+
+class JobScope(BaseModel):
+    job_type: str = Field(..., min_length=2, max_length=60)
+    trade: Optional[str] = None
+    label: Optional[str] = None
+    measurements: dict = Field(default_factory=dict)
+
+
+class MultiQuoteRequest(BaseModel):
+    customer: CustomerInfo
+    scopes: List[JobScope] = Field(..., min_length=1, max_length=12)
+    complexity: Literal["low", "medium", "high"] = "medium"
+    notes: Optional[str] = Field(default=None, max_length=2000)
 
 
 class QuoteResponse(BaseModel):
@@ -86,6 +108,8 @@ class QuoteResponse(BaseModel):
     assumptions: List[str]
     next_steps: List[str]
     generated_at: datetime
+    customer: Optional[CustomerInfo] = None
+    scopes: List[JobScope] = Field(default_factory=list)
 
 
 class WaitlistCreate(BaseModel):
@@ -249,6 +273,117 @@ async def generate_quote(req: QuoteRequest):
         raise HTTPException(status_code=502, detail=f"Malformed AI output: {e}")
 
     # Persist quote
+    doc = response.model_dump()
+    doc['generated_at'] = doc['generated_at'].isoformat()
+    doc['request'] = req.model_dump()
+    await db.quotes.insert_one(doc)
+
+    return response
+
+
+MULTI_SYSTEM_PROMPT = """You are TERRAINPRO-AI, a senior estimator with 20+ years on the tools across landscaping, earthmoving and concreting in Australia. You produce realistic, defensible job estimates in AUD across multiple scopes for a single customer.
+
+You ALWAYS respond with STRICT VALID JSON ONLY — no prose, no markdown fences, no commentary. The JSON object must match this exact schema:
+
+{
+  "summary": "string (2-3 sentence punchy summary covering all scopes, tradie tone)",
+  "line_items": [
+    {
+      "scope": "string (job_type id, e.g., 'slab', 'retaining_wall', 'bulk_earthworks')",
+      "label": "string",
+      "detail": "string",
+      "qty": number,
+      "unit": "string (m2, m3, hrs, day, ea, t, lm)",
+      "unit_cost": number (AUD ex GST),
+      "total": number
+    }
+  ],
+  "labor_total": number,
+  "materials_total": number,
+  "contingency_total": number (8-12% of subtotal for medium complexity),
+  "subtotal": number,
+  "gst": number (10% of subtotal),
+  "total_low": number,
+  "total_high": number,
+  "timeline_estimate": "string",
+  "confidence": "low | medium | high",
+  "assumptions": ["string", ...],
+  "next_steps": ["string", ...]
+}
+
+Rules:
+- Cover EVERY scope provided. Group line items by scope (use the scope field with the job_type id from the input).
+- Each scope should have 3-6 line items. Total line items target: 6-20 across all scopes.
+- Use realistic Australian rates (AUD ex GST): skilled labour $85-$120/hr, concrete 32MPa $300-$340/m³ supplied, excavator hire $750-$1100/day, tipper $180-$220/hr, road base $55-$75/m³ supplied, retaining concrete sleepers $55-$90/lm (0.6m high), buffalo turf $14-$18/m² supplied+laid, colorbond fencing $90-$130/lm installed.
+- Adapt to soil class, access, finish, reinforcement, materials provided.
+- Internal math must be consistent (totals = qty * unit_cost; subtotal = labor + materials + contingency; gst = 10% of subtotal).
+- Round to whole dollars.
+- 4-6 assumptions (site access, soil class, council/permits, weather, exclusions).
+- 3 next_steps (site visit, soil test, formal contract).
+- NO markdown. NO trailing commas.
+"""
+
+
+@api_router.post("/quote/multi-generate", response_model=QuoteResponse)
+async def multi_generate_quote(req: MultiQuoteRequest):
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
+
+    quote_id = str(uuid.uuid4())
+    payload = {
+        "customer": req.customer.model_dump(),
+        "scopes": [s.model_dump() for s in req.scopes],
+        "complexity": req.complexity,
+        "notes": req.notes,
+    }
+
+    chat = LlmChat(
+        api_key=EMERGENT_LLM_KEY,
+        session_id=f"quote-multi-{quote_id}",
+        system_message=MULTI_SYSTEM_PROMPT,
+    ).with_model("openai", "gpt-5.2")
+
+    user_msg = UserMessage(
+        text=(
+            "Generate a consolidated AUD quote for the following customer covering ALL scopes. "
+            "Group line_items by scope using the job_type id. Respond with JSON only.\n\n"
+            f"Brief:\n{json.dumps(payload, indent=2, default=str)}"
+        )
+    )
+
+    try:
+        raw = await chat.send_message(user_msg)
+        data = _extract_json(raw if isinstance(raw, str) else str(raw))
+    except Exception as e:
+        logging.exception("Multi-quote LLM call failed")
+        raise HTTPException(status_code=502, detail=f"AI estimator failed: {e}")
+
+    try:
+        line_items = [LineItem(**li) for li in data.get("line_items", [])]
+        response = QuoteResponse(
+            id=quote_id,
+            job_type="multi",
+            summary=data.get("summary", ""),
+            line_items=line_items,
+            labor_total=float(data.get("labor_total", 0)),
+            materials_total=float(data.get("materials_total", 0)),
+            contingency_total=float(data.get("contingency_total", 0)),
+            subtotal=float(data.get("subtotal", 0)),
+            gst=float(data.get("gst", 0)),
+            total_low=float(data.get("total_low", 0)),
+            total_high=float(data.get("total_high", 0)),
+            timeline_estimate=data.get("timeline_estimate", ""),
+            confidence=data.get("confidence", "medium"),
+            assumptions=data.get("assumptions", []),
+            next_steps=data.get("next_steps", []),
+            generated_at=datetime.now(timezone.utc),
+            customer=req.customer,
+            scopes=req.scopes,
+        )
+    except Exception as e:
+        logging.exception("Failed to parse multi-quote output: %s", data)
+        raise HTTPException(status_code=502, detail=f"Malformed AI output: {e}")
+
     doc = response.model_dump()
     doc['generated_at'] = doc['generated_at'].isoformat()
     doc['request'] = req.model_dump()

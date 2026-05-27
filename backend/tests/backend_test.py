@@ -159,3 +159,96 @@ class TestWaitlist:
     def test_create_invalid_email_422(self, client):
         r = client.post(f"{API}/waitlist", json={"email": "not-an-email"}, timeout=15)
         assert r.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Multi-scope quote (iteration 2)
+# ---------------------------------------------------------------------------
+VALID_MULTI_PAYLOAD = {
+    "customer": {
+        "full_name": "Mike Thompson",
+        "phone": "0412345678",
+        "email": "mike@example.com.au",
+        "address": "14 Settlers Cres, Narangba QLD",
+    },
+    "scopes": [
+        {
+            "job_type": "slab",
+            "trade": "Concreting",
+            "label": "Slab",
+            "measurements": {
+                "length_m": 10,
+                "width_m": 6,
+                "area_sqm": 60,
+                "thickness_mm": 100,
+                "concrete_grade": "32MPa",
+                "reinforcement": "SL82 mesh",
+                "finish": "Broom",
+            },
+        },
+        {
+            "job_type": "retaining_wall",
+            "trade": "Landscaping",
+            "label": "Retaining Wall",
+            "measurements": {
+                "length_lm": 12,
+                "height_m": 0.9,
+                "block_type": "Concrete sleeper + steel post",
+                "ag_drainage": True,
+            },
+        },
+    ],
+    "complexity": "medium",
+}
+
+
+class TestMultiQuoteGenerate:
+    def test_multi_quote_success(self, client):
+        r = client.post(f"{API}/quote/multi-generate", json=VALID_MULTI_PAYLOAD, timeout=AI_TIMEOUT)
+        assert r.status_code == 200, f"unexpected status {r.status_code}: {r.text[:500]}"
+        data = r.json()
+
+        for key in [
+            "id", "job_type", "summary", "line_items",
+            "labor_total", "materials_total", "contingency_total",
+            "subtotal", "gst", "total_low", "total_high",
+            "assumptions", "next_steps", "customer", "scopes",
+        ]:
+            assert key in data, f"missing key {key}"
+
+        assert data["job_type"] == "multi"
+        assert isinstance(data["line_items"], list) and len(data["line_items"]) >= 4
+
+        # Scope grouping: ensure each line_item has a `scope` field and that
+        # scopes from request appear in line items
+        scopes_present = {li.get("scope") for li in data["line_items"]}
+        # AI should populate scope. Allow some flexibility but at least one scope id from input
+        input_ids = {"slab", "retaining_wall"}
+        overlap = scopes_present & input_ids
+        assert overlap, f"no scope ids matched input scopes; got {scopes_present}"
+
+        # Totals sanity
+        assert data["total_low"] > 0
+        assert data["total_high"] >= data["total_low"]
+        assert data["gst"] >= 0
+
+        # Customer + scopes echoed
+        assert data["customer"]["full_name"] == "Mike Thompson"
+        assert len(data["scopes"]) == 2
+        assert {s["job_type"] for s in data["scopes"]} == {"slab", "retaining_wall"}
+
+    @pytest.mark.parametrize(
+        "bad_payload",
+        [
+            {},  # missing all
+            {"customer": VALID_MULTI_PAYLOAD["customer"], "scopes": []},  # empty scopes
+            {"scopes": VALID_MULTI_PAYLOAD["scopes"]},  # missing customer
+            {
+                "customer": {"full_name": "X", "address": ""},  # invalid customer
+                "scopes": VALID_MULTI_PAYLOAD["scopes"],
+            },
+        ],
+    )
+    def test_multi_quote_validation_422(self, client, bad_payload):
+        r = client.post(f"{API}/quote/multi-generate", json=bad_payload, timeout=30)
+        assert r.status_code == 422, f"expected 422, got {r.status_code}: {r.text[:300]}"
