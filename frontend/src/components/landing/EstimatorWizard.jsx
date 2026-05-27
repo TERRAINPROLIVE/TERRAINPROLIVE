@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/select";
 
 import { JOB_GROUPS, JOB_LOOKUP, jobsByIds } from "@/lib/jobCatalog";
+import { AU_STATES } from "@/lib/auSuburbs";
+import SuburbCombobox from "./SuburbCombobox";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const TRADE_ICON = { Landscaping: Leaf, Concreting: Box, Earthmoving: Truck };
@@ -58,7 +60,10 @@ export default function EstimatorWizard() {
     full_name: "",
     phone: "",
     email: "",
-    address: "",
+    street: "",
+    suburb: "",
+    state: "QLD",
+    postcode: "",
   });
   const [selectedJobIds, setSelectedJobIds] = useState([]);
   const [measurements, setMeasurements] = useState({}); // { [jobId]: { fieldKey: value } }
@@ -95,7 +100,9 @@ export default function EstimatorWizard() {
 
   const canAdvanceStep1 =
     customer.full_name.trim().length >= 2 &&
-    customer.address.trim().length >= 4 &&
+    customer.street.trim().length >= 2 &&
+    customer.suburb.trim().length >= 2 &&
+    customer.state.trim().length >= 2 &&
     selectedJobIds.length > 0;
 
   const canAdvanceStep2 = selectedJobs.every((j) => {
@@ -131,12 +138,25 @@ export default function EstimatorWizard() {
         };
       });
 
+      const composedAddress = [
+        customer.street.trim(),
+        [
+          customer.suburb.trim(),
+          customer.state.trim(),
+          (customer.postcode || "").trim(),
+        ]
+          .filter(Boolean)
+          .join(" "),
+      ]
+        .filter(Boolean)
+        .join(", ");
+
       const { data } = await axios.post(`${API}/quote/multi-generate`, {
         customer: {
           full_name: customer.full_name.trim(),
           phone: customer.phone || null,
           email: customer.email || null,
-          address: customer.address.trim(),
+          address: composedAddress,
         },
         scopes,
         complexity,
@@ -314,6 +334,9 @@ function Step1({ customer, setCustomer, selectedJobIds, toggleJob }) {
   const onChange = (k) => (e) =>
     setCustomer((c) => ({ ...c, [k]: e.target.value }));
 
+  const handleSuburbSelect = ({ suburb, state, postcode }) =>
+    setCustomer((c) => ({ ...c, suburb, state, postcode }));
+
   return (
     <div className="space-y-10">
       {/* Customer */}
@@ -326,7 +349,7 @@ function Step1({ customer, setCustomer, selectedJobIds, toggleJob }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <FieldShell label="Full name">
+          <FieldShell label="Full name" required>
             <Input
               data-testid="wiz-customer-name"
               value={customer.full_name}
@@ -354,18 +377,81 @@ function Step1({ customer, setCustomer, selectedJobIds, toggleJob }) {
               className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FieldShell>
-          <FieldShell label="Property address" required>
-            <Input
-              data-testid="wiz-customer-address"
-              value={customer.address}
-              onChange={onChange("address")}
-              placeholder="14 Settlers Cres, Narangba QLD"
-              className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+          <FieldShell label="Suburb (search to prefill state & postcode)" required>
+            <SuburbCombobox
+              testId="wiz-customer-suburb"
+              value={
+                customer.suburb
+                  ? {
+                      suburb: customer.suburb,
+                      state: customer.state,
+                      postcode: customer.postcode,
+                    }
+                  : null
+              }
+              onSelect={handleSuburbSelect}
+              placeholder="Search e.g. Narangba, 4504, Bondi…"
             />
           </FieldShell>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 mt-5">
+          <div className="sm:col-span-7">
+            <FieldShell label="Street address" required>
+              <Input
+                data-testid="wiz-customer-street"
+                value={customer.street}
+                onChange={onChange("street")}
+                placeholder="14 Settlers Cres"
+                className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              />
+            </FieldShell>
+          </div>
+          <div className="sm:col-span-3">
+            <FieldShell label="State" required>
+              <Select
+                value={customer.state}
+                onValueChange={(v) => setCustomer((c) => ({ ...c, state: v }))}
+              >
+                <SelectTrigger
+                  data-testid="wiz-customer-state"
+                  className="h-12 rounded-none bg-black border-neutral-800 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-neutral-950 border-neutral-800 rounded-none">
+                  {AU_STATES.map((s) => (
+                    <SelectItem
+                      key={s.code}
+                      value={s.code}
+                      className="rounded-none focus:bg-yellow-500 focus:text-black"
+                    >
+                      {s.code} — {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldShell>
+          </div>
+          <div className="sm:col-span-2">
+            <FieldShell label="Postcode">
+              <Input
+                data-testid="wiz-customer-postcode"
+                value={customer.postcode}
+                onChange={onChange("postcode")}
+                placeholder="4504"
+                inputMode="numeric"
+                maxLength={4}
+                className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono"
+              />
+            </FieldShell>
+          </div>
+        </div>
+
         <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-          Suppliers and rates auto-tune to your region.
+          {customer.state && customer.suburb
+            ? `Site context locked — ${customer.suburb}, ${customer.state} ${customer.postcode}. Rates auto-tune for the region.`
+            : "Suppliers & rates auto-tune once a suburb is selected."}
         </p>
       </div>
 
@@ -661,7 +747,7 @@ function Step3({ loading, error, quote, selectedJobs, customer, onReset }) {
               >
                 <Line>$ terrainpro --multi-quote --scopes={selectedJobs.length}</Line>
                 <Line delay={0.1}>→ parsing customer: {customer.full_name || "(anon)"}</Line>
-                <Line delay={0.3}>→ resolving regional rates for {customer.address || "site"}...</Line>
+                <Line delay={0.3}>→ resolving regional rates for {customer.suburb ? `${customer.suburb}, ${customer.state}` : "site"}...</Line>
                 <Line delay={0.6}>→ sizing plant, materials, labour across {selectedJobs.length} scope{selectedJobs.length === 1 ? "" : "s"}...</Line>
                 <Line delay={0.9}>→ querying gpt-5.2 estimator...</Line>
                 <Line delay={1.3}>→ assembling consolidated line items...</Line>
