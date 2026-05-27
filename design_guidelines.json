@@ -1,0 +1,130 @@
+{
+  "project_name": "Tradesman AI Quoting App Landing Page",
+  "theme": "dark",
+  "archetype": "Archetype 2 / 4 Hybrid (Industrial Brutalism & Performance Pro)",
+  "vibe": "Rugged, precise, fast, professional, high-contrast, no-BS construction tech",
+  "typography": {
+    "fonts": {
+      "headings": "Oswald, sans-serif",
+      "body": "IBM Plex Sans, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "rules": {
+      "h1": "text-5xl sm:text-6xl uppercase tracking-tighter font-bold",
+      "h2": "text-3xl sm:text-4xl uppercase tracking-tight font-bold",
+      "h3": "text-xl sm:text-2xl uppercase tracking-tight font-semibold",
+      "body": "text-base leading-relaxed text-neutral-300",
+      "labels": "text-xs uppercase tracking-[0.2em] font-semibold text-neutral-400",
+      "data_points": "font-mono text-yellow-500 font-bold"
+    }
+  },
+  "colors": {
+    "background": {
+      "default": "#0A0A0A",
+      "surface": "#171717",
+      "surface_elevated": "#262626"
+    },
+    "border": {
+      "default": "#333333",
+      "focus": "#EAB308"
+    },
+    "primary": {
+      "default": "#EAB308",
+      "hover": "#FACC15",
+      "foreground": "#000000"
+    },
+    "text": {
+      "primary": "#FAFAFA",
+      "secondary": "#A3A3A3",
+      "inverse": "#000000"
+    },
+    "status": {
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "error": "#EF4444"
+    }
+  },
+  "layout_and_spacing": {
+    "container": "max-w-7xl mx-auto px-6 lg:px-8",
+    "section_spacing": "py-24 sm:py-32",
+    "grid_system": {
+      "marketing": "grid grid-cols-1 md:grid-cols-12 gap-8",
+      "bento_features": "grid grid-cols-1 md:grid-cols-3 gap-6",
+      "ai_estimator": "grid grid-cols-1 lg:grid-cols-2 gap-0 border border-neutral-800 rounded-none overflow-hidden"
+    },
+    "corners": "rounded-none",
+    "shadows": "shadow-none"
+  },
+  "surface_strategies": {
+    "header": "Solid black background (bg-black) with a hard bottom border (border-b border-neutral-800). No glassmorphism. Keep it raw and industrial.",
+    "cards": "Grid Borders approach. border border-neutral-800 bg-neutral-900/50. No shadows. Sharp edges.",
+    "ai_terminal": "Retro-Futurism/Terminal Look. Deep black background, monospace fonts for outputs, subtle green/yellow accents for 'generating' states."
+  },
+  "media_assets": [
+    {
+      "category": "hero_background",
+      "url": "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/b6feb06c1e22eb535e31a44dae30920128c69818aea25cf6f2f8021a10380ce0.png",
+      "description": "Wide-angle photograph of a modern excavator on a misty construction site at dawn, cinematic lighting, dark and moody. Use with bg-black/50 overlay."
+    },
+    {
+      "category": "texture_background",
+      "url": "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/8a6e0e28588a6d4a32a829f80e506465aa8ce8eedab9f19c94b543ac5bb6aa75.png",
+      "description": "Abstract dark asphalt texture with neon yellow construction grid lines. Use for CTA or Pricing section background."
+    },
+    {
+      "category": "feature_materials",
+      "url": "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/8a5426a3c4fd7ffff49172e78e3e71be6d7343b360d6f04e51aafa9149109697.png",
+      "description": "Close up of wet concrete being poured, highly textured, dark moody lighting. Use in Features section for 'Material AI Calculation'."
+    },
+    {
+      "category": "use_case_earthmoving",
+      "url": "https://images.pexels.com/photos/37393680/pexels-photo-37393680.jpeg",
+      "description": "CAT excavator working at a construction site. Use for Earthmoving use-case card."
+    },
+    {
+      "category": "use_case_landscaping",
+      "url": "https://images.pexels.com/photos/16239805/pexels-photo-16239805.jpeg",
+      "description": "Worker laying paving stones. Use for Landscaping/Concreting use-case card."
+    },
+    {
+      "category": "sponsor_logo_1",
+      "url": "https://images.pexels.com/photos/56950/pexels-photo-56950.jpeg",
+      "description": "CAT brand logo. Use in 'Trusted by' marquee."
+    },
+    {
+      "category": "sponsor_logo_2",
+      "url": "https://images.pexels.com/photos/8671339/pexels-photo-8671339.jpeg",
+      "description": "John Deere brand logo. Use in 'Trusted by' marquee."
+    },
+    {
+      "category": "sponsor_logo_3",
+      "url": "https://images.unsplash.com/photo-1770969367829-33224dcfb072",
+      "description": "U-protec trading logo. Use in 'Trusted by' marquee."
+    }
+  ],
+  "components_and_interactions": {
+    "buttons": "Square edges (rounded-none). Primary buttons are solid yellow (bg-yellow-500) with black text. Hover state: bg-yellow-400. Use uppercase tracking-wider text.",
+    "inputs": "Shadcn inputs heavily customized: rounded-none, bg-neutral-900, border-neutral-700, focus:border-yellow-500, focus:ring-1 focus:ring-yellow-500.",
+    "ai_quote_demo": {
+      "structure": "Split pane layout. Left: Input form (Job Type Select, Area in sq meters, Timeline Slider, Materials Checkboxes). Right: AI Output Terminal.",
+      "behavior": "When form is submitted, right pane should show a 'generating' state (framer-motion blinking cursor, simulated typing), followed by a structured table of line items (Labor, Materials, AI Contingency, Total Range).",
+      "styling": "Right pane must use font-mono for numbers and look like a high-tech blueprint or terminal (bg-black, border-l border-neutral-800)."
+    },
+    "marquee": "Use react-fast-marquee. Very slow drift. High contrast: border-y border-neutral-800 bg-neutral-950. Logos should be grayscale/dimmed until hover.",
+    "icons": "Use lucide-react. Keep icon sizes consistent (w-6 h-6 for standard, w-8 h-8 for featured icons). Use stroke-width 1.5 for a sharp, technical look."
+  },
+  "accessibility_and_testing": {
+    "data_testid": "ALL interactive elements (buttons, inputs, select options, form submissions, AI output containers) MUST have a data-testid attribute.",
+    "contrast": "Ensure all text over images uses proper overlays (bg-black/60 minimum) for legibility. Yellow accents must not contain white text; use black text on yellow for contrast."
+  },
+  "instructions_to_main_agent": [
+    "Initialize React with Tailwind CSS and install Framer Motion, react-fast-marquee, and lucide-react.",
+    "Import Oswald, IBM Plex Sans, and JetBrains Mono from Google Fonts in index.css.",
+    "Build the UI focusing on sharp edges (rounded-none), thick 1px borders, and a stark industrial aesthetic.",
+    "The Hero section must feature the excavator background image with a dark overlay, massive Oswald typography, and a clear primary CTA.",
+    "The AI Quote Estimator Demo is the core feature. Implement it as a stateful React component using custom HTML/Tailwind for layout, integrating Shadcn UI primitives for the form controls. Ensure it returns a simulated structured quote.",
+    "Include a 'How it Works' section using the 'Grid Borders' strategy—a 3-column grid where items have border-r and border-b but no outer container border, exposing the skeleton.",
+    "Use the provided media assets strictly as categorized. DO NOT use placeholders.",
+    "Ensure the entire app is responsive, mobile-first, and uses generative animations (staggered fade-ins, counting numbers for quotes) to feel premium."
+  ]
+}
