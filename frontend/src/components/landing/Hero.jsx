@@ -1,0 +1,129 @@
+import { motion } from "framer-motion";
+import { ArrowDown, Sparkles } from "lucide-react";
+
+const HERO_BG =
+  "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/b6feb06c1e22eb535e31a44dae30920128c69818aea25cf6f2f8021a10380ce0.png";
+
+export default function Hero() {
+  return (
+    <section
+      id="top"
+      data-testid="hero-section"
+      className="relative min-h-[100svh] flex flex-col justify-end overflow-hidden"
+    >
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${HERO_BG})` }}
+        aria-hidden
+      />
+      {/* Dark overlays */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black" aria-hidden />
+      <div className="absolute inset-0 grid-bg opacity-50" aria-hidden />
+
+      {/* Top tickertape */}
+      <div className="absolute top-16 inset-x-0 z-10 border-y border-yellow-500/30 bg-black/70 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 animate-pulse" />
+            <span>LIVE</span>
+            <span className="text-neutral-600">|</span>
+            <span className="hidden sm:inline">Quoteforge engine online</span>
+          </span>
+          <span className="text-yellow-500 hidden sm:inline">
+            v0.9.4 / GPT-5.2 / AUD
+          </span>
+          <span className="text-neutral-500">SYD 14°C • Site Conditions: Dry</span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-20 sm:pb-28 pt-32 w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="flex items-center gap-3 mb-6"
+        >
+          <div className="h-px w-12 bg-yellow-500" />
+          <span className="font-mono text-xs uppercase tracking-[0.3em] text-yellow-500">
+            Built for Earthmoving · Concreting · Landscaping
+          </span>
+        </motion.div>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+          data-testid="hero-title"
+          className="font-display uppercase text-5xl sm:text-7xl lg:text-8xl leading-[0.92] tracking-tight max-w-5xl"
+        >
+          Quote the job
+          <br />
+          <span className="text-yellow-500">in 30 seconds.</span>
+          <br />
+          Win it by smoko.
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.25, ease: "easeOut" }}
+          className="mt-8 max-w-2xl text-base sm:text-lg text-neutral-300 leading-relaxed"
+        >
+          Quoteforge is the AI estimator for tradies who run dirt, pour slabs and
+          shape yards. Punch in the job, get a tight, line-item quote in AUD —
+          materials, plant, labor, GST — done. No spreadsheets. No guesswork.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
+          className="mt-10 flex flex-col sm:flex-row gap-4"
+        >
+          <a
+            href="#estimator"
+            data-testid="hero-primary-cta"
+            className="inline-flex items-center justify-center gap-2 h-14 px-8 bg-yellow-500 text-black font-bold uppercase tracking-[0.18em] text-sm btn-industrial"
+          >
+            <Sparkles className="w-4 h-4" />
+            Try the AI estimator
+          </a>
+          <a
+            href="#how"
+            data-testid="hero-secondary-cta"
+            className="inline-flex items-center justify-center gap-2 h-14 px-8 border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 font-semibold uppercase tracking-[0.18em] text-sm transition-colors"
+          >
+            How it works
+            <ArrowDown className="w-4 h-4" />
+          </a>
+        </motion.div>
+
+        {/* Stats strip */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="mt-16 grid grid-cols-2 sm:grid-cols-4 border-t border-neutral-800 divide-x divide-neutral-800"
+        >
+          {[
+            { v: "30s", k: "Avg quote time" },
+            { v: "94%", k: "Cost accuracy" },
+            { v: "3.2x", k: "More jobs won" },
+            { v: "$0", k: "Sent to admin" },
+          ].map((s, i) => (
+            <div key={i} className="py-5 pl-4 sm:pl-6 first:pl-0 sm:first:pl-0">
+              <div className="font-mono text-2xl sm:text-3xl text-yellow-500 font-bold">
+                {s.v}
+              </div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+                {s.k}
+              </div>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
