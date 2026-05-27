@@ -5,7 +5,7 @@ const CASES = [
     tag: "EARTHMOVING",
     title: "Bulk earthworks & cut/fill",
     body:
-      "Site cuts, pad preparation, trenching, spoil removal. Quoteforge sizes the excavator, calls the tipper runs, and prices it like a 30-year subbie would.",
+      "Site cuts, pad preparation, trenching, spoil removal. TerrainPRO sizes the excavator, calls the tipper runs, and prices it like a 30-year subbie would.",
     img: "https://images.pexels.com/photos/37393680/pexels-photo-37393680.jpeg",
     stats: [
       { k: "Avg job", v: "$8.4K" },
@@ -29,7 +29,7 @@ const CASES = [
     tag: "LANDSCAPING",
     title: "Hardscape & softscape combos",
     body:
-      "Pavers, retaining walls, turf, irrigation, planting schedules. Mix and match scope — Quoteforge knows what plays nicely with what.",
+      "Pavers, retaining walls, turf, irrigation, planting schedules. Mix and match scope — TerrainPRO knows what plays nicely with what.",
     img: "https://images.pexels.com/photos/16239805/pexels-photo-16239805.jpeg",
     stats: [
       { k: "Pavers", v: "/m²" },
@@ -58,7 +58,7 @@ export default function UseCases() {
             </h2>
           </div>
           <div className="md:col-span-5 md:col-start-8 self-end text-neutral-400 leading-relaxed">
-            Quoteforge's model is trained on real Australian site jobs —
+            TerrainPRO's model is trained on real Australian site jobs —
             earthmoving, concreting, landscaping. It speaks tradie, not
             corporate.
           </div>

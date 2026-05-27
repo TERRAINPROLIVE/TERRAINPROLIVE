@@ -15,7 +15,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-display text-xl uppercase tracking-tight">
-                  Quoteforge
+                  TerrainPRO
                 </span>
                 <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-[0.25em]">
                   AI Estimator
@@ -67,7 +67,7 @@ export default function Footer() {
               Contact
             </h4>
             <ul className="space-y-3 text-sm text-neutral-300">
-              <li>crew@quoteforge.com.au</li>
+              <li>crew@terrainpro.com.au</li>
               <li>1800 QUOTE-IT</li>
               <li className="text-neutral-500">Geelong · Brisbane · Sydney</li>
             </ul>
@@ -76,7 +76,7 @@ export default function Footer() {
 
         <div className="mt-14 pt-6 border-t border-neutral-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-600">
-            © {new Date().getFullYear()} Quoteforge AI · ABN 00 000 000 000
+            © {new Date().getFullYear()} TerrainPRO AI · ABN 00 000 000 000
           </p>
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-600">
             Built with the universal LLM key · GPT-5.2

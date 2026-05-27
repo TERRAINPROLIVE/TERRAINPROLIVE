@@ -28,7 +28,7 @@ export default function Hero() {
             <span className="w-2 h-2 bg-green-500 animate-pulse" />
             <span>LIVE</span>
             <span className="text-neutral-600">|</span>
-            <span className="hidden sm:inline">Quoteforge engine online</span>
+            <span className="hidden sm:inline">TerrainPRO engine online</span>
           </span>
           <span className="text-yellow-500 hidden sm:inline">
             v0.9.4 / GPT-5.2 / AUD
@@ -71,7 +71,7 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.25, ease: "easeOut" }}
           className="mt-8 max-w-2xl text-base sm:text-lg text-neutral-300 leading-relaxed"
         >
-          Quoteforge is the AI estimator for tradies who run dirt, pour slabs and
+          TerrainPRO is the AI estimator for tradies who run dirt, pour slabs and
           shape yards. Punch in the job, get a tight, line-item quote in AUD —
           materials, plant, labor, GST — done. No spreadsheets. No guesswork.
         </motion.p>

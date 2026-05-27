@@ -17,7 +17,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I do residential landscaping with a 3-person crew. Quoteforge made us look like a corporate. Conversion went up, full stop.",
+      "I do residential landscaping with a 3-person crew. TerrainPRO made us look like a corporate. Conversion went up, full stop.",
     name: "Tane Whaiapu",
     role: "Whaiapu Yards",
     location: "Western Sydney, NSW",

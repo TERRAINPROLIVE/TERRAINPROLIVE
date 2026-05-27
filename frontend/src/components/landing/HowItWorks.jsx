@@ -7,14 +7,14 @@ const STEPS = [
     icon: ClipboardList,
     title: "Describe the job",
     body:
-      "Punch in job type, square meterage, timeline and materials. Voice notes work too — Quoteforge parses the lot.",
+      "Punch in job type, square meterage, timeline and materials. Voice notes work too — TerrainPRO parses the lot.",
   },
   {
     n: "02",
     icon: Cpu,
     title: "AI does the math",
     body:
-      "Quoteforge AI cross-checks rates against your region, plant, soil class and current material pricing — in seconds.",
+      "TerrainPRO AI cross-checks rates against your region, plant, soil class and current material pricing — in seconds.",
   },
   {
     n: "03",
@@ -46,7 +46,7 @@ export default function HowItWorks() {
           </div>
           <div className="md:col-span-7 md:col-start-6 text-neutral-400 leading-relaxed self-end">
             Built around how you actually quote — fast, on a phone, between jobs.
-            Quoteforge replaces the back-of-envelope hustle with a defensible,
+            TerrainPRO replaces the back-of-envelope hustle with a defensible,
             line-itemed estimate that wins more work.
           </div>
         </div>

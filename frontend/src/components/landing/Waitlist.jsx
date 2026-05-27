@@ -78,7 +78,7 @@ export default function Waitlist() {
           <span className="text-yellow-500">Start winning more jobs.</span>
         </h2>
         <p className="mt-6 text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-          Quoteforge is rolling out to Aussie crews now. Drop your email and
+          TerrainPRO is rolling out to Aussie crews now. Drop your email and
           we'll get you set up in your first week. Early access pricing locked
           in for the first 500.
         </p>

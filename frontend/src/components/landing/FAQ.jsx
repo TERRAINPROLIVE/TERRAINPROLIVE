@@ -8,7 +8,7 @@ import {
 const FAQS = [
   {
     q: "How accurate are the AI quotes?",
-    a: "Quoteforge pulls realistic AUD rates and applies them to your specific job inputs — square meterage, plant, materials, soil class and timeline. For typical residential and small commercial work, our beta crews report ~94% accuracy vs final invoice. It's an estimate, not a fixed price — final figures should come after a site visit.",
+    a: "TerrainPRO pulls realistic AUD rates and applies them to your specific job inputs — square meterage, plant, materials, soil class and timeline. For typical residential and small commercial work, our beta crews report ~94% accuracy vs final invoice. It's an estimate, not a fixed price — final figures should come after a site visit.",
   },
   {
     q: "Which trades is it built for?",
@@ -16,7 +16,7 @@ const FAQS = [
   },
   {
     q: "Can I use my own rates and suppliers?",
-    a: "Yes. On Crew and Contractor plans you can upload a custom rates library — plant hire, supplier pricing, labour bands. Quoteforge will weight your rates over the regional defaults so quotes match your business.",
+    a: "Yes. On Crew and Contractor plans you can upload a custom rates library — plant hire, supplier pricing, labour bands. TerrainPRO will weight your rates over the regional defaults so quotes match your business.",
   },
   {
     q: "Does it integrate with my accounting software?",
@@ -24,7 +24,7 @@ const FAQS = [
   },
   {
     q: "What if the client wants changes?",
-    a: "Hit ‘Variation’ on any quote. Quoteforge generates a delta quote (just the difference) signed off separately. No more arguments at the end of the job.",
+    a: "Hit ‘Variation’ on any quote. TerrainPRO generates a delta quote (just the difference) signed off separately. No more arguments at the end of the job.",
   },
   {
     q: "Is there a free trial?",

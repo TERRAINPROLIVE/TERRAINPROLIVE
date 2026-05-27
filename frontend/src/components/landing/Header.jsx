@@ -41,7 +41,7 @@ export default function Header() {
           </div>
           <div className="flex flex-col leading-none">
             <span className="font-display text-xl uppercase tracking-tight">
-              Quoteforge
+              TerrainPRO
             </span>
             <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-[0.25em]">
               AI Estimator

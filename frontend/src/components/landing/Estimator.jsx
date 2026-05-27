@@ -128,7 +128,7 @@ export default function Estimator() {
             </h2>
           </div>
           <div className="md:col-span-5 self-end text-neutral-400 leading-relaxed">
-            Punch in a real job. Watch Quoteforge spit out a tight, line-itemed
+            Punch in a real job. Watch TerrainPRO spit out a tight, line-itemed
             AUD quote with materials, plant, labour, contingency and GST. No
             account required.
           </div>
@@ -339,7 +339,7 @@ export default function Estimator() {
                     strokeWidth={2}
                   />
                   <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-neutral-400">
-                    quoteforge://terminal
+                    terrainpro://terminal
                   </span>
                 </div>
                 <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-yellow-500">
@@ -357,7 +357,7 @@ export default function Estimator() {
                       exit={{ opacity: 0 }}
                       className="space-y-2 text-neutral-300"
                     >
-                      <Line>$ quoteforge --estimate --trade={jobType}</Line>
+                      <Line>$ terrainpro --estimate --trade={jobType}</Line>
                       <Line delay={0.1}>→ parsing job brief...</Line>
                       <Line delay={0.4}>→ resolving regional rates ({location})...</Line>
                       <Line delay={0.7}>→ sizing plant / spoil / formwork...</Line>
@@ -378,7 +378,7 @@ export default function Estimator() {
                       exit={{ opacity: 0 }}
                       className="space-y-3 text-neutral-500"
                     >
-                      <Line>$ quoteforge --help</Line>
+                      <Line>$ terrainpro --help</Line>
                       <p className="text-neutral-400 leading-relaxed">
                         Fill out the brief on the left and hit{" "}
                         <span className="text-yellow-500">Generate AI Quote</span>.
