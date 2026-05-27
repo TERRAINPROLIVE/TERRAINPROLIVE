@@ -10,7 +10,9 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional, Literal
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
+import httpx
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
@@ -427,6 +429,208 @@ async def join_waitlist(entry: WaitlistCreate):
 async def waitlist_count():
     count = await db.waitlist.count_documents({})
     return {"count": count}
+
+
+# ============================================================================
+# Nearby Suppliers (free: Photon by Komoot — no API key required)
+# ============================================================================
+USER_AGENT = "TerrainPRO-AI/1.0 (https://terrainpro.com.au)"
+PHOTON_URL = "https://photon.komoot.io/api/"
+
+# (category_id, display_label, query keywords)
+SUPPLIER_CATEGORIES = [
+    ("bunnings", "Bunnings Warehouse", ["Bunnings"]),
+    ("mitre10", "Mitre 10", ["Mitre 10"]),
+    ("reece", "Reece Plumbing", ["Reece Plumbing", "Reece"]),
+    ("landscape", "Landscape Supplies", ["landscape supplies", "soil supplies", "ANL"]),
+    ("nursery", "Nursery / Garden Centre", ["nursery", "garden centre"]),
+]
+
+
+class Supplier(BaseModel):
+    category: str
+    name: str
+    address: Optional[str] = None
+    distance_km: float
+    lat: float
+    lng: float
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    maps_url: str
+
+
+class SuppliersResponse(BaseModel):
+    origin_label: str
+    origin_lat: float
+    origin_lng: float
+    radius_km: float
+    cached: bool
+    suppliers: List[Supplier]
+
+
+def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    from math import radians, sin, cos, asin, sqrt
+    r = 6371.0
+    dlat = radians(lat2 - lat1)
+    dlng = radians(lng2 - lng1)
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlng / 2) ** 2
+    return 2 * r * asin(sqrt(a))
+
+
+async def _photon(client: httpx.AsyncClient, q: str, lat: Optional[float] = None,
+                  lng: Optional[float] = None, limit: int = 10):
+    params = {"q": q, "limit": limit, "lang": "en"}
+    if lat is not None and lng is not None:
+        params["lat"] = lat
+        params["lon"] = lng
+        params["location_bias_scale"] = 0.5
+    r = await client.get(
+        PHOTON_URL,
+        params=params,
+        headers={"User-Agent": USER_AGENT},
+        timeout=15,
+    )
+    r.raise_for_status()
+    return r.json().get("features", [])
+
+
+def _feature_to_supplier(feature: dict, category: str, origin_lat: float,
+                         origin_lng: float) -> Optional[Supplier]:
+    props = feature.get("properties") or {}
+    geom = feature.get("geometry") or {}
+    coords = geom.get("coordinates") or []
+    if len(coords) < 2:
+        return None
+    lng, lat = coords[0], coords[1]
+    name = props.get("name")
+    if not name:
+        return None
+    # Skip if it's just a locality (city, state, country, region) without an actual venue
+    if props.get("osm_value") in ("city", "town", "village", "suburb", "state", "country", "region"):
+        return None
+
+    street_parts = [props.get("housenumber"), props.get("street")]
+    street = " ".join(p for p in street_parts if p).strip()
+    locality_parts = [props.get("city") or props.get("suburb") or "",
+                      props.get("state") or "",
+                      props.get("postcode") or ""]
+    locality = " ".join(p for p in locality_parts if p).strip()
+    address = ", ".join(p for p in [street, locality] if p) or None
+    distance = _haversine_km(origin_lat, origin_lng, lat, lng)
+
+    return Supplier(
+        category=category,
+        name=name,
+        address=address,
+        distance_km=round(distance, 1),
+        lat=lat,
+        lng=lng,
+        phone=None,  # Photon doesn't return phone
+        website=None,
+        maps_url=f"https://www.google.com/maps/search/?api=1&query={lat},{lng}",
+    )
+
+
+@api_router.get("/suppliers/nearby", response_model=SuppliersResponse)
+async def suppliers_nearby(
+    suburb: str,
+    state: str,
+    postcode: Optional[str] = "",
+    radius_km: int = 30,
+    refresh: bool = False,
+):
+    radius_km = max(5, min(80, radius_km))
+    cache_key = f"{suburb.strip().lower()}|{state.strip().upper()}|{(postcode or '').strip()}|{radius_km}"
+
+    if not refresh:
+        cached = await db.supplier_cache.find_one({"_id": cache_key})
+        if cached:
+            cached_at = cached.get("cached_at")
+            if isinstance(cached_at, str):
+                cached_at = datetime.fromisoformat(cached_at)
+            if cached_at and datetime.now(timezone.utc) - cached_at < timedelta(days=7):
+                return SuppliersResponse(
+                    origin_label=cached["origin_label"],
+                    origin_lat=cached["origin_lat"],
+                    origin_lng=cached["origin_lng"],
+                    radius_km=radius_km,
+                    cached=True,
+                    suppliers=[Supplier(**s) for s in cached["suppliers"]],
+                )
+
+    query_str = ", ".join(p for p in [suburb, state, postcode, "Australia"] if p)
+    async with httpx.AsyncClient() as client:
+        origin_features = await _photon(client, query_str, limit=1)
+        if not origin_features:
+            raise HTTPException(status_code=404, detail=f"Couldn't geocode '{query_str}'")
+        og = origin_features[0]
+        og_geom = og.get("geometry") or {}
+        og_coords = og_geom.get("coordinates") or []
+        if len(og_coords) < 2:
+            raise HTTPException(status_code=404, detail="Geocoder returned no coordinates")
+        origin_lng, origin_lat = og_coords[0], og_coords[1]
+        og_props = og.get("properties") or {}
+        origin_label = ", ".join(
+            p for p in [
+                og_props.get("name"),
+                og_props.get("state"),
+                og_props.get("postcode"),
+                og_props.get("country"),
+            ] if p
+        )
+
+        suppliers: List[Supplier] = []
+        seen = set()
+
+        # Sequential to be polite to public API
+        for cat_id, _label, queries in SUPPLIER_CATEGORIES:
+            for q in queries:
+                features = await _photon(client, q, lat=origin_lat, lng=origin_lng, limit=10)
+                for f in features:
+                    s = _feature_to_supplier(f, cat_id, origin_lat, origin_lng)
+                    if not s:
+                        continue
+                    # Only Australian results within radius
+                    fp = f.get("properties") or {}
+                    if (fp.get("countrycode") or "").upper() != "AU":
+                        continue
+                    if s.distance_km > radius_km:
+                        continue
+                    dedup_key = (cat_id, s.name.strip().lower(), round(s.lat, 4), round(s.lng, 4))
+                    if dedup_key in seen:
+                        continue
+                    seen.add(dedup_key)
+                    suppliers.append(s)
+
+    cat_order = {c[0]: i for i, c in enumerate(SUPPLIER_CATEGORIES)}
+    suppliers.sort(key=lambda s: (cat_order.get(s.category, 99), s.distance_km))
+    trimmed: List[Supplier] = []
+    per_cat = {}
+    for s in suppliers:
+        per_cat.setdefault(s.category, 0)
+        if per_cat[s.category] < 3:
+            trimmed.append(s)
+            per_cat[s.category] += 1
+
+    payload = {
+        "_id": cache_key,
+        "origin_label": origin_label,
+        "origin_lat": origin_lat,
+        "origin_lng": origin_lng,
+        "radius_km": radius_km,
+        "suppliers": [s.model_dump() for s in trimmed],
+        "cached_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.supplier_cache.replace_one({"_id": cache_key}, payload, upsert=True)
+
+    return SuppliersResponse(
+        origin_label=origin_label,
+        origin_lat=origin_lat,
+        origin_lng=origin_lng,
+        radius_km=radius_km,
+        cached=False,
+        suppliers=trimmed,
+    )
 
 
 app.include_router(api_router)

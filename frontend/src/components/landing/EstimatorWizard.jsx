@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,6 +14,12 @@ import {
   Terminal,
   AlertTriangle,
   X,
+  Hammer,
+  Wrench,
+  Droplets,
+  MapPin,
+  ExternalLink,
+  Store,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -937,6 +943,8 @@ function QuoteReadout({ quote, customer, selectedJobs }) {
           </ul>
         </div>
       )}
+
+      <NearbySuppliers customer={customer} />
     </motion.div>
   );
 }
@@ -950,6 +958,158 @@ function Stat({ label, value }) {
       <div className="mt-1 font-mono text-base text-neutral-100 font-semibold">
         {value}
       </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Nearby Suppliers
+   ============================================================ */
+const SUPPLIER_META = {
+  bunnings:  { label: "Bunnings Warehouse",     Icon: Hammer  },
+  mitre10:   { label: "Mitre 10",               Icon: Wrench  },
+  reece:     { label: "Reece Plumbing",         Icon: Droplets},
+  landscape: { label: "Landscape Supplies",     Icon: Truck   },
+  nursery:   { label: "Nursery / Garden Centre",Icon: Leaf    },
+};
+const SUPPLIER_ORDER = ["bunnings", "mitre10", "reece", "landscape", "nursery"];
+
+function NearbySuppliers({ customer }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState(null);
+
+  const fetchSuppliers = useCallback(async () => {
+    if (!customer?.suburb || !customer?.state) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await axios.get(`${API}/suppliers/nearby`, {
+        params: {
+          suburb: customer.suburb,
+          state: customer.state,
+          postcode: customer.postcode || "",
+          radius_km: 30,
+        },
+      });
+      setData(data);
+    } catch (err) {
+      setError(err?.response?.data?.detail || err?.message || "Couldn't fetch suppliers");
+    } finally {
+      setLoading(false);
+    }
+  }, [customer?.suburb, customer?.state, customer?.postcode]);
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, [fetchSuppliers]);
+
+  const grouped = {};
+  (data?.suppliers || []).forEach((s) => {
+    if (!grouped[s.category]) grouped[s.category] = [];
+    grouped[s.category].push(s);
+  });
+
+  return (
+    <div
+      data-testid="nearby-suppliers"
+      className="border-t border-neutral-800 pt-6"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <Store className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
+            Nearest Suppliers
+          </span>
+          {data?.origin_label && (
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 hidden sm:inline">
+              · within {data.radius_km}km of {customer.suburb}, {customer.state}
+            </span>
+          )}
+        </div>
+        {data && (
+          <button
+            type="button"
+            onClick={fetchSuppliers}
+            disabled={loading}
+            data-testid="suppliers-refresh"
+            className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500 hover:text-yellow-500 transition-colors disabled:opacity-50"
+          >
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
+        )}
+      </div>
+
+      {loading && !data && (
+        <div className="border border-neutral-800 bg-neutral-950 p-6 flex items-center gap-3 text-sm text-neutral-400">
+          <Loader2 className="w-4 h-4 animate-spin text-yellow-500" />
+          Locating nearest Bunnings, Mitre 10, Reece, landscape supplies & nurseries...
+        </div>
+      )}
+
+      {error && (
+        <div className="border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-300 flex gap-3">
+          <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>Suppliers lookup failed: {error}</span>
+        </div>
+      )}
+
+      {data && data.suppliers.length === 0 && (
+        <div className="border border-neutral-800 bg-neutral-950 p-6 text-sm text-neutral-400">
+          No suppliers found within {data.radius_km}km — try a closer postcode or
+          widen the search.
+        </div>
+      )}
+
+      {data && data.suppliers.length > 0 && (
+        <div className="border border-neutral-800">
+          <div className="hidden sm:grid grid-cols-12 px-3 py-2 bg-neutral-900 border-b border-neutral-800 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+            <span className="col-span-3">Category</span>
+            <span className="col-span-4">Name</span>
+            <span className="col-span-4">Address</span>
+            <span className="col-span-1 text-right">KM</span>
+          </div>
+          <div className="divide-y divide-neutral-900">
+            {SUPPLIER_ORDER.flatMap((catId) => {
+              const items = grouped[catId];
+              if (!items?.length) return [];
+              const meta = SUPPLIER_META[catId];
+              const Icon = meta.Icon;
+              return items.map((s, i) => (
+                <a
+                  key={`${catId}-${i}`}
+                  href={s.maps_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid={`supplier-${catId}-${i}`}
+                  className="grid grid-cols-12 gap-2 px-3 py-3 text-xs hover:bg-neutral-950 group"
+                >
+                  <div className="col-span-12 sm:col-span-3 flex items-center gap-2">
+                    <Icon
+                      className="w-4 h-4 text-yellow-500 flex-shrink-0"
+                      strokeWidth={1.8}
+                    />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400">
+                      {meta.label}
+                    </span>
+                  </div>
+                  <div className="col-span-7 sm:col-span-4 text-neutral-100 font-semibold group-hover:text-yellow-500 transition-colors">
+                    {s.name}
+                  </div>
+                  <div className="col-span-12 sm:col-span-4 text-neutral-500 flex items-center gap-1.5 truncate">
+                    <MapPin className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate">{s.address || "Address n/a"}</span>
+                  </div>
+                  <div className="col-span-5 sm:col-span-1 text-right font-mono text-yellow-500 font-semibold flex items-center justify-end gap-1">
+                    {s.distance_km}
+                    <ExternalLink className="w-3 h-3 opacity-50 group-hover:opacity-100" />
+                  </div>
+                </a>
+              ));
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
