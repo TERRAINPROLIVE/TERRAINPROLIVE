@@ -79,6 +79,15 @@ class CustomerInfo(BaseModel):
     address: str = Field(..., min_length=4, max_length=240)
 
 
+class BusinessInfo(BaseModel):
+    name: Optional[str] = Field(default=None, max_length=120)
+    abn: Optional[str] = Field(default=None, max_length=40)
+    address: str = Field(..., min_length=2, max_length=240)
+    suburb: Optional[str] = Field(default=None, max_length=120)
+    state: Optional[str] = Field(default=None, max_length=20)
+    postcode: Optional[str] = Field(default=None, max_length=10)
+
+
 class JobScope(BaseModel):
     job_type: str = Field(..., min_length=2, max_length=60)
     trade: Optional[str] = None
@@ -88,6 +97,7 @@ class JobScope(BaseModel):
 
 class MultiQuoteRequest(BaseModel):
     customer: CustomerInfo
+    business: Optional[BusinessInfo] = None
     scopes: List[JobScope] = Field(..., min_length=1, max_length=12)
     complexity: Literal["low", "medium", "high"] = "medium"
     notes: Optional[str] = Field(default=None, max_length=2000)
@@ -333,6 +343,7 @@ async def multi_generate_quote(req: MultiQuoteRequest):
 
     quote_id = str(uuid.uuid4())
     payload = {
+        "business": req.business.model_dump() if req.business else None,
         "customer": req.customer.model_dump(),
         "scopes": [s.model_dump() for s in req.scopes],
         "complexity": req.complexity,
@@ -348,7 +359,8 @@ async def multi_generate_quote(req: MultiQuoteRequest):
     user_msg = UserMessage(
         text=(
             "Generate a consolidated AUD quote for the following customer covering ALL scopes. "
-            "Group line_items by scope using the job_type id. Respond with JSON only.\n\n"
+            "Group line_items by scope using the job_type id. Factor in travel from the business "
+            "address to the customer's job site if both are provided. Respond with JSON only.\n\n"
             f"Brief:\n{json.dumps(payload, indent=2, default=str)}"
         )
     )

@@ -62,6 +62,29 @@ function evalComputed(expr, values) {
 
 export default function EstimatorWizard() {
   const [step, setStep] = useState(1);
+  const [business, setBusiness] = useState(() => {
+    try {
+      const raw = typeof window !== "undefined" && localStorage.getItem("terrainpro:business");
+      if (raw) return JSON.parse(raw);
+    } catch {
+      /* ignore */
+    }
+    return {
+      name: "",
+      abn: "",
+      street: "",
+      suburb: "",
+      state: "QLD",
+      postcode: "",
+    };
+  });
+  const [businessLocked, setBusinessLocked] = useState(() => {
+    try {
+      return !!localStorage.getItem("terrainpro:business");
+    } catch {
+      return false;
+    }
+  });
   const [customer, setCustomer] = useState({
     full_name: "",
     phone: "",
@@ -105,6 +128,9 @@ export default function EstimatorWizard() {
   const selectedJobs = useMemo(() => jobsByIds(selectedJobIds), [selectedJobIds]);
 
   const canAdvanceStep1 =
+    business.street.trim().length >= 2 &&
+    business.suburb.trim().length >= 2 &&
+    business.state.trim().length >= 2 &&
     customer.full_name.trim().length >= 2 &&
     customer.street.trim().length >= 2 &&
     customer.suburb.trim().length >= 2 &&
@@ -157,12 +183,37 @@ export default function EstimatorWizard() {
         .filter(Boolean)
         .join(", ");
 
+      const businessAddress = [
+        business.street.trim(),
+        [business.suburb.trim(), business.state.trim(), (business.postcode || "").trim()]
+          .filter(Boolean)
+          .join(" "),
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      // Persist business locally for next time
+      try {
+        localStorage.setItem("terrainpro:business", JSON.stringify(business));
+        setBusinessLocked(true);
+      } catch {
+        /* ignore */
+      }
+
       const { data } = await axios.post(`${API}/quote/multi-generate`, {
         customer: {
           full_name: customer.full_name.trim(),
           phone: customer.phone || null,
           email: customer.email || null,
           address: composedAddress,
+        },
+        business: {
+          name: business.name || null,
+          abn: business.abn || null,
+          address: businessAddress,
+          suburb: business.suburb,
+          state: business.state,
+          postcode: business.postcode || null,
         },
         scopes,
         complexity,
@@ -201,6 +252,10 @@ export default function EstimatorWizard() {
             exit={{ opacity: 0, y: -8 }}
           >
             <Step1
+              business={business}
+              setBusiness={setBusiness}
+              businessLocked={businessLocked}
+              setBusinessLocked={setBusinessLocked}
               customer={customer}
               setCustomer={setCustomer}
               selectedJobIds={selectedJobIds}
@@ -253,6 +308,7 @@ export default function EstimatorWizard() {
               quote={quote}
               selectedJobs={selectedJobs}
               customer={customer}
+              business={business}
               onReset={reset}
             />
           </motion.div>
@@ -336,15 +392,162 @@ function StepHeader({ step }) {
 /* ============================================================
    Step 1 — Customer details + job-type chips
    ============================================================ */
-function Step1({ customer, setCustomer, selectedJobIds, toggleJob }) {
+function Step1({
+  business,
+  setBusiness,
+  businessLocked,
+  setBusinessLocked,
+  customer,
+  setCustomer,
+  selectedJobIds,
+  toggleJob,
+}) {
   const onChange = (k) => (e) =>
     setCustomer((c) => ({ ...c, [k]: e.target.value }));
+
+  const onBizChange = (k) => (e) =>
+    setBusiness((b) => ({ ...b, [k]: e.target.value }));
+
+  const clearBusiness = () => {
+    try {
+      localStorage.removeItem("terrainpro:business");
+    } catch {
+      /* ignore */
+    }
+    setBusiness({
+      name: "",
+      abn: "",
+      street: "",
+      suburb: "",
+      state: "QLD",
+      postcode: "",
+    });
+    setBusinessLocked(false);
+  };
 
   const handleSuburbSelect = ({ suburb, state, postcode }) =>
     setCustomer((c) => ({ ...c, suburb, state, postcode }));
 
   return (
     <div className="space-y-10">
+      {/* Business (the tradie) */}
+      <div className="border border-yellow-500/40 bg-yellow-500/[0.03] p-6 sm:p-8">
+        <div className="flex items-center justify-between border-b border-yellow-500/30 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <Hammer className="w-4 h-4 text-yellow-500" strokeWidth={2} />
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
+              Your Business
+            </span>
+            {businessLocked && (
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500 hidden sm:inline">
+                · saved on this device
+              </span>
+            )}
+          </div>
+          {businessLocked && (
+            <button
+              type="button"
+              onClick={clearBusiness}
+              data-testid="business-clear"
+              className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500 hover:text-yellow-500 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        <p className="text-xs text-neutral-400 mb-5">
+          Punch your own address in once — we use it to find your nearest
+          suppliers and tune travel cost. Saved on your device, never sent
+          anywhere we don't need.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <FieldShell label="Business / trading name">
+            <Input
+              data-testid="wiz-business-name"
+              value={business.name}
+              onChange={onBizChange("name")}
+              placeholder="Thompson Concreting Pty Ltd"
+              className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+            />
+          </FieldShell>
+          <FieldShell label="ABN (optional)">
+            <Input
+              data-testid="wiz-business-abn"
+              value={business.abn}
+              onChange={onBizChange("abn")}
+              placeholder="12 345 678 901"
+              className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono"
+            />
+          </FieldShell>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 mt-5">
+          <div className="sm:col-span-12">
+            <FieldShell label="Street address" required>
+              <Input
+                data-testid="wiz-business-street"
+                value={business.street}
+                onChange={onBizChange("street")}
+                placeholder="22 Industrial Ave"
+                className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              />
+            </FieldShell>
+          </div>
+          <div className="sm:col-span-6">
+            <FieldShell label="Suburb / town" required>
+              <Input
+                data-testid="wiz-business-suburb"
+                value={business.suburb}
+                onChange={onBizChange("suburb")}
+                placeholder="Burpengary"
+                className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              />
+            </FieldShell>
+          </div>
+          <div className="sm:col-span-4">
+            <FieldShell label="State" required>
+              <Select
+                value={business.state}
+                onValueChange={(v) => setBusiness((b) => ({ ...b, state: v }))}
+              >
+                <SelectTrigger
+                  data-testid="wiz-business-state"
+                  className="h-12 rounded-none bg-black border-neutral-800 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-neutral-950 border-neutral-800 rounded-none">
+                  {AU_STATES.map((s) => (
+                    <SelectItem
+                      key={s.code}
+                      value={s.code}
+                      className="rounded-none focus:bg-yellow-500 focus:text-black"
+                    >
+                      {s.code} — {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldShell>
+          </div>
+          <div className="sm:col-span-2">
+            <FieldShell label="Postcode">
+              <Input
+                data-testid="wiz-business-postcode"
+                value={business.postcode}
+                onChange={onBizChange("postcode")}
+                placeholder="4505"
+                inputMode="numeric"
+                maxLength={4}
+                className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono"
+              />
+            </FieldShell>
+          </div>
+        </div>
+      </div>
+
       {/* Customer */}
       <div className="border border-neutral-800 bg-neutral-950 p-6 sm:p-8">
         <div className="flex items-center gap-3 border-b border-neutral-800 pb-4 mb-6">
@@ -724,7 +927,7 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
 /* ============================================================
    Step 3 — AI quote output
    ============================================================ */
-function Step3({ loading, error, quote, selectedJobs, customer, onReset }) {
+function Step3({ loading, error, quote, selectedJobs, customer, business, onReset }) {
   return (
     <div className="space-y-6">
       <div className="relative border border-neutral-800 bg-black overflow-hidden">
@@ -777,7 +980,12 @@ function Step3({ loading, error, quote, selectedJobs, customer, onReset }) {
             )}
 
             {quote && !loading && (
-              <QuoteReadout quote={quote} customer={customer} selectedJobs={selectedJobs} />
+              <QuoteReadout
+                quote={quote}
+                customer={customer}
+                business={business}
+                selectedJobs={selectedJobs}
+              />
             )}
           </AnimatePresence>
         </div>
@@ -810,7 +1018,7 @@ function Line({ children, delay = 0 }) {
   );
 }
 
-function QuoteReadout({ quote, customer, selectedJobs }) {
+function QuoteReadout({ quote, customer, business, selectedJobs }) {
   // Group line items by scope
   const groups = {};
   (quote.line_items || []).forEach((li) => {
@@ -944,7 +1152,7 @@ function QuoteReadout({ quote, customer, selectedJobs }) {
         </div>
       )}
 
-      <NearbySuppliers customer={customer} />
+      <NearbySuppliers business={business} customer={customer} />
     </motion.div>
   );
 }
@@ -974,21 +1182,43 @@ const SUPPLIER_META = {
 };
 const SUPPLIER_ORDER = ["bunnings", "mitre10", "reece", "landscape", "nursery"];
 
-function NearbySuppliers({ customer }) {
+function NearbySuppliers({ business, customer }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
 
+  // Prefer business address (the tradie) — that's who needs to drive to the supplier.
+  // Fall back to customer's job-site address if business not set.
+  const origin = useMemo(() => {
+    if (business?.suburb && business?.state) {
+      return {
+        suburb: business.suburb,
+        state: business.state,
+        postcode: business.postcode || "",
+        label: business.name?.trim() || "your business",
+      };
+    }
+    if (customer?.suburb && customer?.state) {
+      return {
+        suburb: customer.suburb,
+        state: customer.state,
+        postcode: customer.postcode || "",
+        label: "job site",
+      };
+    }
+    return null;
+  }, [business, customer]);
+
   const fetchSuppliers = useCallback(async () => {
-    if (!customer?.suburb || !customer?.state) return;
+    if (!origin) return;
     setLoading(true);
     setError(null);
     try {
       const { data } = await axios.get(`${API}/suppliers/nearby`, {
         params: {
-          suburb: customer.suburb,
-          state: customer.state,
-          postcode: customer.postcode || "",
+          suburb: origin.suburb,
+          state: origin.state,
+          postcode: origin.postcode,
           radius_km: 30,
         },
       });
@@ -998,7 +1228,7 @@ function NearbySuppliers({ customer }) {
     } finally {
       setLoading(false);
     }
-  }, [customer?.suburb, customer?.state, customer?.postcode]);
+  }, [origin]);
 
   useEffect(() => {
     fetchSuppliers();
@@ -1023,7 +1253,7 @@ function NearbySuppliers({ customer }) {
           </span>
           {data?.origin_label && (
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 hidden sm:inline">
-              · within {data.radius_km}km of {customer.suburb}, {customer.state}
+              · within {data.radius_km}km of {origin?.label || data.origin_label}
             </span>
           )}
         </div>
