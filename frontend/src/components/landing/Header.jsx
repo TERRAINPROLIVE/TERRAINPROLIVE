@@ -3,11 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Hammer } from "lucide-react";
 
 const NAV = [
-  { label: "Estimator", href: "#estimator" },
   { label: "How It Works", href: "#how" },
-  { label: "Features", href: "#features" },
   { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
 ];
 
 export default function Header() {
@@ -64,11 +61,11 @@ export default function Header() {
 
         <div className="flex items-center gap-3">
           <a
-            href="#waitlist"
+            href="#estimator"
             data-testid="header-cta"
             className="hidden sm:inline-flex items-center px-4 h-10 bg-yellow-500 text-black font-semibold text-xs uppercase tracking-[0.15em] btn-industrial"
           >
-            Get Early Access
+            Demo Quote
           </a>
           <button
             data-testid="mobile-menu-toggle"
@@ -102,11 +99,11 @@ export default function Header() {
                 </a>
               ))}
               <a
-                href="#waitlist"
+                href="#estimator"
                 onClick={() => setOpen(false)}
                 className="mt-2 inline-flex justify-center items-center h-11 bg-yellow-500 text-black font-semibold text-xs uppercase tracking-[0.15em]"
               >
-                Get Early Access
+                Demo Quote
               </a>
             </div>
           </motion.div>
