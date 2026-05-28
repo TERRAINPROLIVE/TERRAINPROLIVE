@@ -142,7 +142,7 @@ export default function ChatBot() {
             onClick={() => setOpen(true)}
             data-testid="chatbot-launcher"
             aria-label="Open Toolbox Talks"
-            className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 inline-flex items-center gap-3 h-14 pl-4 pr-5 bg-yellow-500 text-black border-2 border-black/10 shadow-[0_10px_30px_rgba(0,0,0,0.45)] btn-industrial"
+            className="fixed bottom-20 right-5 sm:bottom-24 sm:right-6 z-40 inline-flex items-center gap-3 h-14 pl-4 pr-5 bg-yellow-500 text-black border-2 border-black/10 shadow-[0_10px_30px_rgba(0,0,0,0.45)] btn-industrial"
           >
             <span className="w-9 h-9 grid place-items-center bg-black/10">
               <Hammer className="w-5 h-5" strokeWidth={2.5} />
