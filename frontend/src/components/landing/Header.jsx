@@ -151,7 +151,7 @@ export default function Header() {
                       <span className="font-mono text-[10px] text-yellow-500 tracking-[0.2em] group-hover:text-black/70">
                         / 0{i + 1}
                       </span>
-                      <span className="font-display uppercase text-base tracking-tight">
+                      <span className="font-display uppercase text-base tracking-tight font-bold">
                         {item.label}
                       </span>
                     </span>
