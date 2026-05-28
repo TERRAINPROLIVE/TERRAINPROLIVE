@@ -362,7 +362,7 @@ function Step1({
               value={customer.full_name}
               onChange={onChange("full_name")}
               placeholder="Mike Thompson"
-              className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FieldShell>
           <FieldShell label="Phone">
@@ -371,7 +371,7 @@ function Step1({
               value={customer.phone}
               onChange={onChange("phone")}
               placeholder="0412 345 678"
-              className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FieldShell>
           <FieldShell label="Email">
@@ -381,7 +381,7 @@ function Step1({
               value={customer.email}
               onChange={onChange("email")}
               placeholder="customer@email.com"
-              className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FieldShell>
           <FieldShell label="Suburb / town" required>
@@ -390,7 +390,7 @@ function Step1({
               value={customer.suburb}
               onChange={onChange("suburb")}
               placeholder="Narangba"
-              className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FieldShell>
         </div>
@@ -403,7 +403,7 @@ function Step1({
                 value={customer.street}
                 onChange={onChange("street")}
                 placeholder="14 Settlers Cres"
-                className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+                className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
               />
             </FieldShell>
           </div>
@@ -415,16 +415,16 @@ function Step1({
               >
                 <SelectTrigger
                   data-testid="wiz-customer-state"
-                  className="h-12 rounded-none bg-black border-neutral-800 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
                 >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-neutral-950 border-neutral-800 rounded-none">
+                <SelectContent className="bg-zinc-900 border-zinc-700 text-white rounded-none">
                   {AU_STATES.map((s) => (
                     <SelectItem
                       key={s.code}
                       value={s.code}
-                      className="rounded-none focus:bg-yellow-500 focus:text-black"
+                      className="rounded-none text-white focus:bg-yellow-500 focus:text-black"
                     >
                       {s.code} — {s.name}
                     </SelectItem>
@@ -442,7 +442,7 @@ function Step1({
                 placeholder="4504"
                 inputMode="numeric"
                 maxLength={4}
-                className="h-12 rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono"
+                className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono"
               />
             </FieldShell>
           </div>
@@ -496,7 +496,7 @@ function Step1({
                         className={`px-4 h-10 border text-xs uppercase tracking-[0.12em] font-semibold transition-colors ${
                           active
                             ? "bg-yellow-500 border-yellow-500 text-black"
-                            : "bg-black border-neutral-800 text-neutral-300 hover:border-yellow-500 hover:text-yellow-500"
+                            : "bg-zinc-900 border-zinc-700 text-white hover:border-yellow-500 hover:text-yellow-500"
                         }`}
                       >
                         {active && <Check className="inline w-3 h-3 mr-1.5" strokeWidth={3} />}
@@ -559,18 +559,18 @@ function Step2({
             <Select value={complexity} onValueChange={setComplexity}>
               <SelectTrigger
                 data-testid="wiz-complexity"
-                className="h-12 rounded-none bg-black border-neutral-800 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-neutral-950 border-neutral-800 rounded-none">
-                <SelectItem value="low" className="rounded-none focus:bg-yellow-500 focus:text-black">
+              <SelectContent className="bg-zinc-900 border-zinc-700 text-white rounded-none">
+                <SelectItem value="low" className="rounded-none text-white focus:bg-yellow-500 focus:text-black">
                   Low — flat, easy access
                 </SelectItem>
-                <SelectItem value="medium" className="rounded-none focus:bg-yellow-500 focus:text-black">
+                <SelectItem value="medium" className="rounded-none text-white focus:bg-yellow-500 focus:text-black">
                   Medium — typical residential
                 </SelectItem>
-                <SelectItem value="high" className="rounded-none focus:bg-yellow-500 focus:text-black">
+                <SelectItem value="high" className="rounded-none text-white focus:bg-yellow-500 focus:text-black">
                   High — tight access, slope, services
                 </SelectItem>
               </SelectContent>
@@ -584,7 +584,7 @@ function Step2({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Anything else worth knowing — overhead power, septic, council overlays, deadlines..."
-            className="rounded-none bg-black border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 resize-none text-sm"
+            className="rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 resize-none text-sm"
           />
         </FieldShell>
       </div>
