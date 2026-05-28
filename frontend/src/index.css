@@ -166,7 +166,6 @@ body {
 
 /* Custom button hover lift */
 .btn-industrial {
-    position: relative;
     transition:
         transform 0.15s ease,
         box-shadow 0.15s ease,
