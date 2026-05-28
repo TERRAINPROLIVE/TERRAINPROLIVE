@@ -77,12 +77,13 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex items-center gap-3 mb-6"
+          className="flex items-center justify-center gap-4 mb-8"
         >
           <div className="h-px w-12 bg-yellow-500" />
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-yellow-500">
-            Built for Earthmoving · Concreting · Landscaping
+          <span className="font-mono text-xs sm:text-sm uppercase tracking-[0.35em] text-yellow-500 text-center">
+            Concreting · Landscaping · Earthmoving
           </span>
+          <div className="h-px w-12 bg-yellow-500" />
         </motion.div>
 
         <motion.h1
