@@ -171,19 +171,19 @@ export default function ChatBot() {
             exit={{ opacity: 0, y: 24 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
             data-testid="chatbot-panel"
-            className="fixed z-40 bottom-0 right-0 sm:bottom-6 sm:right-6 w-full sm:w-[420px] h-[88vh] sm:h-[640px] sm:max-h-[80vh] bg-neutral-950 border border-neutral-800 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col"
+            className="fixed z-40 bottom-0 right-0 sm:bottom-6 sm:right-6 w-full sm:w-[400px] max-h-[400px] sm:max-h-[560px] bg-neutral-950 border border-neutral-800 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between gap-3 px-5 h-14 border-b border-neutral-800 bg-black">
-              <div className="flex items-center gap-3">
-                <span className="w-9 h-9 grid place-items-center bg-yellow-500 text-black">
-                  <Sparkles className="w-4 h-4" strokeWidth={2.5} />
+            <div className="flex items-center justify-between gap-2 px-3 h-12 border-b border-neutral-800 bg-black">
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-8 grid place-items-center bg-yellow-500 text-black">
+                  <Sparkles className="w-3.5 h-3.5" strokeWidth={2.5} />
                 </span>
                 <div className="flex flex-col leading-none">
-                  <span className="font-display uppercase text-base tracking-tight">
+                  <span className="font-display uppercase text-sm tracking-tight">
                     Toolbox Talks
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-yellow-500 mt-0.5">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-yellow-500 mt-0.5">
                     GPT-5.2 · LIVE
                   </span>
                 </div>
@@ -193,7 +193,7 @@ export default function ChatBot() {
                   type="button"
                   onClick={reset}
                   data-testid="chatbot-reset"
-                  className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500 hover:text-yellow-500 transition-colors px-2 py-1"
+                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-neutral-500 hover:text-yellow-500 transition-colors px-2 py-1"
                 >
                   Reset
                 </button>
@@ -202,9 +202,9 @@ export default function ChatBot() {
                   onClick={() => setOpen(false)}
                   data-testid="chatbot-close"
                   aria-label="Close chat"
-                  className="w-9 h-9 grid place-items-center border border-neutral-800 text-neutral-300 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+                  className="w-8 h-8 grid place-items-center border border-neutral-800 text-neutral-300 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
                 >
-                  <X className="w-4 h-4" strokeWidth={2} />
+                  <X className="w-3.5 h-3.5" strokeWidth={2} />
                 </button>
               </div>
             </div>
@@ -213,7 +213,7 @@ export default function ChatBot() {
             <div
               ref={scrollRef}
               data-testid="chatbot-messages"
-              className="flex-1 overflow-y-auto p-5 space-y-4 no-scrollbar"
+              className="flex-1 overflow-y-auto p-3 space-y-3 max-h-[240px] sm:max-h-[400px] no-scrollbar"
             >
               {messages.map((m, i) => (
                 <Bubble key={i} role={m.role} content={m.content} />
@@ -254,7 +254,7 @@ export default function ChatBot() {
                 e.preventDefault();
                 sendMessage();
               }}
-              className="border-t border-neutral-800 bg-black p-3 flex gap-2"
+              className="border-t border-neutral-800 bg-black p-2 flex gap-2"
             >
               <input
                 ref={inputRef}
@@ -262,13 +262,13 @@ export default function ChatBot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about quotes, materials, pricing..."
-                className="flex-1 h-11 px-3 bg-neutral-950 border border-neutral-800 text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none focus:border-yellow-500 rounded-none"
+                className="flex-1 h-10 px-3 bg-neutral-950 border border-neutral-800 text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none focus:border-yellow-500 rounded-none"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || loading}
                 data-testid="chatbot-send"
-                className="inline-flex items-center justify-center w-11 h-11 bg-yellow-500 text-black disabled:opacity-40 disabled:cursor-not-allowed hover:bg-yellow-400 transition-colors"
+                className="inline-flex items-center justify-center w-10 h-10 bg-yellow-500 text-black disabled:opacity-40 disabled:cursor-not-allowed hover:bg-yellow-400 transition-colors"
                 aria-label="Send"
               >
                 {loading ? (
@@ -293,14 +293,14 @@ function Bubble({ role, content }) {
       className={`flex ${isUser ? "justify-end" : "justify-start"}`}
     >
       <div
-        className={`max-w-[85%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+        className={`max-w-[85%] px-3 py-2 text-sm leading-snug whitespace-pre-wrap ${
           isUser
             ? "bg-yellow-500 text-black"
             : "bg-neutral-900 border border-neutral-800 text-neutral-100"
         }`}
       >
         {!isUser && (
-          <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-yellow-500 mb-1.5">
+          <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-yellow-500 mb-1">
             TerrainPRO
           </div>
         )}
