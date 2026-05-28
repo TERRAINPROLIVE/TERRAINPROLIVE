@@ -28,7 +28,7 @@ const SUGGESTIONS = [
 const INTRO = {
   role: "assistant",
   content:
-    "G'day — welcome to Toolbox Talks. Ask me anything about how the TerrainPRO AI quoter works, pricing, or quick trade questions (concrete volumes, mesh specs, spoil rates, paver lay rates).",
+    "G'day — I'm the TerrainPRO Helper. Ask me anything about how the AI quoter works, pricing, or quick trade questions (concrete volumes, mesh specs, spoil rates) and the best local spots for smoko.",
 };
 
 export default function ChatBot() {
