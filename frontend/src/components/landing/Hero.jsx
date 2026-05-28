@@ -91,7 +91,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
           data-testid="hero-title"
-          className="font-display uppercase text-7xl sm:text-9xl lg:text-[10rem] leading-[0.92] tracking-tight max-w-6xl"
+          className="font-display uppercase text-5xl sm:text-7xl lg:text-8xl leading-[0.92] tracking-tight max-w-5xl"
         >
           Quote in
           <br />
