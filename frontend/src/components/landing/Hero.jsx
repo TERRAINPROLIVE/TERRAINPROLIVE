@@ -53,7 +53,7 @@ export default function Hero() {
       <div className="absolute inset-0 grid-bg opacity-50" aria-hidden />
 
       {/* Top tickertape */}
-      <div className="absolute top-16 inset-x-0 z-10 border-y border-yellow-500/30 bg-black/70 backdrop-blur-sm">
+      <div className="absolute top-24 inset-x-0 z-10 border-y border-yellow-500/30 bg-black/70 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
           <span className="flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 animate-pulse" />
@@ -91,11 +91,11 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
           data-testid="hero-title"
-          className="font-display uppercase text-5xl sm:text-7xl lg:text-8xl leading-[0.92] tracking-tight max-w-5xl"
+          className="font-display uppercase text-7xl sm:text-9xl lg:text-[10rem] leading-[0.92] tracking-tight max-w-6xl"
         >
-          Quote the job
+          Quote in
           <br />
-          <span className="text-yellow-500">in 30 seconds.</span>
+          <span className="text-yellow-500">15 mins.</span>
           <br />
           Win it by smoko.
         </motion.h1>
