@@ -54,7 +54,7 @@ export default function Hero() {
 
       {/* Top tickertape */}
       <div className="absolute top-20 inset-x-0 z-10 border-y border-yellow-500/30 bg-black/70 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2 flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.2em] text-neutral-400">
           <span className="flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 animate-pulse" />
             <span>LIVE</span>
