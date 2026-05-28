@@ -60,20 +60,20 @@ export default function Header() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
         <a
           href="#top"
           data-testid="logo-link"
-          className="flex items-center gap-3 group"
+          className="flex items-center gap-2 sm:gap-3 group"
         >
-          <div className="w-12 h-12 bg-yellow-500 flex items-center justify-center">
-            <Hammer className="w-7 h-7 text-black" strokeWidth={2.5} />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500 flex items-center justify-center">
+            <Hammer className="w-5 h-5 sm:w-7 sm:h-7 text-black" strokeWidth={2.5} />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="font-display text-3xl uppercase tracking-tight">
+            <span className="font-display text-xl sm:text-3xl uppercase tracking-tight">
               TerrainPRO
             </span>
-            <span className="font-mono text-xs text-yellow-500 uppercase tracking-[0.25em] mt-1">
+            <span className="font-mono text-[10px] sm:text-xs text-yellow-500 uppercase tracking-[0.25em] mt-0.5 sm:mt-1">
               AI Estimator
             </span>
           </div>
@@ -84,24 +84,24 @@ export default function Header() {
           aria-label="Toggle menu"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className={`group inline-flex items-center gap-3 h-14 pl-5 pr-3 border transition-all ${
+          className={`group inline-flex items-center gap-2 sm:gap-3 h-11 sm:h-14 pl-3 pr-2 sm:pl-5 sm:pr-3 border transition-all ${
             open
               ? "border-yellow-500 bg-yellow-500 text-black"
               : "border-neutral-800 bg-black text-neutral-100 hover:border-yellow-500 hover:text-yellow-500"
           }`}
         >
-          <span className="font-display uppercase text-lg tracking-[0.22em] font-bold">
+          <span className="font-display uppercase text-xs sm:text-lg tracking-[0.18em] sm:tracking-[0.22em] font-bold">
             You Ready
           </span>
           <span
-            className={`w-9 h-9 grid place-items-center border ${
+            className={`w-7 h-7 sm:w-9 sm:h-9 grid place-items-center border ${
               open ? "border-black/30" : "border-neutral-800 group-hover:border-yellow-500"
             }`}
           >
             {open ? (
-              <X className="w-5 h-5" strokeWidth={2.5} />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
             ) : (
-              <Menu className="w-5 h-5" strokeWidth={2.5} />
+              <Menu className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
             )}
           </span>
         </button>
@@ -118,7 +118,7 @@ export default function Header() {
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
               data-testid="menu-backdrop"
-              className="fixed inset-0 top-20 bg-black/70 backdrop-blur-sm -z-10"
+              className="fixed inset-0 top-16 sm:top-20 bg-black/70 backdrop-blur-sm -z-10"
             />
             <motion.div
               key="panel"
@@ -127,7 +127,7 @@ export default function Header() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
               data-testid="dropdown-menu"
-              className="absolute right-6 lg:right-8 top-[88px] w-[88vw] max-w-sm bg-neutral-950 border border-neutral-800 shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+              className="absolute right-6 lg:right-8 top-[72px] sm:top-[88px] w-[88vw] max-w-sm bg-neutral-950 border border-neutral-800 shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
             >
               <div className="px-5 pt-5 pb-3 border-b border-neutral-800 flex items-center justify-between">
                 <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
