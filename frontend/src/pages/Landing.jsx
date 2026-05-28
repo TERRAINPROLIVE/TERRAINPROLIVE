@@ -1,6 +1,7 @@
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
 import LogoMarquee from "@/components/landing/LogoMarquee";
+import SloganMarquee from "@/components/landing/SloganMarquee";
 import Estimator from "@/components/landing/Estimator";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
@@ -19,6 +20,7 @@ export default function Landing() {
         <Hero />
         <LogoMarquee />
         <Estimator />
+        <SloganMarquee />
         <HowItWorks />
         <Features />
         <UseCases />
