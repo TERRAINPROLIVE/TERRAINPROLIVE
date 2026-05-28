@@ -28,7 +28,7 @@ const SUGGESTIONS = [
 const INTRO = {
   role: "assistant",
   content:
-    "G'day — I'm the TerrainPRO Helper. Ask me anything about how the AI quoter works, pricing, or quick trade questions (concrete volumes, mesh specs, spoil rates).",
+    "G'day — welcome to Toolbox Talks. Ask me anything about how the TerrainPRO AI quoter works, pricing, or quick trade questions (concrete volumes, mesh specs, spoil rates, paver lay rates).",
 };
 
 export default function ChatBot() {
@@ -141,14 +141,14 @@ export default function ChatBot() {
             transition={{ duration: 0.2 }}
             onClick={() => setOpen(true)}
             data-testid="chatbot-launcher"
-            aria-label="Open TerrainPRO Helper"
+            aria-label="Open Toolbox Talks"
             className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 inline-flex items-center gap-3 h-14 pl-4 pr-5 bg-yellow-500 text-black border-2 border-black/10 shadow-[0_10px_30px_rgba(0,0,0,0.45)] btn-industrial"
           >
             <span className="w-9 h-9 grid place-items-center bg-black/10">
               <Hammer className="w-5 h-5" strokeWidth={2.5} />
             </span>
             <span className="font-display uppercase text-sm tracking-[0.18em] font-bold">
-              Ask TerrainPRO
+              Toolbox Talks
             </span>
             {unread && (
               <span
@@ -181,7 +181,7 @@ export default function ChatBot() {
                 </span>
                 <div className="flex flex-col leading-none">
                   <span className="font-display uppercase text-base tracking-tight">
-                    TerrainPRO Helper
+                    Toolbox Talks
                   </span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-yellow-500 mt-0.5">
                     GPT-5.2 · LIVE
