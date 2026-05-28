@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowDown, Sparkles } from "lucide-react";
 
@@ -5,6 +6,36 @@ const HERO_BG =
   "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/b6feb06c1e22eb535e31a44dae30920128c69818aea25cf6f2f8021a10380ce0.png";
 
 export default function Hero() {
+  const [weather, setWeather] = useState(null);
+
+  useEffect(() => {
+    // Brisbane, QLD — Open-Meteo current weather (free, no key)
+    const url =
+      "https://api.open-meteo.com/v1/forecast?latitude=-27.4698&longitude=153.0251" +
+      "&current=temperature_2m,precipitation,weather_code&timezone=Australia%2FBrisbane";
+    fetch(url)
+      .then((r) => r.json())
+      .then((d) => {
+        const c = d?.current || {};
+        const code = c.weather_code;
+        let condition = "Dry";
+        if (typeof c.precipitation === "number" && c.precipitation > 0.1) condition = "Wet";
+        else if ([45, 48].includes(code)) condition = "Foggy";
+        else if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code))
+          condition = "Wet";
+        else if ([71, 73, 75, 77, 85, 86].includes(code)) condition = "Snow";
+        else if ([95, 96, 99].includes(code)) condition = "Storms";
+        else if ([1, 2, 3].includes(code)) condition = "Cloudy";
+        setWeather({
+          temp: Math.round(c.temperature_2m),
+          condition,
+        });
+      })
+      .catch(() => {
+        /* leave fallback */
+      });
+  }, []);
+
   return (
     <section
       id="top"
@@ -33,7 +64,10 @@ export default function Hero() {
           <span className="text-yellow-500 hidden sm:inline">
             v0.9.4 / GPT-5.2 / AUD
           </span>
-          <span className="text-neutral-500">SYD 14°C • Site Conditions: Dry</span>
+          <span data-testid="hero-weather" className="text-neutral-500">
+            BNE {weather ? `${weather.temp}°C` : "—°C"} • Site Conditions:{" "}
+            {weather ? weather.condition : "Loading"}
+          </span>
         </div>
       </div>
 
