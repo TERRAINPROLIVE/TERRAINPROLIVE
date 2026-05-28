@@ -444,6 +444,100 @@ async def waitlist_count():
 
 
 # ============================================================================
+# Chatbot
+# ============================================================================
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., min_length=1, max_length=4000)
+
+
+class ChatRequest(BaseModel):
+    session_id: str = Field(..., min_length=4, max_length=80)
+    messages: List[ChatMessage] = Field(..., min_length=1, max_length=40)
+
+
+class ChatResponse(BaseModel):
+    reply: str
+    session_id: str
+
+
+CHAT_SYSTEM_PROMPT = """You are TERRAINPRO HELPER — an AI assistant on the TerrainPRO landing page.
+
+WHO YOU HELP: Australian tradies running earthmoving, concreting and landscaping crews who are evaluating TerrainPRO.
+
+WHAT YOU DO:
+- Answer questions about TerrainPRO: AI quoting, line-item quotes in AUD, materials/plant/labour pricing, mobile-first workflow, PDF export, Xero/MYOB integration, pricing tiers (Sole Trader $0, Crew $79/mo, Contractor custom).
+- Help with trade questions: "how much concrete for a 60m² slab?", "what mesh for a shed slab?", "rough excavator cost per day?", "spoil disposal rates?", etc. Use real Australian rates and units.
+- Nudge them to try the AI Quote Estimator (link them by saying "hit the YOU READY menu or scroll up to the estimator").
+
+TONE & STYLE:
+- Aussie tradie voice: direct, no fluff, no corporate jargon. Light bit of dry humour is fine — never overdone.
+- KEEP REPLIES TIGHT: 2-4 short sentences unless the question demands more. Use line breaks for lists.
+- AUD only. Metric only. AUD GST = 10% inclusive.
+- If you genuinely don't know, say so and suggest contacting the crew via the Contact link in the YOU READY menu.
+
+DO NOT:
+- Pretend to be a human.
+- Promise pricing accuracy beyond ~94% of final invoice.
+- Make up Australian standards numbers — give realistic ballparks.
+- Discuss anything off-topic (politics, personal advice, unrelated trades).
+"""
+
+
+@api_router.post("/chat/message", response_model=ChatResponse)
+async def chat_message(req: ChatRequest):
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
+    if req.messages[-1].role != "user":
+        raise HTTPException(status_code=400, detail="Last message must be from user")
+
+    chat = LlmChat(
+        api_key=EMERGENT_LLM_KEY,
+        session_id=f"chat-{req.session_id}",
+        system_message=CHAT_SYSTEM_PROMPT,
+    ).with_model("openai", "gpt-5.2")
+
+    # Stateless: pass the whole conversation as one user message for context.
+    convo_lines = []
+    for m in req.messages[:-1]:
+        tag = "USER" if m.role == "user" else "ASSISTANT"
+        convo_lines.append(f"{tag}: {m.content}")
+    latest = req.messages[-1].content
+
+    if convo_lines:
+        prompt = (
+            "Prior conversation so far:\n"
+            + "\n".join(convo_lines)
+            + f"\n\nCurrent USER message:\n{latest}\n\n"
+            "Reply directly as TERRAINPRO HELPER. Do not prefix your reply with 'ASSISTANT:' or any role label."
+        )
+    else:
+        prompt = latest
+
+    try:
+        raw = await chat.send_message(UserMessage(text=prompt))
+        reply = raw if isinstance(raw, str) else str(raw)
+        # Strip any accidental role prefix
+        for prefix in ("ASSISTANT:", "Assistant:", "assistant:"):
+            if reply.lstrip().startswith(prefix):
+                reply = reply.lstrip()[len(prefix):].lstrip()
+                break
+    except Exception as e:
+        logging.exception("Chat LLM call failed")
+        raise HTTPException(status_code=502, detail=f"Chat failed: {e}")
+
+    # Persist (light-touch logging)
+    await db.chat_messages.insert_one({
+        "session_id": req.session_id,
+        "user_message": latest,
+        "assistant_reply": reply,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+    return ChatResponse(reply=reply, session_id=req.session_id)
+
+
+# ============================================================================
 # Nearby Suppliers (free: Photon by Komoot — no API key required)
 # ============================================================================
 USER_AGENT = "TerrainPRO-AI/1.0 (https://terrainpro.com.au)"

@@ -11,6 +11,7 @@ import Testimonials from "@/components/landing/Testimonials";
 import FAQ from "@/components/landing/FAQ";
 import Waitlist from "@/components/landing/Waitlist";
 import Footer from "@/components/landing/Footer";
+import ChatBot from "@/components/landing/ChatBot";
 
 export default function Landing() {
   return (
@@ -30,6 +31,7 @@ export default function Landing() {
         <Waitlist />
       </main>
       <Footer />
+      <ChatBot />
     </div>
   );
 }
