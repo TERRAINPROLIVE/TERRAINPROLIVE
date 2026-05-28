@@ -657,16 +657,16 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
         <Select value={value || ""} onValueChange={onChange}>
           <SelectTrigger
             data-testid={`mfield-${jobId}-${field.key}`}
-            className="h-12 rounded-none bg-black border-neutral-800 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+            className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
           >
             <SelectValue placeholder="Select..." />
           </SelectTrigger>
-          <SelectContent className="bg-neutral-950 border-neutral-800 rounded-none max-h-72">
+          <SelectContent className="bg-zinc-900 border-zinc-700 text-white rounded-none max-h-72">
             {field.options.map((opt) => (
               <SelectItem
                 key={opt}
                 value={opt}
-                className="rounded-none focus:bg-yellow-500 focus:text-black"
+                className="rounded-none text-white focus:bg-yellow-500 focus:text-black"
               >
                 {opt}
               </SelectItem>
@@ -679,8 +679,8 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
 
   if (field.type === "boolean") {
     return (
-      <div className="flex items-center justify-between border border-neutral-800 px-4 h-12 bg-black">
-        <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+      <div className="flex items-center justify-between border border-zinc-700 px-4 h-12 bg-zinc-900">
+        <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-300">
           {field.label}
         </Label>
         <Switch
@@ -705,10 +705,10 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
         step={field.step || "any"}
         onChange={(e) => onChange(e.target.value)}
         placeholder={readOnly ? "Auto" : field.default ?? ""}
-        className={`h-12 rounded-none border-neutral-800 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono ${
+        className={`h-12 rounded-none border-zinc-700 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono ${
           readOnly
-            ? "bg-neutral-900 text-yellow-500 cursor-not-allowed"
-            : "bg-black"
+            ? "bg-zinc-950 text-yellow-500 cursor-not-allowed"
+            : "bg-zinc-900 text-white placeholder:text-neutral-500"
         }`}
       />
     </FieldShell>
