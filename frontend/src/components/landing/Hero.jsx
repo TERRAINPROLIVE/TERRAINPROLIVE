@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Play } from "lucide-react";
 import Marquee from "react-fast-marquee";
 
 const TICKER_ITEMS = [
@@ -89,6 +89,21 @@ export default function Hero({ onTryEstimator }) {
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>Start Free Trial</span>
           </button>
+
+          <a
+            href="#how"
+            data-testid="hero-secondary-cta"
+            className="group relative inline-flex items-center justify-center gap-3 py-4 px-8 sm:py-5 sm:px-10 bg-zinc-900/80 backdrop-blur-sm border-2 border-neutral-600 text-neutral-100 font-black uppercase tracking-widest text-sm sm:text-base transition-all duration-200 hover:border-white hover:text-white hover:shadow-[0_0_24px_rgba(255,255,255,0.15)]"
+          >
+            {/* Corner brackets */}
+            <span aria-hidden className="absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 border-neutral-500 group-hover:border-white transition-colors" />
+            <span aria-hidden className="absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 border-neutral-500 group-hover:border-white transition-colors" />
+            <span aria-hidden className="absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 border-neutral-500 group-hover:border-white transition-colors" />
+            <span aria-hidden className="absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 border-neutral-500 group-hover:border-white transition-colors" />
+
+            <Play className="w-4 h-4" strokeWidth={2.5} />
+            <span>Watch Demo</span>
+          </a>
         </motion.div>
 
         {/* Stats dashboard */}
