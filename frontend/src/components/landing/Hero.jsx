@@ -86,28 +86,39 @@ export default function Hero({ onTryEstimator }) {
           </button>
         </motion.div>
 
-        {/* Stats strip */}
+        {/* Stats dashboard */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-16 grid grid-cols-2 sm:grid-cols-4 border-t border-neutral-800 divide-x divide-neutral-800"
+          className="mt-16 relative bg-zinc-950/60 backdrop-blur-sm border border-zinc-800 p-6 sm:p-8"
         >
-          {[
-            { v: "8 mins", k: "Avg quote time" },
-            { v: "94%", k: "Cost accuracy" },
-            { v: "3.2x", k: "More jobs won" },
-            { v: "Smarter", k: "With every quote" },
-          ].map((s, i) => (
-            <div key={i} className="py-5 pl-4 sm:pl-6 first:pl-0 sm:first:pl-0">
-              <div className="font-mono text-2xl sm:text-3xl text-yellow-500 font-bold">
-                {s.v}
+          {/* Corner brackets */}
+          <span aria-hidden className="absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 border-yellow-500" />
+          <span aria-hidden className="absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 border-yellow-500" />
+          <span aria-hidden className="absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 border-yellow-500" />
+          <span aria-hidden className="absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 border-yellow-500" />
+
+          <div className="grid grid-cols-2 divide-x divide-zinc-800">
+            {[
+              { v: "8 mins", k: "Avg Quote Time" },
+              { v: "94%", k: "Accuracy Rate" },
+              { v: "3.2x", k: "More Jobs Won" },
+              { v: "Smarter", k: "With Every Quote" },
+            ].map((s, i) => (
+              <div
+                key={i}
+                className={`px-4 sm:px-6 py-3 ${i < 2 ? "border-b border-zinc-800 pb-5" : "pt-5"}`}
+              >
+                <div className="font-display text-4xl sm:text-5xl font-black text-white tracking-tight leading-none">
+                  {s.v}
+                </div>
+                <div className="mt-3 text-xs font-bold tracking-widest text-yellow-500/80 uppercase">
+                  [ {s.k} ]
+                </div>
               </div>
-              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-                {s.k}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>
