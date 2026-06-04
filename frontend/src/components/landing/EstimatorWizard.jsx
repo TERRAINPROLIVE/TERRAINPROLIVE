@@ -10,7 +10,6 @@ import {
   Box,
   Leaf,
   Truck,
-  User,
   Terminal,
   AlertTriangle,
   X,
@@ -212,6 +211,7 @@ export default function EstimatorWizard() {
               onNext={() => setStep(2)}
               nextDisabled={!canAdvanceStep1}
               showBack={false}
+              selectedCount={selectedJobIds.length}
               nextLabel="Continue to measurements"
             />
           </motion.div>
@@ -347,25 +347,23 @@ function Step1({
   const onChange = (k) => (e) =>
     setCustomer((c) => ({ ...c, [k]: e.target.value }));
 
+  const inputCls =
+    "h-12 rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 transition-colors focus-visible:border-yellow-500 focus-visible:ring-2 focus-visible:ring-yellow-500/20";
+
   return (
     <div className="space-y-10">
       {/* Customer */}
       <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6 sm:p-8">
-        <div className="flex items-center gap-3 border-b border-zinc-800 pb-4 mb-6">
-          <User className="w-4 h-4 text-yellow-500" strokeWidth={2} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400">
-            Customer Details
-          </span>
-        </div>
+        <SectionHeader>Customer Details</SectionHeader>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-6">
           <FieldShell label="Full name" required>
             <Input
               data-testid="wiz-customer-name"
               value={customer.full_name}
               onChange={onChange("full_name")}
               placeholder="Mike Thompson"
-              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className={inputCls}
             />
           </FieldShell>
           <FieldShell label="Phone">
@@ -374,7 +372,7 @@ function Step1({
               value={customer.phone}
               onChange={onChange("phone")}
               placeholder="0412 345 678"
-              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className={inputCls}
             />
           </FieldShell>
           <FieldShell label="Email">
@@ -384,7 +382,7 @@ function Step1({
               value={customer.email}
               onChange={onChange("email")}
               placeholder="customer@email.com"
-              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className={inputCls}
             />
           </FieldShell>
           <FieldShell label="Suburb / town" required>
@@ -393,7 +391,7 @@ function Step1({
               value={customer.suburb}
               onChange={onChange("suburb")}
               placeholder="Narangba"
-              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className={inputCls}
             />
           </FieldShell>
         </div>
@@ -406,7 +404,7 @@ function Step1({
                 value={customer.street}
                 onChange={onChange("street")}
                 placeholder="14 Settlers Cres"
-                className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+                className={inputCls}
               />
             </FieldShell>
           </div>
@@ -418,16 +416,16 @@ function Step1({
               >
                 <SelectTrigger
                   data-testid="wiz-customer-state"
-                  className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="h-12 rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 transition-colors focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20"
                 >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-700 text-white rounded-none">
+                <SelectContent className="bg-zinc-950 border-zinc-800 text-zinc-100 rounded-none">
                   {AU_STATES.map((s) => (
                     <SelectItem
                       key={s.code}
                       value={s.code}
-                      className="rounded-none text-white focus:bg-yellow-500 focus:text-black"
+                      className="rounded-none text-zinc-100 focus:bg-yellow-500 focus:text-black"
                     >
                       {s.code} — {s.name}
                     </SelectItem>
@@ -445,7 +443,7 @@ function Step1({
                 placeholder="4504"
                 inputMode="numeric"
                 maxLength={4}
-                className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono"
+                className={`${inputCls} font-mono`}
               />
             </FieldShell>
           </div>
@@ -460,13 +458,11 @@ function Step1({
 
       {/* Job types */}
       <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6 sm:p-8">
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400">
-            Job Types — Select all that apply
-          </span>
+        <div className="flex items-center justify-between mb-6">
+          <SectionHeader>Job Types</SectionHeader>
           <span
             data-testid="wiz-selected-count"
-            className="font-mono text-[10px] uppercase tracking-[0.25em] text-yellow-500"
+            className="text-[11px] font-bold uppercase tracking-wider text-zinc-500"
           >
             {selectedJobIds.length} selected
           </span>
@@ -482,12 +478,12 @@ function Step1({
                     className="w-4 h-4 text-yellow-500"
                     strokeWidth={1.8}
                   />
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
+                  <span className="text-xs font-bold uppercase tracking-widest text-yellow-500">
                     {group.trade}
                   </span>
-                  <span className="h-px flex-1 bg-neutral-800" />
+                  <span className="h-px flex-1 bg-zinc-800" />
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {group.jobs.map((j) => {
                     const active = selectedJobIds.includes(j.id);
                     return (
@@ -496,14 +492,24 @@ function Step1({
                         type="button"
                         data-testid={`job-chip-${j.id}`}
                         onClick={() => toggleJob(j.id)}
-                        className={`px-4 h-10 border text-xs uppercase tracking-[0.12em] font-semibold transition-colors ${
+                        className={`group flex items-center justify-between gap-3 p-4 rounded-lg border text-left transition-colors ${
                           active
-                            ? "bg-yellow-500 border-yellow-500 text-black"
-                            : "bg-zinc-900 border-zinc-700 text-white hover:border-yellow-500 hover:text-yellow-500"
+                            ? "bg-yellow-500/[0.02] border-yellow-500 text-white"
+                            : "bg-zinc-950/40 border-zinc-800 text-zinc-400 hover:border-zinc-700"
                         }`}
                       >
-                        {active && <Check className="inline w-3 h-3 mr-1.5" strokeWidth={3} />}
-                        {j.label}
+                        <span className="text-sm font-semibold tracking-tight leading-snug">
+                          {j.label}
+                        </span>
+                        <span
+                          className={`shrink-0 w-5 h-5 grid place-items-center border transition-colors ${
+                            active
+                              ? "bg-yellow-500 border-yellow-500"
+                              : "border-zinc-700 group-hover:border-zinc-600"
+                          }`}
+                        >
+                          {active && <Check className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
+                        </span>
                       </button>
                     );
                   })}
@@ -517,10 +523,21 @@ function Step1({
   );
 }
 
+function SectionHeader({ children }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span aria-hidden className="w-1 h-4 bg-yellow-500" />
+      <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+        {children}
+      </span>
+    </div>
+  );
+}
+
 function FieldShell({ label, required, children }) {
   return (
     <div className="space-y-2">
-      <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+      <Label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
         {label} {required && <span className="text-yellow-500">*</span>}
       </Label>
       {children}
@@ -1126,6 +1143,7 @@ function StepNav({
   nextLabel = "Continue",
   nextIcon: NextIcon = ArrowRight,
   nextSpin = false,
+  selectedCount = null,
 }) {
   return (
     <div className="mt-8 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -1138,6 +1156,13 @@ function StepNav({
         >
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
+      ) : selectedCount != null ? (
+        <span
+          data-testid="wiz-footer-count"
+          className="inline-flex items-center justify-center bg-yellow-500 text-black px-3 h-12 sm:h-auto sm:py-2 font-mono text-[11px] font-bold uppercase tracking-[0.25em]"
+        >
+          {selectedCount} Selected
+        </span>
       ) : (
         <span className="hidden sm:block" />
       )}
