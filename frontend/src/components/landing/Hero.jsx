@@ -71,20 +71,6 @@ export default function Hero({ onTryEstimator }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25, ease: "easeOut" }}
-          className="mt-8 max-w-2xl"
-        >
-          <div className="font-mono text-xs uppercase tracking-[0.35em] text-yellow-500">
-            TerrainPRO
-          </div>
-          <p className="mt-2 text-lg sm:text-xl text-neutral-200 leading-tight">
-            AI quoting software for Australian tradies.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
           className="mt-10 flex flex-col sm:flex-row gap-4"
         >
