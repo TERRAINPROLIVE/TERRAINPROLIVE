@@ -127,28 +127,28 @@ export default function Header() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
               data-testid="dropdown-menu"
-              className="absolute right-6 lg:right-8 top-[72px] sm:top-[88px] w-[88vw] max-w-sm bg-neutral-950 border border-neutral-800 shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+              className="absolute right-6 lg:right-8 top-[72px] sm:top-[88px] w-[88vw] max-w-sm overflow-hidden rounded-xl bg-zinc-950 border border-zinc-800 shadow-[0_20px_60px_rgba(0,0,0,0.7)]"
             >
-              <div className="px-5 pt-5 pb-3 border-b border-neutral-800 flex items-center justify-between">
+              <div className="px-5 pt-5 pb-4 border-b border-zinc-800/50 flex items-center justify-between">
                 <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
                   Menu
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
                   Esc to close
                 </span>
               </div>
 
-              <nav className="py-2">
+              <nav className="py-1">
                 {NAV.map((item, i) => (
                   <a
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
                     data-testid={`menu-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="group flex items-center justify-between px-5 py-4 border-b border-neutral-900 hover:bg-yellow-500 hover:text-black transition-colors"
+                    className="group flex items-center justify-between px-5 py-5 border-b border-zinc-800/50 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
                   >
                     <span className="flex items-center gap-4">
-                      <span className="font-mono text-[10px] text-yellow-500 tracking-[0.2em] group-hover:text-black/70">
+                      <span className="font-mono text-[10px] text-zinc-600 tracking-[0.2em] group-hover:text-yellow-500 transition-colors">
                         / 0{i + 1}
                       </span>
                       <span className="font-display uppercase text-base tracking-tight font-bold">
@@ -156,7 +156,7 @@ export default function Header() {
                       </span>
                     </span>
                     <ArrowUpRight
-                      className="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity"
+                      className="w-4 h-4 opacity-30 group-hover:opacity-100 group-hover:text-yellow-500 transition-all"
                       strokeWidth={2}
                     />
                   </a>
@@ -164,7 +164,7 @@ export default function Header() {
               </nav>
 
               <div className="px-5 py-5">
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-3">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-3">
                   Social
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -176,14 +176,14 @@ export default function Header() {
                       rel="noopener noreferrer"
                       onClick={() => setOpen(false)}
                       data-testid={`menu-social-${label.toLowerCase()}`}
-                      className="group flex items-center gap-3 px-4 h-12 border border-neutral-800 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+                      className="group flex items-center gap-3 px-4 h-12 rounded-lg border border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900 hover:text-white transition-colors"
                     >
                       <Icon className="w-4 h-4" strokeWidth={1.8} />
                       <span className="font-mono text-[11px] uppercase tracking-[0.2em] font-semibold">
                         {label}
                       </span>
                       <ArrowUpRight
-                        className="w-3 h-3 ml-auto opacity-50 group-hover:opacity-100"
+                        className="w-3 h-3 ml-auto opacity-40 group-hover:opacity-100 group-hover:text-yellow-500 transition-all"
                         strokeWidth={2}
                       />
                     </a>
