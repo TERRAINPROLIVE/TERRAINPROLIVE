@@ -195,18 +195,35 @@ export default function EstimatorWizard() {
     <div data-testid="estimator-wizard">
       <StepHeader step={step} />
 
-      <button
-        type="button"
-        onClick={() => navigate("/dashboard")}
-        data-testid="wiz-back-dashboard"
-        className="group inline-flex items-center gap-2 mb-6 h-10 px-4 bg-zinc-950/30 border border-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider transition-all duration-150 hover:border-zinc-600 hover:text-zinc-100"
-      >
-        <ArrowLeft
-          className="w-4 h-4 transition-transform duration-150 group-hover:-translate-x-0.5"
-          strokeWidth={2.5}
-        />
-        Back to Dashboard
-      </button>
+      <div className="flex items-center gap-3 mb-6">
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          data-testid="wiz-back-dashboard"
+          className="group inline-flex items-center gap-2 h-10 px-4 bg-zinc-950/30 border border-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider transition-all duration-150 hover:border-zinc-600 hover:text-zinc-100"
+        >
+          <ArrowLeft
+            className="w-4 h-4 transition-transform duration-150 group-hover:-translate-x-0.5"
+            strokeWidth={2.5}
+          />
+          Back to Dashboard
+        </button>
+
+        {step > 1 && (
+          <button
+            type="button"
+            onClick={() => setStep((s) => Math.max(1, s - 1))}
+            data-testid="wiz-back-step"
+            className="group inline-flex items-center gap-2 h-10 px-4 bg-zinc-950/30 border border-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider transition-all duration-150 hover:border-zinc-600 hover:text-zinc-100"
+          >
+            <ArrowLeft
+              className="w-4 h-4 transition-transform duration-150 group-hover:-translate-x-0.5"
+              strokeWidth={2.5}
+            />
+            Previous Step
+          </button>
+        )}
+      </div>
 
       <AnimatePresence mode="wait">
         {step === 1 && (
