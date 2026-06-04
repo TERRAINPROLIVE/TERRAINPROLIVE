@@ -66,15 +66,16 @@ export default function Header({ onTryEstimator }) {
           data-testid="logo-link"
           className="flex items-center gap-3 group"
         >
-          <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500 grid place-items-center shrink-0">
-            <span className="font-display font-black text-black text-xl sm:text-2xl leading-none tracking-tighter select-none">
+          <div className="relative w-11 h-11 sm:w-14 sm:h-14 bg-yellow-500 grid place-items-center shrink-0">
+            <span className="font-display font-black text-black text-2xl sm:text-3xl leading-none tracking-tighter select-none">
               [ ]
             </span>
             <span aria-hidden className="absolute inset-0 border-2 border-black/10" />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="font-display uppercase text-xl font-black tracking-wider text-white">
-              TerrainPRO
+            <span className="font-display uppercase text-2xl font-black sm:text-3xl tracking-wide">
+              <span className="text-white">Terrain</span>
+              <span className="text-yellow-500">PRO</span>
             </span>
             <span className="font-mono text-[10px] sm:text-xs text-yellow-500 uppercase tracking-[0.25em] mt-1">
               AI Estimator
