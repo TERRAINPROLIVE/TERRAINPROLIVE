@@ -317,7 +317,7 @@ export default function Dashboard() {
               <ActionLink icon={FileText} label="View Saved Invoices" testid="action-invoices" />
               <ActionLink icon={Users} label="Manage Client Profiles" testid="action-clients" />
               <ActionLink icon={Map} label="Check Supplier Map" testid="action-suppliers" />
-              <ActionLink icon={HardHat} label="Find An Operator" testid="action-find-operator" />
+              <ActionLink icon={HardHat} label="Preferred Pro's" testid="action-preferred-pros" />
               <ActionLink icon={FolderClock} label="Quote History" testid="action-history" />
             </div>
           </aside>
