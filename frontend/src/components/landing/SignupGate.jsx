@@ -34,7 +34,7 @@ export default function SignupGate({ children }) {
   if (user) {
     return (
       <div data-testid="signup-gate-unlocked">
-        <div className="mb-6 border border-yellow-500/40 bg-yellow-500/[0.04] px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="mb-6 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-yellow-500" strokeWidth={2} />
             <div className="leading-tight">
@@ -130,11 +130,11 @@ function SignupForm({ onSuccess }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="border border-neutral-800 bg-neutral-950"
+      className="rounded-lg overflow-hidden border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-950"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12">
         {/* LEFT — pitch */}
-        <div className="lg:col-span-5 p-8 sm:p-10 border-b lg:border-b-0 lg:border-r border-neutral-800 bg-black flex flex-col justify-between">
+        <div className="lg:col-span-5 p-8 sm:p-10 border-b lg:border-b-0 lg:border-r border-zinc-800 bg-black flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-6">
               <Sparkles className="w-4 h-4 text-yellow-500" />
@@ -190,7 +190,7 @@ function SignupForm({ onSuccess }) {
               onChange={onChange("name")}
               placeholder="Mike Thompson"
               autoComplete="name"
-              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </Field>
           <Field label="Phone">
@@ -201,7 +201,7 @@ function SignupForm({ onSuccess }) {
               placeholder="0412 345 678"
               inputMode="tel"
               autoComplete="tel"
-              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </Field>
           <Field label="Email">
@@ -212,7 +212,7 @@ function SignupForm({ onSuccess }) {
               onChange={onChange("email")}
               placeholder="you@yourbusiness.com.au"
               autoComplete="email"
-              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </Field>
           <Field label="ABN">
@@ -223,7 +223,7 @@ function SignupForm({ onSuccess }) {
               placeholder="12 345 678 901"
               inputMode="numeric"
               maxLength={14}
-              className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono"
+              className="h-12 rounded-none bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono"
             />
           </Field>
 

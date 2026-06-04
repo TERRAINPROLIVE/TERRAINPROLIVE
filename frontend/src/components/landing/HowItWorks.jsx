@@ -69,8 +69,8 @@ export default function HowItWorks() {
 
               <div className="relative flex items-start mb-6">
                 <s.icon
-                  className="w-7 h-7 text-neutral-400 group-hover:text-yellow-500 transition-colors"
-                  strokeWidth={1.5}
+                  className="w-7 h-7 text-yellow-500 group-hover:text-yellow-400 transition-colors"
+                  strokeWidth={1.8}
                 />
               </div>
               <h3 className="relative font-display uppercase text-2xl tracking-tight mb-3 text-white">
