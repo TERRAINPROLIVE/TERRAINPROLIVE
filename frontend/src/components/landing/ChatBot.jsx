@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  MessageSquare,
   X,
   Send,
   Loader2,
   Sparkles,
-  Hammer,
 } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -135,25 +133,22 @@ export default function ChatBot() {
         {!open && (
           <motion.button
             key="launcher"
-            initial={{ opacity: 0, y: 16, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.2 }}
             onClick={() => setOpen(true)}
             data-testid="chatbot-launcher"
             aria-label="Open Toolbox Talks"
-            className="fixed bottom-20 right-5 sm:bottom-24 sm:right-6 z-40 inline-flex items-center gap-3 h-14 pl-4 pr-5 bg-yellow-500 text-black border-2 border-black/10 shadow-[0_10px_30px_rgba(0,0,0,0.45)] btn-industrial"
+            className="fixed bottom-4 right-4 z-40 w-11 h-11 rounded-full bg-[#F5A623] text-black grid place-items-center shadow-[0_8px_24px_rgba(0,0,0,0.45)] hover:brightness-110 active:scale-95 transition-all"
           >
-            <span className="w-9 h-9 grid place-items-center bg-black/10">
-              <Hammer className="w-5 h-5" strokeWidth={2.5} />
-            </span>
-            <span className="font-display uppercase text-sm tracking-[0.18em] font-bold">
-              Toolbox Talks
+            <span className="text-xl leading-none" role="img" aria-label="toolbox">
+              🛠️
             </span>
             {unread && (
               <span
                 data-testid="chatbot-unread"
-                className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"
+                className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full ring-2 ring-neutral-950 animate-pulse"
                 aria-label="new message"
               />
             )}
