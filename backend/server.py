@@ -1030,14 +1030,21 @@ class SaveQuoteRequest(BaseModel):
 @api_router.post("/quotes")
 async def save_quote(req: SaveQuoteRequest, user: dict = Depends(get_current_user)):
     q = req.quote or {}
+
+    def _num(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
     doc = {
         "id": str(uuid.uuid4()),
         "user_id": user["id"],
         "quote_ref": q.get("id"),
         "client": req.customer.get("full_name") or "Customer",
         "scope_summary": req.scope_summary or (q.get("summary") or "")[:200],
-        "total_low": q.get("total_low"),
-        "total_high": q.get("total_high"),
+        "total_low": _num(q.get("total_low")),
+        "total_high": _num(q.get("total_high")),
         "status": "Draft",
         "customer": req.customer,
         "quote": q,

@@ -39,6 +39,13 @@ Aussie tradies (sole traders, 2–10 person crews, contractors) running earthmov
 - Tested: 9/9 backend auth + 9/9 frontend e2e (testing_agent iteration_3), zero issues.
 - Many landing styling refinements: mountain logo lockup, ticker tape marquee, consistent left-aligned section headers + bento cards across Process/Capabilities/UseCases/Pricing/Testimonials/FAQ/EarlyAccess, Watch Demo CTA, industrial "You Ready" menu toggle.
 
+## Implemented (2026-06) — Workspace, Dashboard, Estimator & Quote Export
+- Business Dashboard (`/dashboard`) as post-login landing: identity block, KPI cards, editable hourly Labour Rate (persisted via PUT /api/auth/profile, fed into AI quote `labour_rate`), Recent AI Quotes table (real data via GET /api/quotes), Quick Actions. Estimator moved to `/quote` (AppShell shared layout + trial banner + expiry lock).
+- Estimator Step 1/2/3 redesigned to a consistent industrial bento language (SectionHeader yellow-bar labels, zinc-950 inputs w/ amber focus, bento toggle cards). New "Decorative Rocks & Pebbles" job group (5 types). Step 2 live Area/Volume summary (length×width, ×depth). Top "Back to Dashboard" + "Previous Step" ghost buttons.
+- Step 3: sticky bottom Total banner (aligned to QTY column), 120s request timeout + retry, **Export to PDF** (jsPDF branded doc) and **Save Quote** (POST /api/quotes, per-user) actions.
+- Backend: POST/GET /api/quotes (auth, db.saved_quotes, user-scoped), totals coerced to float.
+- Tested: testing_agent iteration_4 — 14/14 backend (9 auth + 5 quotes), 100% frontend. Tests at /app/backend/tests/test_auth.py & test_quotes.py.
+
 ## Backlog
 P0 — none (MVP + trial auth complete)
 P1 — Branded PDF quote export, save-quote-by-email, returning-user dashboard with saved quotes
