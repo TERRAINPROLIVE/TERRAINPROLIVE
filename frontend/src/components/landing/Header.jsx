@@ -84,24 +84,20 @@ export default function Header() {
           aria-label="Toggle menu"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className={`group inline-flex items-center gap-2 sm:gap-3 h-11 sm:h-14 pl-3 pr-2 sm:pl-5 sm:pr-3 border transition-all ${
+          className={`group inline-flex items-center gap-3 sm:gap-4 py-3 px-5 sm:py-4 sm:px-8 font-black uppercase tracking-wider rounded-sm border-2 border-black transition-all duration-150 active:translate-y-[3px] active:shadow-[0_2px_0_0_#000] ${
             open
-              ? "border-yellow-500 bg-yellow-500 text-black"
-              : "border-neutral-800 bg-black text-neutral-100 hover:border-yellow-500 hover:text-yellow-500"
+              ? "bg-white text-black shadow-[0_5px_0_0_#000] hover:bg-yellow-400"
+              : "bg-yellow-500 text-black shadow-[0_5px_0_0_#000] hover:bg-white"
           }`}
         >
-          <span className="font-display uppercase text-xs sm:text-lg tracking-[0.18em] sm:tracking-[0.22em] font-bold">
+          <span className="text-xs sm:text-lg tracking-[0.18em] sm:tracking-[0.22em]">
             You Ready
           </span>
-          <span
-            className={`w-7 h-7 sm:w-9 sm:h-9 grid place-items-center border ${
-              open ? "border-black/30" : "border-neutral-800 group-hover:border-yellow-500"
-            }`}
-          >
+          <span className="w-7 h-7 sm:w-9 sm:h-9 grid place-items-center border-2 border-black/80 bg-black/5 group-hover:bg-black/10 transition-colors">
             {open ? (
-              <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={3} />
             ) : (
-              <Menu className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
+              <Menu className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={3} />
             )}
           </span>
         </button>
