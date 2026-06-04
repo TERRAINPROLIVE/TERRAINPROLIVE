@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, Mountain } from "lucide-react";
+import { Loader2, ArrowRight, Mountain, Home } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,16 +52,28 @@ export default function Signup() {
         data-testid="signup-page"
         className="relative w-full max-w-md rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-950 p-6 sm:p-8"
       >
-        {/* Logo */}
-        <Link to="/" data-testid="signup-logo" className="flex items-center gap-3 mb-8">
-          <div className="relative w-11 h-11 bg-yellow-500 grid place-items-center shrink-0">
-            <Mountain className="w-6 h-6 text-black" strokeWidth={2.4} />
-          </div>
-          <span className="font-display uppercase text-2xl font-black tracking-wide leading-none">
-            <span className="text-white">Terrain</span>
-            <span className="text-yellow-500">PRO</span>
-          </span>
-        </Link>
+        {/* Logo + Home */}
+        <div className="flex items-center justify-between gap-3 mb-8">
+          <Link to="/" data-testid="signup-logo" className="flex items-center gap-3">
+            <div className="relative w-11 h-11 bg-yellow-500 grid place-items-center shrink-0">
+              <Mountain className="w-6 h-6 text-black" strokeWidth={2.4} />
+            </div>
+            <span className="font-display uppercase text-2xl font-black tracking-wide leading-none">
+              <span className="text-white">Terrain</span>
+              <span className="text-yellow-500">PRO</span>
+            </span>
+          </Link>
+
+          <Link
+            to="/"
+            data-testid="signup-home-btn"
+            aria-label="Back to home"
+            title="Back to home"
+            className="shrink-0 h-9 w-9 grid place-items-center border border-zinc-800 text-neutral-400 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+          >
+            <Home className="w-4 h-4" strokeWidth={2} />
+          </Link>
+        </div>
 
         {/* High-contrast trial badge */}
         <div
