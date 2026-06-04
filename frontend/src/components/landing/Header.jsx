@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles } from "lucide-react";
+import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles, Mountain } from "lucide-react";
 
 const NAV = [
   { label: "How It Works", href: "#how", external: false },
@@ -67,22 +67,7 @@ export default function Header({ onTryEstimator }) {
           className="flex items-center gap-3 group"
         >
           <div className="relative w-11 h-11 sm:w-14 sm:h-14 bg-yellow-500 grid place-items-center shrink-0">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-6 h-6 sm:w-8 sm:h-8 text-black"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M3 17V9a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
-              <circle cx="9" cy="13" r="3" />
-              <path d="M9 10V7" />
-              <path d="M15 19v-3" />
-              <path d="M19 19v-2" />
-            </svg>
+            <Mountain className="w-6 h-6 sm:w-8 sm:h-8 text-black" strokeWidth={2.4} />
             <span aria-hidden className="absolute inset-0 border-2 border-black/10" />
           </div>
           <div className="flex flex-col leading-none">
