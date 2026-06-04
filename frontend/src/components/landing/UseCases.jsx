@@ -99,9 +99,15 @@ export default function UseCases() {
 
               <div className="relative z-10 grid grid-cols-3 border-t border-zinc-800 pt-4 -mx-2">
                 {c.stats.map((s) => (
-                  <div key={s.k} className="px-2">
-                    <div className="font-mono text-base sm:text-lg text-yellow-500 font-bold">
-                      {s.v}
+                  <div key={s.k} className="px-2 min-w-0">
+                    <div className="font-mono text-sm sm:text-lg text-yellow-500 font-bold leading-tight break-words">
+                      {s.v.split("/").map((part, idx, arr) => (
+                        <span key={idx}>
+                          {part}
+                          {idx < arr.length - 1 ? "/" : ""}
+                          {idx < arr.length - 1 ? <wbr /> : null}
+                        </span>
+                      ))}
                     </div>
                     <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">
                       {s.k}
