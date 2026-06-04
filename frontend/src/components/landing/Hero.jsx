@@ -49,16 +49,19 @@ export default function Hero() {
           <span className="text-yellow-500">15 mins.</span>
         </motion.h1>
 
-        <motion.p
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.25, ease: "easeOut" }}
-          className="mt-8 max-w-2xl text-base sm:text-lg text-neutral-300 leading-relaxed"
+          className="mt-8 max-w-2xl"
         >
-          TerrainPRO is the AI estimator for tradies who run dirt, pour slabs and
-          shape yards. Punch in the job, get a tight, line-item quote in AUD —
-          materials, plant, labor, GST — done. No spreadsheets. No guesswork.
-        </motion.p>
+          <div className="font-mono text-xs uppercase tracking-[0.35em] text-yellow-500">
+            TerrainPRO
+          </div>
+          <p className="mt-2 text-lg sm:text-xl text-neutral-200 leading-tight">
+            AI quoting software for Australian tradies.
+          </p>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

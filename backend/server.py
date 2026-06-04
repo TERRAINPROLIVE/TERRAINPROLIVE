@@ -601,6 +601,59 @@ async def _photon(client: httpx.AsyncClient, q: str, lat: Optional[float] = None
     return r.json().get("features", [])
 
 
+async def _geocode_origin(client: httpx.AsyncClient, suburb: str, state: str,
+                          postcode: str):
+    """Geocode a suburb robustly — prefer city/town/village, skip airports/POIs."""
+    queries = [
+        ", ".join(p for p in [suburb, state, postcode, "Australia"] if p),
+        ", ".join(p for p in [suburb, state, "Australia"] if p),
+        f"{suburb}, Australia",
+    ]
+    PLACE_KINDS = {"city", "town", "village", "suburb", "hamlet", "locality", "neighbourhood"}
+    seen_urls = set()
+    for q in queries:
+        features = await _photon(client, q, limit=10)
+        # First pass: prefer proper place results
+        for f in features:
+            props = f.get("properties") or {}
+            if (props.get("countrycode") or "").upper() != "AU":
+                continue
+            if state and props.get("state") and state.upper() not in (props.get("state") or "").upper()[:30]:
+                # only enforce state match when state was provided and looks unrelated
+                continue
+            if props.get("osm_value") in PLACE_KINDS:
+                return _to_origin(f)
+            # cache fallbacks
+            seen_urls.add(id(f))
+        # Second pass on this query: any AU result matching suburb name
+        for f in features:
+            props = f.get("properties") or {}
+            if (props.get("countrycode") or "").upper() != "AU":
+                continue
+            name = (props.get("name") or "").lower()
+            if "airport" in name or "station" in name:
+                continue
+            return _to_origin(f)
+    return None
+
+
+def _to_origin(feature: dict):
+    geom = feature.get("geometry") or {}
+    coords = geom.get("coordinates") or []
+    if len(coords) < 2:
+        return None
+    props = feature.get("properties") or {}
+    label = ", ".join(
+        p for p in [
+            props.get("name"),
+            props.get("state"),
+            props.get("postcode"),
+            props.get("country"),
+        ] if p
+    )
+    return {"lat": coords[1], "lng": coords[0], "label": label}
+
+
 def _feature_to_supplier(feature: dict, category: str, origin_lat: float,
                          origin_lng: float) -> Optional[Supplier]:
     props = feature.get("properties") or {}
@@ -665,39 +718,27 @@ async def suppliers_nearby(
                     suppliers=[Supplier(**s) for s in cached["suppliers"]],
                 )
 
-    query_str = ", ".join(p for p in [suburb, state, postcode, "Australia"] if p)
     async with httpx.AsyncClient() as client:
-        origin_features = await _photon(client, query_str, limit=1)
-        if not origin_features:
-            raise HTTPException(status_code=404, detail=f"Couldn't geocode '{query_str}'")
-        og = origin_features[0]
-        og_geom = og.get("geometry") or {}
-        og_coords = og_geom.get("coordinates") or []
-        if len(og_coords) < 2:
-            raise HTTPException(status_code=404, detail="Geocoder returned no coordinates")
-        origin_lng, origin_lat = og_coords[0], og_coords[1]
-        og_props = og.get("properties") or {}
-        origin_label = ", ".join(
-            p for p in [
-                og_props.get("name"),
-                og_props.get("state"),
-                og_props.get("postcode"),
-                og_props.get("country"),
-            ] if p
-        )
+        origin = await _geocode_origin(client, suburb, state, postcode or "")
+        if not origin:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Couldn't geocode '{suburb}, {state} {postcode}'",
+            )
+        origin_lat = origin["lat"]
+        origin_lng = origin["lng"]
+        origin_label = origin["label"]
 
         suppliers: List[Supplier] = []
         seen = set()
 
-        # Sequential to be polite to public API
         for cat_id, _label, queries in SUPPLIER_CATEGORIES:
             for q in queries:
-                features = await _photon(client, q, lat=origin_lat, lng=origin_lng, limit=10)
+                features = await _photon(client, q, lat=origin_lat, lng=origin_lng, limit=15)
                 for f in features:
                     s = _feature_to_supplier(f, cat_id, origin_lat, origin_lng)
                     if not s:
                         continue
-                    # Only Australian results within radius
                     fp = f.get("properties") or {}
                     if (fp.get("countrycode") or "").upper() != "AU":
                         continue
