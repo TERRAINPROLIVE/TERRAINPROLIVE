@@ -48,6 +48,31 @@ export default function Signup() {
       <div className="absolute inset-0 grid-bg opacity-40" aria-hidden />
       <div className="absolute top-0 inset-x-0 h-1 hazard-stripes opacity-80" aria-hidden />
 
+      {/* Industrial concrete watermark background */}
+      <div data-testid="signup-bg-texture" aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_15%_0%,#161616_0%,#0c0c0c_45%,#070707_100%)] opacity-70" />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, #fff 0px, #fff 1px, transparent 1px, transparent 160px)",
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          }}
+        />
+        <span className="hidden lg:block absolute left-3 top-1/2 -translate-y-1/2 -rotate-90 origin-center whitespace-nowrap font-display font-black uppercase text-white/[0.03] text-6xl xl:text-7xl tracking-[0.5em] select-none">
+          Your Project,
+        </span>
+        <span className="hidden lg:block absolute right-3 top-1/2 -translate-y-1/2 rotate-90 origin-center whitespace-nowrap font-display font-black uppercase text-white/[0.03] text-6xl xl:text-7xl tracking-[0.5em] select-none">
+          Our Terrain.
+        </span>
+      </div>
+
       <div
         data-testid="signup-page"
         className="relative w-full max-w-md rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-950 p-6 sm:p-8"
