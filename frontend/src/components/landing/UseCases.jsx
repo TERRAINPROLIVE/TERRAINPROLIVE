@@ -50,11 +50,11 @@ export default function UseCases() {
       className="relative py-24 sm:py-32 border-t border-neutral-900"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="mb-12">
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
             [ Use Cases ]
           </span>
-          <p className="mt-6 text-neutral-400 leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-4 text-neutral-400 leading-relaxed max-w-xl">
             Three trades, one brain. TerrainPRO's model is trained on real
             Australian site jobs — earthmoving, concreting, landscaping. It
             speaks tradie, not corporate.

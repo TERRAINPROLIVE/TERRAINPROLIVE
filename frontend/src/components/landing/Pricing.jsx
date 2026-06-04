@@ -69,11 +69,11 @@ export default function Pricing() {
       <div className="absolute inset-0 bg-black/70" aria-hidden />
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="mb-12">
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
             [ Pricing ]
           </span>
-          <p className="mt-6 text-neutral-400 max-w-2xl mx-auto">
+          <p className="mt-4 text-neutral-400 leading-relaxed max-w-xl">
             One quote you win pays for the year. Cancel any time — no lock-in,
             no exit fees, no BS.
           </p>
