@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Hammer, Facebook, Instagram, ArrowUpRight, Sparkles } from "lucide-react";
+import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles } from "lucide-react";
 
 const NAV = [
   { label: "How It Works", href: "#how", external: false },
@@ -64,16 +64,19 @@ export default function Header({ onTryEstimator }) {
         <a
           href="#top"
           data-testid="logo-link"
-          className="flex items-center gap-2 sm:gap-3 group"
+          className="flex items-center gap-3 group"
         >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500 flex items-center justify-center">
-            <Hammer className="w-5 h-5 sm:w-7 sm:h-7 text-black" strokeWidth={2.5} />
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500 grid place-items-center shrink-0">
+            <span className="font-display font-black text-black text-xl sm:text-2xl leading-none tracking-tighter select-none">
+              [ ]
+            </span>
+            <span aria-hidden className="absolute inset-0 border-2 border-black/10" />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="font-display text-xl sm:text-3xl uppercase tracking-tight">
+            <span className="font-display uppercase text-xl font-black tracking-wider text-white">
               TerrainPRO
             </span>
-            <span className="font-mono text-[10px] sm:text-xs text-yellow-500 uppercase tracking-[0.25em] mt-0.5 sm:mt-1">
+            <span className="font-mono text-[10px] sm:text-xs text-yellow-500 uppercase tracking-[0.25em] mt-1">
               AI Estimator
             </span>
           </div>
