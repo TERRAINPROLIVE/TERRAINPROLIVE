@@ -57,12 +57,12 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors overflow-hidden"
+              className="relative bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors"
             >
               {/* Watermark step number */}
               <span
                 aria-hidden
-                className="pointer-events-none select-none absolute -top-2 right-4 font-display text-7xl sm:text-8xl font-extrabold text-zinc-700/40 tracking-tight leading-none"
+                className="pointer-events-none select-none absolute top-3 right-5 font-display text-6xl sm:text-7xl font-extrabold text-zinc-600/70 tracking-tight leading-none"
               >
                 {s.n}
               </span>
