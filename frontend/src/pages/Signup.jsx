@@ -44,7 +44,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#0a0a0a] text-[#fafafa] flex items-center justify-center px-5 py-12 overflow-hidden">
+    <div className="relative h-screen bg-[#0a0a0a] text-[#fafafa] flex items-center justify-center px-5 py-6 overflow-hidden">
       <div className="absolute inset-0 grid-bg opacity-40" aria-hidden />
       <div className="absolute top-0 inset-x-0 h-1 hazard-stripes opacity-80" aria-hidden />
 
@@ -75,10 +75,10 @@ export default function Signup() {
 
       <div
         data-testid="signup-page"
-        className="relative w-full max-w-md rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-950 p-6 sm:p-8"
+        className="relative w-full max-w-md rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-950 p-5 sm:p-6"
       >
         {/* Logo + Home */}
-        <div className="flex items-center justify-between gap-3 mb-8">
+        <div className="flex items-center justify-between gap-3 mb-5">
           <Link to="/" data-testid="signup-logo" className="flex items-center gap-3">
             <div className="relative w-11 h-11 bg-yellow-500 grid place-items-center shrink-0">
               <Mountain className="w-6 h-6 text-black" strokeWidth={2.4} />
@@ -100,24 +100,19 @@ export default function Signup() {
           </Link>
         </div>
 
-        {/* High-contrast trial badge */}
-        <div
-          data-testid="signup-trial-badge"
-          className="inline-block bg-yellow-500 text-black text-[10px] sm:text-xs font-black tracking-widest uppercase px-3 py-1.5 rounded-sm mb-5"
-        >
-          [ No Credit Card Required — 7 Days Free Access ]
-        </div>
-
         <h1 className="font-display uppercase text-3xl tracking-tight leading-[0.95]">
           Start your
           <br />
           <span className="text-yellow-500">free trial.</span>
         </h1>
-        <p className="mt-3 text-sm text-neutral-400 leading-relaxed">
-          Create your account and jump straight into the AI Quote Estimator.
+        <p
+          data-testid="signup-subtitle"
+          className="mt-2.5 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-yellow-500"
+        >
+          No Payment Required — 7 Days Free Access
         </p>
 
-        <form onSubmit={submit} className="mt-7 space-y-4" data-testid="signup-form">
+        <form onSubmit={submit} className="mt-5 space-y-3" data-testid="signup-form">
           <FormField label="Full Name">
             <Input
               data-testid="signup-name"
@@ -166,7 +161,7 @@ export default function Signup() {
             type="submit"
             disabled={!canSubmit}
             data-testid="signup-submit"
-            className="w-full inline-flex items-center justify-center gap-2 h-14 bg-yellow-500 text-black font-black uppercase tracking-[0.18em] text-sm btn-industrial disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full inline-flex items-center justify-center gap-2 h-12 bg-yellow-500 text-black font-black uppercase tracking-[0.18em] text-sm btn-industrial disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -178,7 +173,7 @@ export default function Signup() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-neutral-400">
+        <p className="mt-4 text-center text-sm text-neutral-400">
           Already on the tools?{" "}
           <Link to="/login" data-testid="signup-login-link" className="text-yellow-500 font-semibold hover:underline">
             Log in
@@ -191,7 +186,7 @@ export default function Signup() {
 
 function FormField({ label, children }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
         {label}
       </Label>
