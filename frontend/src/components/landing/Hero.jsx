@@ -98,7 +98,7 @@ export default function Hero() {
             { v: "30s", k: "Avg quote time" },
             { v: "94%", k: "Cost accuracy" },
             { v: "3.2x", k: "More jobs won" },
-            { v: "$0", k: "Sent to admin" },
+            { v: "Smarter", k: "With every quote" },
           ].map((s, i) => (
             <div key={i} className="py-5 pl-4 sm:pl-6 first:pl-0 sm:first:pl-0">
               <div className="font-mono text-2xl sm:text-3xl text-yellow-500 font-bold">
