@@ -128,12 +128,9 @@ export default function Dashboard() {
             {/* Desktop: side-by-side info grid */}
             <div
               data-testid="business-meta"
-              className="hidden lg:grid lg:col-span-2 lg:col-start-3 lg:mt-14 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4 grid-cols-2 gap-x-8 gap-y-3"
+              className="hidden lg:block lg:col-span-2 lg:col-start-3 lg:mt-14 relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4"
             >
-              <Meta label="Business" value={BUSINESS.name} />
-              <Meta label="Location" value={BUSINESS.location} />
-              <Meta label="Registration" value={BUSINESS.abn} />
-              <Meta label="Crew Size" value={BUSINESS.size} />
+              <BusinessMetaEditable />
             </div>
           </div>
 
@@ -149,7 +146,7 @@ export default function Dashboard() {
               <span className="flex items-center gap-2 min-w-0">
                 <Building2 className="w-4 h-4 text-yellow-500 shrink-0" strokeWidth={1.8} />
                 <span className="font-display uppercase text-sm tracking-tight text-white truncate">
-                  {BUSINESS.name}
+                  {user?.business_name || BUSINESS.name}
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 truncate">
                   · {BUSINESS.location}
@@ -164,12 +161,9 @@ export default function Dashboard() {
             {metaOpen && (
               <div
                 data-testid="business-meta-mobile"
-                className="mt-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-4 py-4 grid grid-cols-2 gap-x-6 gap-y-3"
+                className="relative mt-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-4 py-4"
               >
-                <Meta label="Business" value={BUSINESS.name} />
-                <Meta label="Location" value={BUSINESS.location} />
-                <Meta label="Registration" value={BUSINESS.abn} />
-                <Meta label="Crew Size" value={BUSINESS.size} />
+                <BusinessMetaEditable />
               </div>
             )}
           </div>
@@ -468,6 +462,108 @@ function Meta({ label, value }) {
       <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">{label}</div>
       <div className="mt-1 font-display uppercase text-sm tracking-tight text-white">{value}</div>
     </div>
+  );
+}
+
+function BusinessMetaEditable() {
+  const { user, updateProfile } = useAuth();
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState("");
+  const [abn, setAbn] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const bizName = user?.business_name || BUSINESS.name;
+  const abnDisplay = user?.abn ? `ABN ${user.abn}` : "Not set";
+
+  const startEdit = () => {
+    setName(user?.business_name || "");
+    setAbn(user?.abn || "");
+    setEditing(true);
+  };
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await updateProfile({ business_name: name.trim(), abn: abn.trim() });
+      toast.success("Business details saved — they'll appear on exported quote PDFs.");
+      setEditing(false);
+    } catch {
+      toast.error("Couldn't save business details. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (editing) {
+    return (
+      <div className="space-y-3" data-testid="business-meta-edit">
+        <div>
+          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500 mb-1.5">
+            Business Name
+          </div>
+          <Input
+            data-testid="business-name-input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Apex Landscaping"
+            className="h-9 rounded-none bg-neutral-950 border-neutral-800 text-white text-sm focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+          />
+        </div>
+        <div>
+          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500 mb-1.5">
+            ABN
+          </div>
+          <Input
+            data-testid="business-abn-input"
+            value={abn}
+            onChange={(e) => setAbn(e.target.value)}
+            placeholder="12 345 678 910"
+            inputMode="numeric"
+            className="h-9 rounded-none bg-neutral-950 border-neutral-800 text-white text-sm font-mono focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+          />
+        </div>
+        <div className="flex items-center gap-2 pt-1">
+          <button
+            type="button"
+            data-testid="business-meta-save"
+            onClick={save}
+            disabled={saving}
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-[11px] hover:bg-yellow-400 disabled:opacity-50 transition-colors"
+          >
+            <Check className="w-3.5 h-3.5" strokeWidth={3} />
+            Save
+          </button>
+          <button
+            type="button"
+            data-testid="business-meta-cancel"
+            onClick={() => setEditing(false)}
+            className="h-9 px-3 text-neutral-400 hover:text-white font-mono text-[11px] uppercase tracking-[0.16em] transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        data-testid="business-meta-edit-btn"
+        onClick={startEdit}
+        aria-label="Edit business details"
+        className="absolute top-3 right-3 inline-flex items-center justify-center w-7 h-7 text-yellow-500 hover:text-yellow-400 transition-colors"
+      >
+        <Pencil className="w-3.5 h-3.5" />
+      </button>
+      <div className="grid grid-cols-2 gap-x-8 gap-y-3 pr-6">
+        <Meta label="Business" value={bizName} />
+        <Meta label="Location" value={BUSINESS.location} />
+        <Meta label="Registration" value={abnDisplay} />
+        <Meta label="Crew Size" value={BUSINESS.size} />
+      </div>
+    </>
   );
 }
 

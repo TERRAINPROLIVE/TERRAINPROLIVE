@@ -916,6 +916,8 @@ def _public_user(doc: dict) -> dict:
         "phone": doc.get("phone"),
         "email": doc.get("email"),
         "hourly_rate": doc.get("hourly_rate"),
+        "abn": doc.get("abn"),
+        "business_name": doc.get("business_name"),
         "trial_expires_at": doc.get("trial_expires_at"),
         "trial_active": trial_active,
         "days_remaining": days_remaining,
@@ -1008,6 +1010,8 @@ async def auth_me(user: dict = Depends(get_current_user)):
 
 class ProfileUpdate(BaseModel):
     hourly_rate: Optional[float] = Field(default=None, ge=0, le=1000)
+    abn: Optional[str] = Field(default=None, max_length=40)
+    business_name: Optional[str] = Field(default=None, max_length=120)
 
 
 @api_router.put("/auth/profile")
@@ -1015,6 +1019,10 @@ async def update_profile(req: ProfileUpdate, user: dict = Depends(get_current_us
     updates = {}
     if req.hourly_rate is not None:
         updates["hourly_rate"] = round(float(req.hourly_rate), 2)
+    if req.abn is not None:
+        updates["abn"] = req.abn.strip()
+    if req.business_name is not None:
+        updates["business_name"] = req.business_name.strip()
     if updates:
         await db.users.update_one({"id": user["id"]}, {"$set": updates})
         user = {**user, **updates}

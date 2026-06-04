@@ -227,7 +227,10 @@ export default function EstimatorWizard() {
             .join(", "),
         },
         selectedJobs: selectedJobsForExport(),
-        business: { name: user?.name ? `${user.name}'s Quote` : "TerrainPRO" },
+        business: {
+          name: user?.business_name || (user?.name ? `${user.name}'s Quote` : "TerrainPRO"),
+          abn: user?.abn ? `ABN ${user.abn}` : "",
+        },
       });
       toast.success("PDF downloaded.");
     } catch {
