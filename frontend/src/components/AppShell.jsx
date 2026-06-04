@@ -15,7 +15,36 @@ export default function AppShell({ children, label = "Business Dashboard" }) {
   const days = user?.days_remaining ?? 0;
 
   return (
-    <div data-testid="app-shell" className="min-h-screen bg-[#0a0a0a] text-[#fafafa]">
+    <div data-testid="app-shell" className="relative min-h-screen bg-[#0a0a0a] text-[#fafafa] overflow-x-hidden">
+      {/* Industrial concrete watermark background (webapp only) */}
+      <div data-testid="app-bg-texture" aria-hidden className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* charcoal concrete base + cinematic moody lighting */}
+        <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_15%_0%,#161616_0%,#0c0c0c_45%,#070707_100%)]" />
+        {/* subtle architectural vertical lines */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, #fff 0px, #fff 1px, transparent 1px, transparent 160px)",
+          }}
+        />
+        {/* fine grain / concrete noise */}
+        <div
+          className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          }}
+        />
+        {/* Left margin vertical watermark */}
+        <span className="hidden lg:block absolute left-3 top-1/2 -translate-y-1/2 -rotate-90 origin-center whitespace-nowrap font-display font-black uppercase text-white/[0.03] text-6xl xl:text-7xl tracking-[0.5em] select-none">
+          Your Project,
+        </span>
+        {/* Right margin vertical watermark */}
+        <span className="hidden lg:block absolute right-3 top-1/2 -translate-y-1/2 rotate-90 origin-center whitespace-nowrap font-display font-black uppercase text-white/[0.03] text-6xl xl:text-7xl tracking-[0.5em] select-none">
+          Our Terrain.
+        </span>
+      </div>
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-black border-b border-neutral-800">
         <div className="relative max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between gap-3">
@@ -74,9 +103,9 @@ export default function AppShell({ children, label = "Business Dashboard" }) {
       </header>
 
       {trialActive ? (
-        children
+        <div className="relative z-10">{children}</div>
       ) : (
-        <main className="max-w-2xl mx-auto px-5 py-24 text-center" data-testid="trial-expired">
+        <main className="relative z-10 max-w-2xl mx-auto px-5 py-24 text-center" data-testid="trial-expired">
           <div className="inline-grid place-items-center w-14 h-14 bg-zinc-900 border border-zinc-800 mb-6">
             <Lock className="w-6 h-6 text-yellow-500" />
           </div>
