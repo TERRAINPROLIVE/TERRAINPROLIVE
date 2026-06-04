@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "@/pages/Landing";
 import Signup from "@/pages/Signup";
 import Login from "@/pages/Login";
+import Dashboard from "@/pages/Dashboard";
 import Workspace from "@/pages/Workspace";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/context/AuthContext";
@@ -20,6 +21,14 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route
               path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quote"
               element={
                 <ProtectedRoute>
                   <Workspace />
