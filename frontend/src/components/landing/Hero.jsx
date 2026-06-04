@@ -21,31 +21,22 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black" aria-hidden />
       <div className="absolute inset-0 grid-bg opacity-50" aria-hidden />
 
-      {/* Top tickertape — live indicator only */}
+      {/* Top tickertape — live + trades */}
       <div className="absolute top-16 sm:top-20 inset-x-0 z-10 border-y border-yellow-500/30 bg-black/70 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center justify-center font-mono text-[8px] uppercase tracking-[0.2em] text-neutral-400">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center justify-center gap-4 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
           <span className="flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 animate-pulse" />
             <span>LIVE</span>
+          </span>
+          <span className="text-neutral-700">|</span>
+          <span className="text-yellow-500 tracking-[0.3em]">
+            Concreting · Landscaping · Earthmoving
           </span>
         </div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-20 sm:pb-28 pt-32 w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex items-center justify-center gap-4 mb-8"
-        >
-          <div className="h-px w-12 bg-yellow-500" />
-          <span className="font-mono text-xs sm:text-sm uppercase tracking-[0.35em] text-yellow-500 text-center">
-            Concreting · Landscaping · Earthmoving
-          </span>
-          <div className="h-px w-12 bg-yellow-500" />
-        </motion.div>
-
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
