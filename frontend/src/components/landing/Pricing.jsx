@@ -84,15 +84,15 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {TIERS.map((t) => (
             <div
               key={t.name}
               data-testid={`pricing-tier-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
-              className={`relative flex flex-col p-8 sm:p-10 border ${
+              className={`relative flex flex-col rounded-lg p-8 sm:p-10 border transition-colors group ${
                 t.highlight
-                  ? "border-yellow-500 bg-neutral-950 md:scale-[1.02] z-10"
-                  : "border-neutral-800 bg-black/60"
+                  ? "border-yellow-500 border-l-2 border-l-yellow-500 bg-zinc-900 md:scale-[1.02] z-10"
+                  : "border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 hover:bg-zinc-900 hover:border-l-yellow-400"
               }`}
             >
               {t.highlight && (
