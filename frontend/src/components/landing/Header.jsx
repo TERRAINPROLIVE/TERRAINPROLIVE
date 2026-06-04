@@ -83,35 +83,13 @@ export default function Header() {
           </div>
         </a>
 
-        {/* Desktop horizontal navbar */}
-        <nav data-testid="desktop-nav" className="hidden md:flex items-center gap-8 lg:gap-10">
-          {NAV.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              data-testid={`nav-${item.label.toLowerCase()}`}
-              className="font-mono text-xs uppercase tracking-[0.22em] text-neutral-400 hover:text-white transition-colors duration-150"
-            >
-              {item.label}
-            </a>
-          ))}
-          <button
-            type="button"
-            data-testid="nav-start-trial"
-            onClick={() => navigate("/signup")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-yellow-500 text-yellow-500 font-black uppercase tracking-[0.18em] text-xs hover:bg-yellow-500 hover:text-black transition-colors duration-150"
-          >
-            Start Free Trial
-          </button>
-        </nav>
-
-        {/* Mobile hamburger */}
+        {/* Hamburger (mobile + web) */}
         <button
           data-testid="menu-toggle"
           aria-label="Toggle menu"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className={`md:hidden flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-150 ${
+          className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-150 ${
             open
               ? "bg-yellow-500 text-black border-yellow-500"
               : "bg-neutral-800 text-white border-neutral-700 hover:border-amber-400"
