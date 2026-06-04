@@ -37,6 +37,7 @@ import {
 import { JOB_GROUPS, JOB_LOOKUP, jobsByIds } from "@/lib/jobCatalog";
 import { AU_STATES } from "@/lib/auSuburbs";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const TRADE_ICON = { Landscaping: Leaf, Concreting: Box, Earthmoving: Truck };
@@ -61,6 +62,7 @@ function evalComputed(expr, values) {
 
 export default function EstimatorWizard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [customer, setCustomer] = useState({
     full_name: "",
@@ -192,6 +194,19 @@ export default function EstimatorWizard() {
   return (
     <div data-testid="estimator-wizard">
       <StepHeader step={step} />
+
+      <button
+        type="button"
+        onClick={() => navigate("/dashboard")}
+        data-testid="wiz-back-dashboard"
+        className="group inline-flex items-center gap-2 mb-6 h-10 px-4 bg-zinc-950/30 border border-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider transition-all duration-150 hover:border-zinc-600 hover:text-zinc-100"
+      >
+        <ArrowLeft
+          className="w-4 h-4 transition-transform duration-150 group-hover:-translate-x-0.5"
+          strokeWidth={2.5}
+        />
+        Back to Dashboard
+      </button>
 
       <AnimatePresence mode="wait">
         {step === 1 && (
