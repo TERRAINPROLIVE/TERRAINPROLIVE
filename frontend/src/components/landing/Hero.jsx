@@ -73,10 +73,16 @@ export default function Hero({ onTryEstimator }) {
             type="button"
             onClick={onTryEstimator}
             data-testid="hero-primary-cta"
-            className="inline-flex items-center justify-center gap-2 h-14 px-8 bg-yellow-500 text-black font-bold uppercase tracking-[0.18em] text-sm btn-industrial"
+            className="group relative inline-flex items-center justify-center gap-3 py-4 px-8 sm:py-5 sm:px-10 bg-zinc-900/80 backdrop-blur-sm border-2 border-yellow-500 text-yellow-500 font-black uppercase tracking-widest text-sm sm:text-base transition-all duration-200 hover:bg-yellow-500 hover:text-black hover:shadow-[0_0_24px_rgba(234,179,8,0.45)]"
           >
-            <Sparkles className="w-4 h-4" />
-            Start Free Trial
+            {/* Corner brackets */}
+            <span aria-hidden className="absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 border-yellow-500" />
+            <span aria-hidden className="absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 border-yellow-500" />
+            <span aria-hidden className="absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 border-yellow-500" />
+            <span aria-hidden className="absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 border-yellow-500" />
+
+            <Sparkles className="w-4 h-4" strokeWidth={2.5} />
+            <span>Start Free Trial</span>
           </button>
         </motion.div>
 
