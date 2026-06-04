@@ -165,25 +165,31 @@ export default function EstimatorWizard() {
         .filter(Boolean)
         .join(", ");
 
-      const { data } = await axios.post(`${API}/quote/multi-generate`, {
-        customer: {
-          full_name: customer.full_name.trim(),
-          phone: customer.phone || null,
-          email: customer.email || null,
-          address: composedAddress,
+      const { data } = await axios.post(
+        `${API}/quote/multi-generate`,
+        {
+          customer: {
+            full_name: customer.full_name.trim(),
+            phone: customer.phone || null,
+            email: customer.email || null,
+            address: composedAddress,
+          },
+          scopes,
+          complexity,
+          notes: notes || null,
+          labour_rate: user?.hourly_rate ?? null,
         },
-        scopes,
-        complexity,
-        notes: notes || null,
-        labour_rate: user?.hourly_rate ?? null,
-      });
+        { timeout: 120000 }
+      );
       setQuote(data);
       toast.success("Quote ready. Scroll to see the breakdown.");
     } catch (err) {
       const msg =
-        err?.response?.data?.detail ||
-        err?.message ||
-        "Couldn't generate quote.";
+        err?.code === "ECONNABORTED"
+          ? "The estimator took too long to respond. Please try again."
+          : err?.response?.data?.detail ||
+            err?.message ||
+            "Couldn't generate quote.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -294,6 +300,7 @@ export default function EstimatorWizard() {
               selectedJobs={selectedJobs}
               customer={customer}
               onReset={reset}
+              onRetry={submit}
             />
           </motion.div>
         )}
@@ -814,7 +821,7 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
 /* ============================================================
    Step 3 — AI quote output
    ============================================================ */
-function Step3({ loading, error, quote, selectedJobs, customer, onReset }) {
+function Step3({ loading, error, quote, selectedJobs, customer, onReset, onRetry }) {
   return (
     <div className="space-y-6">
       <div className="relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-black overflow-hidden">
@@ -848,9 +855,15 @@ function Step3({ loading, error, quote, selectedJobs, customer, onReset }) {
                 <Line delay={0.9}>→ querying gpt-5.2 estimator...</Line>
                 <Line delay={1.3}>→ assembling consolidated line items...</Line>
                 <div className="flex items-center gap-2 mt-3 text-yellow-500">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>computing</span>
                   <span className="caret" />
                 </div>
+                <Line delay={1.6}>
+                  <span className="text-neutral-500">
+                    // this usually takes 20–40 seconds — hang tight, don't refresh
+                  </span>
+                </Line>
               </motion.div>
             )}
 
@@ -859,10 +872,20 @@ function Step3({ loading, error, quote, selectedJobs, customer, onReset }) {
                 key="err"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-300 flex gap-3"
+                className="space-y-4"
               >
-                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>{error}</span>
+                <div className="border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-300 flex gap-3">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  data-testid="wiz-retry"
+                  className="inline-flex items-center justify-center gap-2 h-11 px-6 bg-yellow-500 text-black font-bold uppercase tracking-[0.15em] text-xs btn-industrial"
+                >
+                  <Sparkles className="w-4 h-4" /> Try again
+                </button>
               </motion.div>
             )}
 
