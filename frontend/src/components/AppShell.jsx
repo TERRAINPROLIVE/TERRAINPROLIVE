@@ -64,10 +64,10 @@ export default function AppShell({ children, label = "Business Dashboard" }) {
             <span className={`w-1.5 h-1.5 ${trialActive ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
             {trialActive ? (
               <span className="text-yellow-500">
-                [ System Status: Trial Active // {days} {days === 1 ? "Day" : "Days"} Remaining ]
+                Trial Active // {days} {days === 1 ? "Day" : "Days"} Remaining
               </span>
             ) : (
-              <span className="text-red-400">[ System Status: Trial Expired ]</span>
+              <span className="text-red-400">Trial Expired</span>
             )}
           </div>
         </div>
