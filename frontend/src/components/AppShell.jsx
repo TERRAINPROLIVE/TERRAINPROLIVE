@@ -60,8 +60,8 @@ export default function AppShell({ children, label = "Business Dashboard" }) {
             trialActive ? "border-yellow-500/30 bg-yellow-500/[0.05]" : "border-red-500/40 bg-red-500/[0.06]"
           }`}
         >
-          <div className="max-w-7xl mx-auto px-5 lg:px-8 py-2 flex items-center gap-3 font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.3em]">
-            <span className={`w-2 h-2 ${trialActive ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+          <div className="max-w-7xl mx-auto px-5 lg:px-8 py-2 flex items-center gap-3 font-mono text-[7px] sm:text-[9px] uppercase tracking-[0.2em] sm:tracking-[0.3em]">
+            <span className={`w-1.5 h-1.5 ${trialActive ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
             {trialActive ? (
               <span className="text-yellow-500">
                 [ System Status: Trial Active // {days} {days === 1 ? "Day" : "Days"} Remaining ]
