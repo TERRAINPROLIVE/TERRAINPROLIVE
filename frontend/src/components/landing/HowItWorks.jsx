@@ -35,7 +35,7 @@ export default function HowItWorks() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
           <div className="md:col-span-4">
-            <span className="font-mono text-xs uppercase tracking-[0.3em] text-yellow-500">
+            <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
               [ Process ]
             </span>
             <h2 className="mt-4 font-display uppercase text-4xl sm:text-5xl tracking-tight">
