@@ -166,12 +166,12 @@ export default function ChatBot() {
         {open && (
           <motion.div
             key="panel"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 40 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
             data-testid="chatbot-panel"
-            className="fixed z-40 bottom-0 right-0 sm:bottom-6 sm:right-6 w-full sm:w-[400px] max-h-[400px] sm:max-h-[560px] bg-neutral-950 border border-neutral-800 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col"
+            className="fixed z-50 top-0 right-0 bottom-0 h-screen w-full sm:w-[400px] bg-neutral-950 border-l border-neutral-800 shadow-[0_0_60px_rgba(0,0,0,0.6)] flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between gap-2 px-3 h-12 border-b border-neutral-800 bg-black">
@@ -213,7 +213,7 @@ export default function ChatBot() {
             <div
               ref={scrollRef}
               data-testid="chatbot-messages"
-              className="flex-1 overflow-y-auto p-3 space-y-3 max-h-[240px] sm:max-h-[400px] no-scrollbar"
+              className="flex-1 overflow-y-auto p-3 space-y-3 no-scrollbar"
             >
               {messages.map((m, i) => (
                 <Bubble key={i} role={m.role} content={m.content} />
