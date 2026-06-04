@@ -91,30 +91,32 @@ export default function Hero({ onTryEstimator }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-16 bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 sm:p-8"
+          className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
         >
-          <div className="grid grid-cols-2">
-            {[
-              { v: "8 mins", k: "Average Quote Time" },
-              { v: "94%", k: "Accuracy Rate" },
-              { v: "3.2x", k: "More Jobs Won" },
-              { v: "Smarter", k: "With Every Quote" },
-            ].map((s, i) => (
-              <div
-                key={i}
-                className={`px-4 sm:px-6 py-4 ${
-                  i % 2 === 0 ? "border-r border-zinc-800/60" : ""
-                } ${i < 2 ? "border-b border-zinc-800/60" : ""}`}
+          {[
+            { n: "01", v: "8 mins", k: "Average Quote Time" },
+            { n: "02", v: "94%", k: "Accuracy Rate" },
+            { n: "03", v: "3.2x", k: "More Jobs Won" },
+            { n: "04", v: "Smarter", k: "With Every Quote" },
+          ].map((s) => (
+            <div
+              key={s.n}
+              className="relative bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors"
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none select-none absolute top-3 right-4 font-display text-5xl sm:text-6xl font-extrabold text-zinc-600/70 tracking-tight leading-none"
               >
+                {s.n}
+              </span>
+              <div className="relative z-10">
                 <div className="font-display text-4xl sm:text-5xl font-black text-white tracking-tight leading-none">
                   {s.v}
                 </div>
-                <div className="mt-3 text-sm sm:text-base text-zinc-400">
-                  {s.k}
-                </div>
+                <div className="mt-3 text-sm text-zinc-400">{s.k}</div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </motion.div>
       </div>
     </section>
