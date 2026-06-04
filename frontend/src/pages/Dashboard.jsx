@@ -20,6 +20,7 @@ import {
   X,
   Download,
   RotateCcw,
+  Save,
 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { useAuth } from "@/context/AuthContext";
@@ -326,6 +327,22 @@ export default function Dashboard() {
           doc={selected}
           onClose={() => setSelected(null)}
           onReopen={() => navigate("/quote")}
+          onUpdated={(updated) => {
+            setSelected(updated);
+            setQuotes((qs) =>
+              (qs || []).map((row) =>
+                row.raw?.id === updated.id
+                  ? {
+                      ...row,
+                      status: updated.status || "Draft",
+                      scope: updated.scope_summary || row.scope,
+                      total: `${fmtMoney(updated.total_low)} - ${fmtMoney(updated.total_high)}`,
+                      raw: updated,
+                    }
+                  : row
+              )
+            );
+          }}
         />
       )}
     </AppShell>
@@ -344,17 +361,48 @@ function StatusTag({ status }) {
   );
 }
 
-function SavedQuoteDetail({ doc, onClose, onReopen }) {
+const QUOTE_STATUSES = ["Draft", "Sent", "Won", "Lost"];
+
+const DETAIL_INPUT =
+  "h-9 w-full rounded-none bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-mono px-2 focus:border-yellow-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+
+function SavedQuoteDetail({ doc, onClose, onReopen, onUpdated }) {
   const { user } = useAuth();
   const q = doc.quote || {};
-  const items = q.line_items || [];
   const cust = doc.customer || {};
+
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [statusVal, setStatusVal] = useState(doc.status || "Draft");
+  const [markupPct, setMarkupPct] = useState(
+    q.markup_pct != null ? String(q.markup_pct) : "20"
+  );
+  const [items, setItems] = useState(() =>
+    (q.line_items || []).map((li, i) => ({
+      key: `${li.scope || "general"}-${i}`,
+      scope: li.scope || "general",
+      label: li.label || "Item",
+      detail: li.detail || "",
+      unit: li.unit || "",
+      qty: li.qty != null ? String(li.qty) : "",
+      unit_cost: li.unit_cost != null ? String(li.unit_cost) : "",
+    }))
+  );
+
+  const updateItem = (key, field, value) =>
+    setItems((arr) => arr.map((it) => (it.key === key ? { ...it, [field]: value } : it)));
+
+  // Live recalculation (used in edit mode)
+  const lineTotal = (it) => (parseFloat(it.qty) || 0) * (parseFloat(it.unit_cost) || 0);
+  const subtotal = items.reduce((s, it) => s + lineTotal(it), 0);
+  const markupAmt = subtotal * ((parseFloat(markupPct) || 0) / 100);
+  const gstLive = (subtotal + markupAmt) * 0.1;
+  const totalLive = subtotal + markupAmt + gstLive;
 
   // Group line items by scope
   const groups = {};
-  items.forEach((li) => {
-    const k = li.scope || "general";
-    (groups[k] = groups[k] || []).push(li);
+  items.forEach((it) => {
+    (groups[it.scope] = groups[it.scope] || []).push(it);
   });
   const groupIds = Object.keys(groups);
 
@@ -362,14 +410,70 @@ function SavedQuoteDetail({ doc, onClose, onReopen }) {
     ? new Date(doc.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })
     : "";
 
+  const r = (n) => Math.round((Number(n) || 0) * 100) / 100;
+  const buildQuote = () => ({
+    ...q,
+    line_items: items.map((it) => ({
+      scope: it.scope,
+      label: it.label,
+      detail: it.detail,
+      unit: it.unit,
+      qty: parseFloat(it.qty) || 0,
+      unit_cost: parseFloat(it.unit_cost) || 0,
+      total: r(lineTotal(it)),
+    })),
+    markup_pct: parseFloat(markupPct) || 0,
+    subtotal: r(subtotal),
+    contingency_total: r(markupAmt),
+    gst: r(gstLive),
+    total: r(totalLive),
+    total_low: r(totalLive),
+    total_high: r(totalLive),
+  });
+
+  const persist = async (patch, msg) => {
+    setSaving(true);
+    try {
+      const { data } = await axios.patch(`${API}/quotes/${doc.id}`, patch);
+      onUpdated && onUpdated(data);
+      if (msg) toast.success(msg);
+      return data;
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || "Couldn't update the quote.");
+      throw e;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const changeStatus = async (val) => {
+    const prev = statusVal;
+    setStatusVal(val);
+    try {
+      await persist({ status: val }, `Marked as ${val}.`);
+    } catch {
+      setStatusVal(prev);
+    }
+  };
+
+  const saveEdits = async () => {
+    const nq = buildQuote();
+    try {
+      await persist(
+        { quote: nq, total_low: nq.total_low, total_high: nq.total_high },
+        "Quote updated."
+      );
+      setEditing(false);
+    } catch {
+      /* toast already shown */
+    }
+  };
+
   const exportPdf = () => {
     try {
       generateQuotePdf({
-        quote: q,
-        customer: {
-          full_name: cust.full_name || doc.client,
-          address: cust.address || "",
-        },
+        quote: editing ? buildQuote() : q,
+        customer: { full_name: cust.full_name || doc.client, address: cust.address || "" },
         selectedJobs: groupIds.map((id) => JOB_LOOKUP[id]).filter(Boolean),
         business: {
           name: user?.business_name || (user?.name ? `${user.name}'s Quote` : "TerrainPRO"),
@@ -397,13 +501,28 @@ function SavedQuoteDetail({ doc, onClose, onReopen }) {
         <div className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800 px-5 sm:px-6 py-4">
           <div className="min-w-0">
             <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-yellow-500">
-              Saved Quote · {dateStr}
+              {editing ? "Editing Quote" : "Saved Quote"} · {dateStr}
             </div>
             <h2 className="mt-1 font-display uppercase text-xl sm:text-2xl tracking-tight text-white truncate">
               {doc.client || "Customer"}
             </h2>
-            <div className="mt-2">
-              <StatusTag status={doc.status || "Draft"} />
+            <div className="mt-2 flex items-center gap-2">
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                Status
+              </span>
+              <select
+                data-testid="quote-detail-status"
+                value={statusVal}
+                onChange={(e) => changeStatus(e.target.value)}
+                disabled={saving}
+                className="h-8 rounded-none bg-zinc-900 border border-zinc-700 text-white font-mono text-[11px] uppercase tracking-[0.15em] px-2 focus:border-yellow-500 focus:outline-none cursor-pointer disabled:opacity-60"
+              >
+                {QUOTE_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <button
@@ -418,11 +537,15 @@ function SavedQuoteDetail({ doc, onClose, onReopen }) {
         </div>
 
         <div className="px-5 sm:px-6 py-5 space-y-6">
-          {/* Total range */}
+          {/* Total */}
           <div className="flex items-center justify-between gap-4 bg-yellow-500 text-black px-4 py-3">
-            <span className="font-black uppercase tracking-[0.16em] text-xs">Total Range (incl. GST)</span>
-            <span className="font-mono font-bold text-base sm:text-lg">
-              {fmtMoney(doc.total_low)} — {fmtMoney(doc.total_high)}
+            <span className="font-black uppercase tracking-[0.16em] text-xs">Total (incl. GST)</span>
+            <span data-testid="quote-detail-total" className="font-mono font-bold text-base sm:text-lg">
+              {editing
+                ? fmtMoney(totalLive)
+                : doc.total_low != null && doc.total_high != null && doc.total_low !== doc.total_high
+                ? `${fmtMoney(doc.total_low)} — ${fmtMoney(doc.total_high)}`
+                : fmtMoney(doc.total_high ?? doc.total_low)}
             </span>
           </div>
 
@@ -445,39 +568,136 @@ function SavedQuoteDetail({ doc, onClose, onReopen }) {
                   {job ? job.label : scopeId.replace(/_/g, " ")}
                 </div>
                 <div className="space-y-2">
-                  {groups[scopeId].map((li, idx) => (
-                    <div key={idx} className="flex items-start justify-between gap-4 text-sm">
-                      <div className="min-w-0">
-                        <div className="text-neutral-200">{li.label}</div>
-                        {li.detail && (
-                          <div className="text-xs text-neutral-500 mt-0.5">{li.detail}</div>
-                        )}
-                        {(li.qty != null || li.unit) && (
-                          <div className="font-mono text-[11px] text-neutral-500 mt-0.5">
-                            {li.qty} {li.unit} {li.unit_cost != null ? `@ ${fmtMoney(li.unit_cost)}` : ""}
-                          </div>
-                        )}
+                  {groups[scopeId].map((li) =>
+                    editing ? (
+                      <div
+                        key={li.key}
+                        data-testid={`detail-line-${li.key}`}
+                        className="grid grid-cols-12 gap-2 items-center"
+                      >
+                        <div className="col-span-12 sm:col-span-5">
+                          <div className="text-sm text-neutral-200">{li.label}</div>
+                          {li.detail && (
+                            <div className="text-[11px] text-neutral-500 line-clamp-1">{li.detail}</div>
+                          )}
+                        </div>
+                        <div className="col-span-4 sm:col-span-2 flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            min="0"
+                            step="any"
+                            value={li.qty}
+                            onChange={(e) => updateItem(li.key, "qty", e.target.value)}
+                            data-testid={`detail-qty-${li.key}`}
+                            className={DETAIL_INPUT}
+                          />
+                          {li.unit && (
+                            <span className="font-mono text-[10px] uppercase text-neutral-500 shrink-0">
+                              {li.unit}
+                            </span>
+                          )}
+                        </div>
+                        <div className="col-span-4 sm:col-span-2 flex items-center">
+                          <span className="font-mono text-xs text-neutral-500 pr-1">$</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="any"
+                            value={li.unit_cost}
+                            onChange={(e) => updateItem(li.key, "unit_cost", e.target.value)}
+                            data-testid={`detail-rate-${li.key}`}
+                            className={DETAIL_INPUT}
+                          />
+                        </div>
+                        <div className="col-span-4 sm:col-span-3 text-right font-mono text-sm text-yellow-500">
+                          {fmtMoney(lineTotal(li))}
+                        </div>
                       </div>
-                      <div className="shrink-0 font-mono text-sm text-yellow-500 text-right">
-                        {fmtMoney(li.total)}
+                    ) : (
+                      <div key={li.key} className="flex items-start justify-between gap-4 text-sm">
+                        <div className="min-w-0">
+                          <div className="text-neutral-200">{li.label}</div>
+                          {li.detail && (
+                            <div className="text-xs text-neutral-500 mt-0.5">{li.detail}</div>
+                          )}
+                          {(li.qty !== "" || li.unit) && (
+                            <div className="font-mono text-[11px] text-neutral-500 mt-0.5">
+                              {li.qty} {li.unit} {li.unit_cost !== "" ? `@ ${fmtMoney(li.unit_cost)}` : ""}
+                            </div>
+                          )}
+                        </div>
+                        <div className="shrink-0 font-mono text-sm text-yellow-500 text-right">
+                          {fmtMoney(lineTotal(li))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </div>
             );
           })}
 
+          {/* Markup control (edit only) */}
+          {editing && (
+            <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-display uppercase text-sm tracking-tight text-white">
+                  Margin &amp; Markup
+                </span>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={markupPct}
+                    onChange={(e) => setMarkupPct(e.target.value)}
+                    data-testid="detail-markup-input"
+                    className="h-9 w-16 rounded-none bg-zinc-950 border border-zinc-800 text-yellow-500 text-sm font-mono px-2 text-right focus:border-yellow-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <span className="text-yellow-500 font-bold">%</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="50"
+                step="1"
+                value={parseFloat(markupPct) || 0}
+                onChange={(e) => setMarkupPct(e.target.value)}
+                data-testid="detail-markup-slider"
+                className="w-full accent-yellow-500 cursor-pointer"
+              />
+            </div>
+          )}
+
           {/* Totals breakdown */}
           <div className="border-t border-zinc-800 pt-4 space-y-1.5">
-            <TotalRow label="Labour" value={q.labor_total} />
-            <TotalRow label="Materials" value={q.materials_total} />
-            <TotalRow label="Contingency" value={q.contingency_total} />
-            <TotalRow label="GST" value={q.gst} />
+            {editing ? (
+              <>
+                <TotalRow label="Subtotal" value={subtotal} />
+                <TotalRow label={`Markup (${parseFloat(markupPct) || 0}%)`} value={markupAmt} />
+                <TotalRow label="GST (10%)" value={gstLive} />
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-800 mt-1">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+                    Total AUD
+                  </span>
+                  <span className="font-display text-xl text-yellow-500 font-black">
+                    {fmtMoney(totalLive)}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <TotalRow label="Labour" value={q.labor_total} />
+                <TotalRow label="Materials" value={q.materials_total} />
+                <TotalRow label={q.markup_pct != null ? `Markup (${q.markup_pct}%)` : "Contingency"} value={q.contingency_total} />
+                <TotalRow label="GST" value={q.gst} />
+              </>
+            )}
           </div>
 
           {/* Assumptions */}
-          {Array.isArray(q.assumptions) && q.assumptions.length > 0 && (
+          {!editing && Array.isArray(q.assumptions) && q.assumptions.length > 0 && (
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500 mb-2">
                 Assumptions
@@ -495,25 +715,59 @@ function SavedQuoteDetail({ doc, onClose, onReopen }) {
         </div>
 
         {/* Footer actions */}
-        <div className="sticky bottom-0 flex items-center gap-3 bg-zinc-950/95 backdrop-blur-sm border-t border-zinc-800 px-5 sm:px-6 py-4">
-          <button
-            type="button"
-            onClick={exportPdf}
-            data-testid="quote-detail-export"
-            className="inline-flex items-center justify-center gap-2 h-11 px-5 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-xs hover:bg-yellow-400 transition-colors"
-          >
-            <Download className="w-4 h-4" strokeWidth={2.5} />
-            Export PDF
-          </button>
-          <button
-            type="button"
-            onClick={onReopen}
-            data-testid="quote-detail-reopen"
-            className="inline-flex items-center justify-center gap-2 h-11 px-5 border border-zinc-700 text-neutral-300 font-bold uppercase tracking-[0.16em] text-xs hover:border-yellow-500 hover:text-yellow-500 transition-colors"
-          >
-            <RotateCcw className="w-4 h-4" />
-            New Quote
-          </button>
+        <div className="sticky bottom-0 flex flex-wrap items-center gap-3 bg-zinc-950/95 backdrop-blur-sm border-t border-zinc-800 px-5 sm:px-6 py-4">
+          {editing ? (
+            <>
+              <button
+                type="button"
+                onClick={saveEdits}
+                disabled={saving}
+                data-testid="quote-detail-save"
+                className="inline-flex items-center justify-center gap-2 h-11 px-5 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-xs hover:bg-yellow-400 disabled:opacity-60 transition-colors"
+              >
+                <Save className="w-4 h-4" strokeWidth={2.5} />
+                {saving ? "Saving…" : "Save Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                data-testid="quote-detail-cancel"
+                className="inline-flex items-center justify-center gap-2 h-11 px-5 border border-zinc-700 text-neutral-300 font-bold uppercase tracking-[0.16em] text-xs hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                data-testid="quote-detail-edit"
+                className="inline-flex items-center justify-center gap-2 h-11 px-5 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-xs hover:bg-yellow-400 transition-colors"
+              >
+                <Pencil className="w-4 h-4" strokeWidth={2.5} />
+                Edit Quote
+              </button>
+              <button
+                type="button"
+                onClick={exportPdf}
+                data-testid="quote-detail-export"
+                className="inline-flex items-center justify-center gap-2 h-11 px-5 border border-zinc-700 text-neutral-300 font-bold uppercase tracking-[0.16em] text-xs hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Export PDF
+              </button>
+              <button
+                type="button"
+                onClick={onReopen}
+                data-testid="quote-detail-reopen"
+                className="inline-flex items-center justify-center gap-2 h-11 px-5 border border-zinc-700 text-neutral-300 font-bold uppercase tracking-[0.16em] text-xs hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                New Quote
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

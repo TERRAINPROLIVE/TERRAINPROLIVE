@@ -52,6 +52,11 @@ P1 — save-quote-by-email, returning-user dashboard with saved quotes
 P1 — Decouple JWT TTL from trial length; password reset (/forgot-password, /reset-password)
 P2 — Custom rates library, Xero/MYOB export, variation deltas, voice-to-job input, Stripe upgrade on trial expiry
 
+## Implemented (2026-06-04b) — Quote status dropdown + in-modal Edit
+- **Backend**: `PATCH /api/quotes/{id}` (user-scoped) updates `status` (Draft/Sent/Won/Lost, 422 on invalid, 404 if not owned), and/or `quote`+`total_low`/`total_high`/`scope_summary`. Verified via curl.
+- **Dashboard detail modal**: status dropdown (`quote-detail-status`) saves instantly via PATCH and updates the table row live. New **Edit Quote** mode (`quote-detail-edit`) makes every line item's QTY/RATE editable with a markup slider/% and live Subtotal→Markup→GST→Total; **Save Changes** (`quote-detail-save`) persists the recalculated quote; Cancel reverts. PDF export reflects unsaved edits. Verified live: edit a rate + markup 30% recalced $4,633→$12,518 and persisted.
+- Cleaned leftover TEST_/empty-line-item quotes from demo data.
+
 ## Implemented (2026-06-04) — Editable Step 3, Saved-Quote View, Profile ABN, UI polish
 - **Step 3 fully editable rebuild**: three-tier breakdown — Material Costs + Labour & Earthmoving (auto-classified by unit hr/day) with inline editable QTY & RATE per row (instant per-row total), plus a global Margin & Markup slider/% input. Live Totals sidebar (Subtotal → Markup → GST 10% → Total AUD) recalculates instantly. Actions: "Save Draft / Re-Calculate" + primary "Generate Final Client Quote →" (saves + exports branded PDF). Mobile sticky total bar. Edited values flow into Save and PDF (parent `computed`/`computedQuote` model in EstimatorWizard.jsx).
 - **Saved-quote detail view**: dashboard rows/cards are clickable → `SavedQuoteDetail` modal (total range, scope summary, grouped line items, totals breakdown, assumptions, Export PDF + close). Fixed "can't save multiple" — estimator resets `saved` on each new generation; backend inserts a new record per save.

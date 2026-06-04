@@ -1073,6 +1073,54 @@ async def list_quotes(user: dict = Depends(get_current_user)):
     return out
 
 
+VALID_STATUSES = {"Draft", "Sent", "Won", "Lost"}
+
+
+class UpdateQuoteRequest(BaseModel):
+    status: Optional[str] = None
+    quote: Optional[dict] = None
+    total_low: Optional[float] = None
+    total_high: Optional[float] = None
+    scope_summary: Optional[str] = Field(default=None, max_length=400)
+
+
+@api_router.patch("/quotes/{quote_id}")
+async def update_saved_quote(
+    quote_id: str, req: UpdateQuoteRequest, user: dict = Depends(get_current_user)
+):
+    existing = await db.saved_quotes.find_one({"id": quote_id, "user_id": user["id"]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Quote not found")
+
+    def _num(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
+    updates = {}
+    if req.status is not None:
+        if req.status not in VALID_STATUSES:
+            raise HTTPException(status_code=422, detail="Invalid status")
+        updates["status"] = req.status
+    if req.quote is not None:
+        updates["quote"] = req.quote
+    if req.total_low is not None:
+        updates["total_low"] = _num(req.total_low)
+    if req.total_high is not None:
+        updates["total_high"] = _num(req.total_high)
+    if req.scope_summary is not None:
+        updates["scope_summary"] = req.scope_summary
+
+    if updates:
+        updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db.saved_quotes.update_one({"id": quote_id}, {"$set": updates})
+
+    doc = await db.saved_quotes.find_one({"id": quote_id})
+    doc.pop("_id", None)
+    return doc
+
+
 app.include_router(api_router)
 
 app.add_middleware(
