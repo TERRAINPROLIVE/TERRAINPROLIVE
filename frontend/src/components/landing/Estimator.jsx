@@ -1,4 +1,5 @@
 import EstimatorWizard from "./EstimatorWizard";
+import SignupGate from "./SignupGate";
 
 export default function Estimator() {
   return (
@@ -20,13 +21,15 @@ export default function Estimator() {
             </h2>
           </div>
           <div className="md:col-span-5 self-end text-neutral-400 leading-relaxed">
-            Three steps. Customer + scope, then measurements for every selected
-            job, then TerrainPRO AI assembles a tight, line-itemed AUD quote.
-            No account required.
+            Sign up free, then run a real job through the wizard — customer,
+            scope, measurements — and TerrainPRO AI returns a tight, line-itemed
+            AUD quote.
           </div>
         </div>
 
-        <EstimatorWizard />
+        <SignupGate>
+          <EstimatorWizard />
+        </SignupGate>
       </div>
     </section>
   );

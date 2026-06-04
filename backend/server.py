@@ -444,6 +444,65 @@ async def waitlist_count():
 
 
 # ============================================================================
+# User Signup (free-trial gate)
+# ============================================================================
+class SignupRequest(BaseModel):
+    name: str = Field(..., min_length=2, max_length=120)
+    phone: str = Field(..., min_length=6, max_length=40)
+    email: EmailStr
+    abn: str = Field(..., min_length=4, max_length=40)
+
+
+class SignupResponse(BaseModel):
+    id: str
+    name: str
+    phone: str
+    email: str
+    abn: str
+    created_at: datetime
+    is_new: bool
+
+
+@api_router.post("/signup", response_model=SignupResponse)
+async def signup(req: SignupRequest):
+    email_lower = req.email.lower()
+    existing = await db.users.find_one({"email": email_lower})
+    if existing:
+        return SignupResponse(
+            id=existing["id"],
+            name=existing.get("name", req.name),
+            phone=existing.get("phone", req.phone),
+            email=existing["email"],
+            abn=existing.get("abn", req.abn),
+            created_at=(
+                datetime.fromisoformat(existing["created_at"])
+                if isinstance(existing.get("created_at"), str)
+                else existing.get("created_at", datetime.now(timezone.utc))
+            ),
+            is_new=False,
+        )
+
+    doc = {
+        "id": str(uuid.uuid4()),
+        "name": req.name.strip(),
+        "phone": req.phone.strip(),
+        "email": email_lower,
+        "abn": req.abn.strip().replace(" ", ""),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.users.insert_one(doc)
+    return SignupResponse(
+        id=doc["id"],
+        name=doc["name"],
+        phone=doc["phone"],
+        email=doc["email"],
+        abn=doc["abn"],
+        created_at=datetime.fromisoformat(doc["created_at"]),
+        is_new=True,
+    )
+
+
+# ============================================================================
 # Chatbot
 # ============================================================================
 class ChatMessage(BaseModel):
