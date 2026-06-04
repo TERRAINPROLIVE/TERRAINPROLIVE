@@ -50,17 +50,15 @@ export default function UseCases() {
       className="relative py-24 sm:py-32 border-t border-neutral-900"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
-          <div className="md:col-span-7">
-            <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-              [ Use Cases ]
-            </span>
-            <p className="mt-4 text-neutral-400 leading-relaxed max-w-xl">
-              Three trades, one brain. TerrainPRO's model is trained on real
-              Australian site jobs — earthmoving, concreting, landscaping. It
-              speaks tradie, not corporate.
-            </p>
-          </div>
+        <div className="text-center mb-16">
+          <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
+            [ Use Cases ]
+          </span>
+          <p className="mt-6 text-neutral-400 leading-relaxed max-w-2xl mx-auto">
+            Three trades, one brain. TerrainPRO's model is trained on real
+            Australian site jobs — earthmoving, concreting, landscaping. It
+            speaks tradie, not corporate.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
