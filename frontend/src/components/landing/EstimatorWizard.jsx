@@ -347,8 +347,8 @@ function Step1({
   return (
     <div className="space-y-10">
       {/* Customer */}
-      <div className="border border-neutral-800 bg-neutral-950 p-6 sm:p-8">
-        <div className="flex items-center gap-3 border-b border-neutral-800 pb-4 mb-6">
+      <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6 sm:p-8">
+        <div className="flex items-center gap-3 border-b border-zinc-800 pb-4 mb-6">
           <User className="w-4 h-4 text-yellow-500" strokeWidth={2} />
           <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400">
             Customer Details
@@ -456,8 +456,8 @@ function Step1({
       </div>
 
       {/* Job types */}
-      <div className="border border-neutral-800 bg-neutral-950 p-6 sm:p-8">
-        <div className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-6">
+      <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6 sm:p-8">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
           <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400">
             Job Types — Select all that apply
           </span>
