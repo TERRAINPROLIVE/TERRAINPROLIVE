@@ -33,6 +33,6 @@
   "seed_data_creation": "Each pytest run inserts 3-4 new users via /api/auth/register (TEST_ prefix not enforced — qa_<uuid>@test.com). One UI signup test also creates a user via the frontend. All under db.users.",
   "retest_needed": false,
   "main_agent_can_self_test": true,
-  "context_for_next_testing_agent": "Backend auth tests live in /app/backend/tests/test_auth.py (run: pytest backend/tests/test_auth.py). Public URL: https://blueprint-build-15.preview.emergentagent.com. Auth = Bearer token in Authorization header (NOT cookies). Token stored in localStorage 'terrainpro:token'. data-testids confirmed working: signup-page, signup-trial-badge, signup-name/phone/email/password, signup-submit, login-page, login-email/password, login-submit, trial-banner, workspace-page, workspace-signout, hero-primary-cta, menu-start-trial.",
+  "context_for_next_testing_agent": "Backend auth tests live in /app/backend/tests/test_auth.py (run: pytest backend/tests/test_auth.py). Public URL: https://terrain-bid.preview.emergentagent.com. Auth = Bearer token in Authorization header (NOT cookies). Token stored in localStorage 'terrainpro:token'. data-testids confirmed working: signup-page, signup-trial-badge, signup-name/phone/email/password, signup-submit, login-page, login-email/password, login-submit, trial-banner, workspace-page, workspace-signout, hero-primary-cta, menu-start-trial.",
   "rca of the issue": "n/a — no issues found. Implementation matches spec end-to-end."
 }

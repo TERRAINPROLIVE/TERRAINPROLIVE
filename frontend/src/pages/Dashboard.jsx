@@ -104,7 +104,7 @@ export default function Dashboard() {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
             <div>
-              <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.3em] text-yellow-500">
+              <span className="md:hidden font-mono text-[10px] sm:text-xs uppercase tracking-[0.3em] text-yellow-500">
                 TERRAIN PRO // Business Dashboard
               </span>
               <h1 className="mt-2 sm:mt-3 font-display uppercase text-2xl sm:text-4xl tracking-tight">

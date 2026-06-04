@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mountain, LogOut, Lock, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-export default function AppShell({ children }) {
+export default function AppShell({ children, label = "Business Dashboard" }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -18,8 +18,8 @@ export default function AppShell({ children }) {
     <div data-testid="app-shell" className="min-h-screen bg-[#0a0a0a] text-[#fafafa]">
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-black border-b border-neutral-800">
-        <div className="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/dashboard" className="flex items-center gap-2.5" data-testid="shell-logo">
+        <div className="relative max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between gap-3">
+          <Link to="/dashboard" className="flex items-center gap-2.5 shrink-0" data-testid="shell-logo">
             <div className="w-9 h-9 bg-yellow-500 grid place-items-center shrink-0">
               <Mountain className="w-5 h-5 text-black" strokeWidth={2.4} />
             </div>
@@ -29,18 +29,26 @@ export default function AppShell({ children }) {
             </span>
           </Link>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+          {/* Centered section label */}
+          <span
+            data-testid="shell-center-label"
+            className="hidden md:block absolute left-1/2 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.32em] text-yellow-500 whitespace-nowrap pointer-events-none"
+          >
+            TERRAIN PRO // {label}
+          </span>
+
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+            <span className="hidden lg:block font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400 max-w-[160px] truncate">
               {user?.name}
             </span>
             <button
               type="button"
               onClick={signOut}
               data-testid="shell-signout"
-              className="inline-flex items-center gap-2 h-9 px-3 border border-neutral-800 text-neutral-300 hover:border-yellow-500 hover:text-yellow-500 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors"
+              className="inline-flex items-center gap-2 h-9 px-3.5 border border-neutral-800 text-neutral-300 hover:border-yellow-500 hover:text-yellow-500 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
-              Sign out
+              <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>
         </div>

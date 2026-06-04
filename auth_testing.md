@@ -4,7 +4,7 @@ Token-based JWT auth (Bearer header; token returned in response body, stored in 
 
 ## API Testing
 ```
-API=https://blueprint-build-15.preview.emergentagent.com
+API=https://terrain-bid.preview.emergentagent.com
 
 # Register (returns token + user with 7-day trial)
 curl -s -X POST "$API/api/auth/register" -H "Content-Type: application/json" \
