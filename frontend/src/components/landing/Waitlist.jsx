@@ -78,15 +78,6 @@ export default function Waitlist() {
             TerrainPRO is rolling out to Aussie crews now — early access
             pricing locked in for the first 500.
           </p>
-
-          {count !== null && (
-            <div className="mt-6 inline-flex items-center gap-3 border border-zinc-800 px-4 py-2 font-mono text-xs uppercase tracking-[0.25em] text-neutral-300">
-              <span className="w-2 h-2 bg-yellow-500 animate-pulse" />
-              <span data-testid="waitlist-count">
-                {count.toLocaleString()} tradies on the list
-              </span>
-            </div>
-          )}
         </div>
 
         <div className="bg-zinc-900/40 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 sm:p-10 max-w-3xl">

@@ -61,11 +61,13 @@ export default function Hero({ onTryEstimator }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
           data-testid="hero-title"
-          className="font-display uppercase text-5xl sm:text-7xl lg:text-8xl leading-[0.92] tracking-tight max-w-5xl"
+          className="font-display uppercase text-4xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight max-w-5xl"
         >
-          Quote in
+          Australian Tradies
           <br />
-          <span className="text-yellow-500">15 mins.</span>
+          Quote Faster With
+          <br />
+          <span className="text-yellow-500">Terrain PRO</span>
         </motion.h1>
 
         <motion.div
