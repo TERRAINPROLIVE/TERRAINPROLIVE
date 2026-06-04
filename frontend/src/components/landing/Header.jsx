@@ -86,15 +86,12 @@ export default function Header({ onTryEstimator }) {
           aria-label="Toggle menu"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className={`group inline-flex items-center gap-3 sm:gap-4 py-3 px-5 sm:py-4 sm:px-8 font-black uppercase tracking-wider rounded-sm border-2 border-black transition-all duration-150 active:translate-y-[3px] active:shadow-[0_2px_0_0_#000] ${
+          className={`group inline-flex items-center justify-center py-3 px-4 sm:py-4 sm:px-5 font-black uppercase tracking-wider rounded-sm border-2 border-black transition-all duration-150 active:translate-y-[3px] active:shadow-[0_2px_0_0_#000] ${
             open
               ? "bg-white text-black shadow-[0_5px_0_0_#000] hover:bg-yellow-400"
               : "bg-yellow-500 text-black shadow-[0_5px_0_0_#000] hover:bg-white"
           }`}
         >
-          <span className="text-xs sm:text-lg tracking-[0.18em] sm:tracking-[0.22em]">
-            You Ready
-          </span>
           <span className="w-7 h-7 sm:w-9 sm:h-9 grid place-items-center border-2 border-black/80 bg-black/5 group-hover:bg-black/10 transition-colors">
             {open ? (
               <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={3} />
