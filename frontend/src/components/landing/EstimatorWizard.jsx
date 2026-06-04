@@ -929,7 +929,7 @@ function Step3({ loading, error, quote, selectedJobs, customer, onReset, onRetry
                   Total incl. GST
                 </span>
               </div>
-              <div className="col-span-6 flex items-baseline gap-2 sm:gap-3 font-display">
+              <div className="col-start-8 col-span-5 flex items-baseline justify-start gap-2 sm:gap-3 font-display">
                 <span className="text-base sm:text-xl text-yellow-500 font-black tracking-tight">
                   {currency(quote.total_low)}
                 </span>
