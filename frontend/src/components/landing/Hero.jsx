@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { ArrowDown, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const HERO_BG =
   "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/b6feb06c1e22eb535e31a44dae30920128c69818aea25cf6f2f8021a10380ce0.png";
 
-export default function Hero() {
+export default function Hero({ onTryEstimator }) {
   return (
     <section
       id="top"
@@ -69,22 +69,15 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
           className="mt-10 flex flex-col sm:flex-row gap-4"
         >
-          <a
-            href="#estimator"
+          <button
+            type="button"
+            onClick={onTryEstimator}
             data-testid="hero-primary-cta"
             className="inline-flex items-center justify-center gap-2 h-14 px-8 bg-yellow-500 text-black font-bold uppercase tracking-[0.18em] text-sm btn-industrial"
           >
             <Sparkles className="w-4 h-4" />
             Start Free Trial
-          </a>
-          <a
-            href="#how"
-            data-testid="hero-secondary-cta"
-            className="inline-flex items-center justify-center gap-2 h-14 px-8 border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 font-semibold uppercase tracking-[0.18em] text-sm transition-colors"
-          >
-            How it works
-            <ArrowDown className="w-4 h-4" />
-          </a>
+          </button>
         </motion.div>
 
         {/* Stats strip */}
