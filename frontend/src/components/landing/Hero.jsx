@@ -75,7 +75,7 @@ export default function Hero() {
             className="inline-flex items-center justify-center gap-2 h-14 px-8 bg-yellow-500 text-black font-bold uppercase tracking-[0.18em] text-sm btn-industrial"
           >
             <Sparkles className="w-4 h-4" />
-            Try the AI estimator
+            Start Free Trial
           </a>
           <a
             href="#how"
