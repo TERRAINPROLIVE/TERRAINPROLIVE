@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, Mountain, Home } from "lucide-react";
+import { Loader2, ArrowRight, Mountain, Home, ShieldCheck } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +46,7 @@ export default function Signup() {
   return (
     <div className="relative h-screen bg-[#0a0a0a] text-[#fafafa] flex items-center justify-center px-5 py-6 overflow-hidden">
       <div className="absolute inset-0 grid-bg opacity-40" aria-hidden />
-      <div className="absolute top-0 inset-x-0 h-1 hazard-stripes opacity-80" aria-hidden />
+      <div className="absolute top-0 inset-x-0 h-0.5 hazard-stripes opacity-60" aria-hidden />
 
       {/* Industrial concrete watermark background */}
       <div data-testid="signup-bg-texture" aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -107,8 +107,9 @@ export default function Signup() {
         </h1>
         <p
           data-testid="signup-subtitle"
-          className="mt-2.5 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-yellow-500"
+          className="mt-2.5 flex items-center gap-2 text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-yellow-500"
         >
+          <ShieldCheck className="w-4 h-4 shrink-0" strokeWidth={2.4} />
           No Payment Required — 7 Days Free Access
         </p>
 
@@ -120,7 +121,7 @@ export default function Signup() {
               onChange={onChange("name")}
               placeholder="Mike Thompson"
               autoComplete="name"
-              className="h-12 rounded-none bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-[#1a1a1a] border-neutral-800 border-l-2 border-l-yellow-500 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FormField>
           <FormField label="Mobile Number">
@@ -131,7 +132,7 @@ export default function Signup() {
               placeholder="0412 345 678"
               inputMode="tel"
               autoComplete="tel"
-              className="h-12 rounded-none bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-[#1a1a1a] border-neutral-800 border-l-2 border-l-yellow-500 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FormField>
           <FormField label="Email">
@@ -142,7 +143,7 @@ export default function Signup() {
               onChange={onChange("email")}
               placeholder="you@yourbusiness.com.au"
               autoComplete="email"
-              className="h-12 rounded-none bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-[#1a1a1a] border-neutral-800 border-l-2 border-l-yellow-500 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FormField>
           <FormField label="Password">
@@ -153,7 +154,7 @@ export default function Signup() {
               onChange={onChange("password")}
               placeholder="Minimum 6 characters"
               autoComplete="new-password"
-              className="h-12 rounded-none bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-12 rounded-none bg-[#1a1a1a] border-neutral-800 border-l-2 border-l-yellow-500 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
           </FormField>
 
@@ -161,7 +162,7 @@ export default function Signup() {
             type="submit"
             disabled={!canSubmit}
             data-testid="signup-submit"
-            className="w-full inline-flex items-center justify-center gap-2 h-12 bg-yellow-500 text-black font-black uppercase tracking-[0.18em] text-sm btn-industrial disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-lg bg-[#F5A623] text-zinc-900 font-black uppercase tracking-[0.18em] text-sm shadow-[0_10px_30px_-5px_rgba(245,166,35,0.5)] hover:bg-[#ffb733] hover:shadow-[0_14px_38px_-4px_rgba(245,166,35,0.65)] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:shadow-none"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -172,6 +173,8 @@ export default function Signup() {
             )}
           </button>
         </form>
+
+        <div className="mt-5 border-t border-zinc-800/70" />
 
         <p className="mt-4 text-center text-sm text-neutral-400">
           Already on the tools?{" "}
