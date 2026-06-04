@@ -75,7 +75,7 @@ export default function Features() {
           {/* Image cell */}
           <div className="md:col-span-5 md:row-span-2 relative min-h-[260px] md:min-h-0 border-b md:border-b-0 md:border-r border-neutral-800 overflow-hidden">
             <div
-              className="absolute inset-0 bg-cover bg-center"
+              className="absolute inset-0 bg-cover bg-center scale-125"
               style={{ backgroundImage: `url(${FEATURE_IMG})` }}
               aria-hidden
             />
