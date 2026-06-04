@@ -7,6 +7,7 @@ const NAV = [
   { label: "Estimator", href: "#estimator", external: false },
   { label: "Features", href: "#features", external: false },
   { label: "Pricing", href: "#pricing", external: false },
+  { label: "Contact", href: "#waitlist", external: false },
 ];
 
 const SOCIALS = [
