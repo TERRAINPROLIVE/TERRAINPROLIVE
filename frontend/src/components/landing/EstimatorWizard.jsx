@@ -272,7 +272,7 @@ function StepHeader({ step }) {
   ];
   return (
     <div className="mb-10">
-      <div className="border border-neutral-800 p-6 sm:p-8 bg-neutral-950 mb-6">
+      <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6 sm:p-8 mb-6">
         <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
           Step {step} of 3
         </div>
@@ -297,12 +297,12 @@ function StepHeader({ step }) {
             <div
               key={s.n}
               data-testid={`step-indicator-${s.n}`}
-              className={`relative border p-4 ${
+              className={`relative rounded-lg border border-l-2 p-4 transition-colors ${
                 active
-                  ? "border-yellow-500 bg-yellow-500/5"
+                  ? "border-yellow-500 border-l-yellow-500 bg-zinc-900"
                   : done
-                  ? "border-yellow-500/40 bg-neutral-950"
-                  : "border-neutral-800 bg-neutral-950"
+                  ? "border-zinc-800 border-l-yellow-500 bg-zinc-900/40"
+                  : "border-zinc-800 border-l-zinc-700 bg-zinc-900/40"
               }`}
             >
               <div className="flex items-center justify-between">
