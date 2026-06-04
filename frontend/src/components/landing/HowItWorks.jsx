@@ -49,7 +49,7 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 border-t border-l border-neutral-800">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {STEPS.map((s, i) => (
             <motion.div
               key={s.n}
@@ -57,21 +57,21 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="border-r border-b border-neutral-800 p-8 sm:p-10 group hover:bg-neutral-950 transition-colors"
+              className="bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors"
             >
-              <div className="flex items-start justify-between mb-8">
-                <span className="font-mono text-xs text-yellow-500 tracking-[0.25em]">
+              <div className="flex items-start justify-between mb-6">
+                <span className="font-mono text-xs text-yellow-500 tracking-[0.25em] font-semibold">
                   / {s.n}
                 </span>
                 <s.icon
-                  className="w-7 h-7 text-neutral-500 group-hover:text-yellow-500 transition-colors"
+                  className="w-7 h-7 text-neutral-400 group-hover:text-yellow-500 transition-colors"
                   strokeWidth={1.5}
                 />
               </div>
-              <h3 className="font-display uppercase text-2xl tracking-tight mb-3">
+              <h3 className="font-display uppercase text-2xl tracking-tight mb-3 text-white">
                 {s.title}
               </h3>
-              <p className="text-neutral-400 leading-relaxed text-sm">{s.body}</p>
+              <p className="text-neutral-300 leading-relaxed text-sm">{s.body}</p>
             </motion.div>
           ))}
         </div>
