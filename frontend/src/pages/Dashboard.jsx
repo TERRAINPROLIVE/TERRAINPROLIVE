@@ -17,10 +17,15 @@ import {
   ChevronDown,
   Building2,
   Image as ImageIcon,
+  X,
+  Download,
+  RotateCcw,
 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
+import { generateQuotePdf } from "@/lib/quotePdf";
+import { JOB_LOOKUP } from "@/lib/jobCatalog";
 
 // Sample business profile (placeholder data — wire to API later)
 const BUSINESS = {
@@ -66,6 +71,7 @@ export default function Dashboard() {
   const [query, setQuery] = useState("");
   const [quotes, setQuotes] = useState(null);
   const [metaOpen, setMetaOpen] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -81,6 +87,7 @@ export default function Dashboard() {
           date: q.created_at
             ? new Date(q.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })
             : "",
+          raw: q,
         }));
         setQuotes(mapped);
       })
@@ -254,7 +261,10 @@ export default function Dashboard() {
                     <tr
                       key={i}
                       data-testid={`quote-row-${i}`}
-                      className="border-b border-zinc-800/60 hover:bg-zinc-900 transition-colors"
+                      onClick={() => q.raw && setSelected(q.raw)}
+                      className={`border-b border-zinc-800/60 hover:bg-zinc-900 transition-colors ${
+                        q.raw ? "cursor-pointer" : ""
+                      }`}
                     >
                       <td className="py-4 pr-4 font-display uppercase text-sm tracking-tight text-white">
                         {q.client}
@@ -281,7 +291,7 @@ export default function Dashboard() {
             {/* Mobile/Tablet: quote cards */}
             <div className="lg:hidden space-y-3" data-testid="quotes-cards">
               {filtered.map((q, i) => (
-                <QuoteCard key={i} q={q} index={i} />
+                <QuoteCard key={i} q={q} index={i} onOpen={() => q.raw && setSelected(q.raw)} />
               ))}
               {filtered.length === 0 && (
                 <div className="py-10 text-center text-sm text-neutral-500">
@@ -317,6 +327,14 @@ export default function Dashboard() {
           </aside>
         </div>
       </main>
+
+      {selected && (
+        <SavedQuoteDetail
+          doc={selected}
+          onClose={() => setSelected(null)}
+          onReopen={() => navigate("/quote")}
+        />
+      )}
     </AppShell>
   );
 }
@@ -333,11 +351,199 @@ function StatusTag({ status }) {
   );
 }
 
-function QuoteCard({ q, index }) {
+function SavedQuoteDetail({ doc, onClose, onReopen }) {
+  const { user } = useAuth();
+  const q = doc.quote || {};
+  const items = q.line_items || [];
+  const cust = doc.customer || {};
+
+  // Group line items by scope
+  const groups = {};
+  items.forEach((li) => {
+    const k = li.scope || "general";
+    (groups[k] = groups[k] || []).push(li);
+  });
+  const groupIds = Object.keys(groups);
+
+  const dateStr = doc.created_at
+    ? new Date(doc.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })
+    : "";
+
+  const exportPdf = () => {
+    try {
+      generateQuotePdf({
+        quote: q,
+        customer: {
+          full_name: cust.full_name || doc.client,
+          address: cust.address || "",
+        },
+        selectedJobs: groupIds.map((id) => JOB_LOOKUP[id]).filter(Boolean),
+        business: {
+          name: user?.business_name || (user?.name ? `${user.name}'s Quote` : "TerrainPRO"),
+          abn: user?.abn ? `ABN ${user.abn}` : "",
+        },
+      });
+      toast.success("PDF downloaded.");
+    } catch {
+      toast.error("Couldn't generate the PDF.");
+    }
+  };
+
+  return (
+    <div
+      data-testid="quote-detail-modal"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-6"
+    >
+      <div
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+        data-testid="quote-detail-backdrop"
+      />
+      <div className="relative w-full sm:max-w-2xl max-h-[92vh] sm:max-h-[88vh] overflow-y-auto rounded-t-xl sm:rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-950">
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800 px-5 sm:px-6 py-4">
+          <div className="min-w-0">
+            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-yellow-500">
+              Saved Quote · {dateStr}
+            </div>
+            <h2 className="mt-1 font-display uppercase text-xl sm:text-2xl tracking-tight text-white truncate">
+              {doc.client || "Customer"}
+            </h2>
+            <div className="mt-2">
+              <StatusTag status={doc.status || "Draft"} />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            data-testid="quote-detail-close"
+            aria-label="Close"
+            className="shrink-0 h-9 w-9 grid place-items-center border border-zinc-800 text-neutral-400 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="px-5 sm:px-6 py-5 space-y-6">
+          {/* Total range */}
+          <div className="flex items-center justify-between gap-4 bg-yellow-500 text-black px-4 py-3">
+            <span className="font-black uppercase tracking-[0.16em] text-xs">Total Range (incl. GST)</span>
+            <span className="font-mono font-bold text-base sm:text-lg">
+              {fmtMoney(doc.total_low)} — {fmtMoney(doc.total_high)}
+            </span>
+          </div>
+
+          {/* Scope summary */}
+          {q.summary && (
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500 mb-2">
+                Scope Summary
+              </div>
+              <p className="text-sm text-neutral-300 leading-relaxed">{q.summary}</p>
+            </div>
+          )}
+
+          {/* Line items grouped */}
+          {groupIds.map((scopeId) => {
+            const job = JOB_LOOKUP[scopeId];
+            return (
+              <div key={scopeId}>
+                <div className="font-display uppercase text-sm tracking-tight text-yellow-500 mb-2 border-b border-zinc-800 pb-2">
+                  {job ? job.label : scopeId.replace(/_/g, " ")}
+                </div>
+                <div className="space-y-2">
+                  {groups[scopeId].map((li, idx) => (
+                    <div key={idx} className="flex items-start justify-between gap-4 text-sm">
+                      <div className="min-w-0">
+                        <div className="text-neutral-200">{li.label}</div>
+                        {li.detail && (
+                          <div className="text-xs text-neutral-500 mt-0.5">{li.detail}</div>
+                        )}
+                        {(li.qty != null || li.unit) && (
+                          <div className="font-mono text-[11px] text-neutral-500 mt-0.5">
+                            {li.qty} {li.unit} {li.unit_cost != null ? `@ ${fmtMoney(li.unit_cost)}` : ""}
+                          </div>
+                        )}
+                      </div>
+                      <div className="shrink-0 font-mono text-sm text-yellow-500 text-right">
+                        {fmtMoney(li.total)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Totals breakdown */}
+          <div className="border-t border-zinc-800 pt-4 space-y-1.5">
+            <TotalRow label="Labour" value={q.labor_total} />
+            <TotalRow label="Materials" value={q.materials_total} />
+            <TotalRow label="Contingency" value={q.contingency_total} />
+            <TotalRow label="GST" value={q.gst} />
+          </div>
+
+          {/* Assumptions */}
+          {Array.isArray(q.assumptions) && q.assumptions.length > 0 && (
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500 mb-2">
+                Assumptions
+              </div>
+              <ul className="space-y-1.5">
+                {q.assumptions.map((a, idx) => (
+                  <li key={idx} className="text-xs text-neutral-400 leading-relaxed flex gap-2">
+                    <span className="text-yellow-500">•</span>
+                    <span>{a}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Footer actions */}
+        <div className="sticky bottom-0 flex items-center gap-3 bg-zinc-950/95 backdrop-blur-sm border-t border-zinc-800 px-5 sm:px-6 py-4">
+          <button
+            type="button"
+            onClick={exportPdf}
+            data-testid="quote-detail-export"
+            className="inline-flex items-center justify-center gap-2 h-11 px-5 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-xs hover:bg-yellow-400 transition-colors"
+          >
+            <Download className="w-4 h-4" strokeWidth={2.5} />
+            Export PDF
+          </button>
+          <button
+            type="button"
+            onClick={onReopen}
+            data-testid="quote-detail-reopen"
+            className="inline-flex items-center justify-center gap-2 h-11 px-5 border border-zinc-700 text-neutral-300 font-bold uppercase tracking-[0.16em] text-xs hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+          >
+            <RotateCcw className="w-4 h-4" />
+            New Quote
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TotalRow({ label, value }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-neutral-500">{label}</span>
+      <span className="font-mono text-neutral-200">{fmtMoney(value)}</span>
+    </div>
+  );
+}
+
+function QuoteCard({ q, index, onOpen }) {
   return (
     <div
       data-testid={`quote-card-${index}`}
-      className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-4 active:bg-zinc-900 transition-colors"
+      onClick={onOpen}
+      className={`rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-4 active:bg-zinc-900 transition-colors ${
+        q.raw ? "cursor-pointer" : ""
+      }`}
     >
       <div className="flex items-start justify-between gap-3">
         <span className="font-display uppercase text-sm tracking-tight text-white truncate">

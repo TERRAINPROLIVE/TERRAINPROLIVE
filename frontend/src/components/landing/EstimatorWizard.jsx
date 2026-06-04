@@ -141,6 +141,7 @@ export default function EstimatorWizard() {
     setLoading(true);
     setError(null);
     setQuote(null);
+    setSaved(false);
     setStep(3);
     try {
       // Compute any derived fields before sending
