@@ -4,7 +4,6 @@ import { X } from "lucide-react";
 
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
-import LogoMarquee from "@/components/landing/LogoMarquee";
 import SloganMarquee from "@/components/landing/SloganMarquee";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
@@ -47,7 +46,6 @@ export default function Landing() {
       <Header />
       <main>
         <Hero onTryEstimator={() => setEstimatorOpen(true)} />
-        <LogoMarquee />
         <SloganMarquee />
         <HowItWorks />
         <Features />
