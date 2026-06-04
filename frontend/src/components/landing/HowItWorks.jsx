@@ -36,7 +36,7 @@ export default function HowItWorks() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
           <div className="md:col-span-4">
             <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-              [ Process ]
+              <span className="opacity-50">[</span> Process <span className="opacity-50">]</span>
             </span>
           </div>
           <div className="md:col-span-7 md:col-start-6 text-neutral-400 leading-relaxed self-end">
@@ -49,7 +49,7 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {STEPS.map((s, i) => (
             <motion.div
               key={s.n}
@@ -57,21 +57,23 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors"
+              className="relative bg-[#141414] border border-zinc-800 border-l-4 border-l-[#F5A623] rounded-lg p-5 group hover:bg-[#1a1a1a] hover:border-l-[#ffb733] transition-colors"
             >
               {/* Watermark step number */}
               <span
                 aria-hidden
-                className="pointer-events-none select-none absolute top-3 right-5 font-display text-6xl sm:text-7xl font-extrabold text-zinc-600/70 tracking-tight leading-none"
+                className="pointer-events-none select-none absolute top-3 right-5 font-display text-6xl sm:text-7xl font-extrabold text-white/[0.15] tracking-tight leading-none"
               >
                 {s.n}
               </span>
 
-              <div className="relative flex items-start mb-6">
-                <s.icon
-                  className="w-7 h-7 text-yellow-500 group-hover:text-yellow-400 transition-colors"
-                  strokeWidth={1.8}
-                />
+              <div className="relative mb-6">
+                <span className="inline-grid place-items-center w-12 h-12 rounded-lg bg-[#1E1A0E] ring-1 ring-yellow-500/15">
+                  <s.icon
+                    className="w-6 h-6 text-yellow-500 group-hover:text-yellow-400 transition-colors"
+                    strokeWidth={1.8}
+                  />
+                </span>
               </div>
               <h3 className="relative font-display uppercase text-2xl tracking-tight mb-3 text-white">
                 {s.title}

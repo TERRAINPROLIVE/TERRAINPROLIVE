@@ -12,7 +12,7 @@ export default function Estimator() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
           <div className="md:col-span-7">
             <span className="font-mono text-xs uppercase tracking-[0.3em] text-yellow-500">
-              [ Live Demo · Powered by GPT-5.2 ]
+              <span className="opacity-50">[</span> Live Demo · Powered by GPT-5.2 <span className="opacity-50">]</span>
             </span>
             <h2 className="mt-4 font-display uppercase text-4xl sm:text-5xl lg:text-6xl tracking-tight">
               Build a quote.

@@ -42,7 +42,7 @@ export default function FAQ() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="mb-12">
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-            [ FAQ ]
+            <span className="opacity-50">[</span> FAQ <span className="opacity-50">]</span>
           </span>
           <p className="mt-4 text-neutral-400 leading-relaxed max-w-xl">
             Straight answers. No fluff. Everything Aussie tradies ask before

@@ -72,7 +72,7 @@ export default function Pricing() {
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
         <div className="mb-12">
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-            [ Pricing ]
+            <span className="opacity-50">[</span> Pricing <span className="opacity-50">]</span>
           </span>
           <p className="mt-4 text-neutral-400 leading-relaxed max-w-xl">
             One quote you win pays for the year. Cancel any time — no lock-in,

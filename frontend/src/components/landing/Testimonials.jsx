@@ -33,7 +33,7 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="mb-16">
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-            [ Talk of the Town ]
+            <span className="opacity-50">[</span> Talk of the Town <span className="opacity-50">]</span>
           </span>
           <h2 className="mt-4 font-display uppercase text-2xl sm:text-3xl tracking-tight text-white max-w-2xl">
             Tradies running it

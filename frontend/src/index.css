@@ -166,6 +166,7 @@ body {
 
 /* Custom button hover lift */
 .btn-industrial {
+    background-color: #f5a623;
     transition:
         transform 0.15s ease,
         box-shadow 0.15s ease,
@@ -174,6 +175,7 @@ body {
 .btn-industrial:hover {
     transform: translate(-2px, -2px);
     box-shadow: 4px 4px 0 #000;
+    background-color: #ffb733;
 }
 .btn-industrial:active {
     transform: translate(0, 0);
