@@ -555,6 +555,15 @@ function Step1({
   );
 }
 
+const WIZ_INPUT =
+  "h-12 rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 transition-colors focus-visible:border-yellow-500 focus-visible:ring-2 focus-visible:ring-yellow-500/20";
+const WIZ_TRIGGER =
+  "h-12 rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 transition-colors focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20";
+const WIZ_CONTENT = "bg-zinc-950 border-zinc-800 text-zinc-100 rounded-none";
+const WIZ_ITEM = "rounded-none text-zinc-100 focus:bg-yellow-500 focus:text-black";
+const WIZ_CARD =
+  "rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40";
+
 function SectionHeader({ children }) {
   return (
     <div className="flex items-center gap-2.5">
@@ -600,29 +609,22 @@ function Step2({
         />
       ))}
 
-      <div className="border border-neutral-800 bg-neutral-950 p-6 sm:p-8 space-y-5">
-        <div className="flex items-center gap-3 border-b border-neutral-800 pb-4">
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400">
-            Job Complexity & Notes
-          </span>
-        </div>
+      <div className={`${WIZ_CARD} p-6 sm:p-8 space-y-5`}>
+        <SectionHeader>Job Complexity &amp; Notes</SectionHeader>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <FieldShell label="Complexity">
             <Select value={complexity} onValueChange={setComplexity}>
-              <SelectTrigger
-                data-testid="wiz-complexity"
-                className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-              >
+              <SelectTrigger data-testid="wiz-complexity" className={WIZ_TRIGGER}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-700 text-white rounded-none">
-                <SelectItem value="low" className="rounded-none text-white focus:bg-yellow-500 focus:text-black">
+              <SelectContent className={WIZ_CONTENT}>
+                <SelectItem value="low" className={WIZ_ITEM}>
                   Low — flat, easy access
                 </SelectItem>
-                <SelectItem value="medium" className="rounded-none text-white focus:bg-yellow-500 focus:text-black">
+                <SelectItem value="medium" className={WIZ_ITEM}>
                   Medium — typical residential
                 </SelectItem>
-                <SelectItem value="high" className="rounded-none text-white focus:bg-yellow-500 focus:text-black">
+                <SelectItem value="high" className={WIZ_ITEM}>
                   High — tight access, slope, services
                 </SelectItem>
               </SelectContent>
@@ -636,7 +638,7 @@ function Step2({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Anything else worth knowing — overhead power, septic, council overlays, deadlines..."
-            className="rounded-none bg-zinc-900 border-zinc-700 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 resize-none text-sm"
+            className="rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 transition-colors focus-visible:border-yellow-500 focus-visible:ring-2 focus-visible:ring-yellow-500/20 resize-none text-sm"
           />
         </FieldShell>
       </div>
@@ -650,16 +652,16 @@ function JobMeasurements({ job, values, setField }) {
   return (
     <div
       data-testid={`measurements-${job.id}`}
-      className="border border-neutral-800 bg-neutral-950"
+      className={WIZ_CARD}
     >
-      <div className="flex items-center justify-between border-b border-neutral-800 px-6 sm:px-8 py-4">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-6 sm:px-8 py-4">
         <div className="flex items-center gap-3">
           <Icon className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
+          <span className="text-xs font-bold uppercase tracking-widest text-yellow-500">
             {job.trade}
           </span>
-          <span className="text-neutral-700">/</span>
-          <span className="font-display uppercase text-lg tracking-tight">
+          <span className="text-zinc-700">/</span>
+          <span className="font-display uppercase text-lg tracking-tight text-zinc-100">
             {job.label}
           </span>
         </div>
@@ -709,16 +711,16 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
         <Select value={value || ""} onValueChange={onChange}>
           <SelectTrigger
             data-testid={`mfield-${jobId}-${field.key}`}
-            className="h-12 rounded-none bg-zinc-900 border-zinc-700 text-white focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+            className={WIZ_TRIGGER}
           >
             <SelectValue placeholder="Select..." />
           </SelectTrigger>
-          <SelectContent className="bg-zinc-900 border-zinc-700 text-white rounded-none max-h-72">
+          <SelectContent className={`${WIZ_CONTENT} max-h-72`}>
             {field.options.map((opt) => (
               <SelectItem
                 key={opt}
                 value={opt}
-                className="rounded-none text-white focus:bg-yellow-500 focus:text-black"
+                className={WIZ_ITEM}
               >
                 {opt}
               </SelectItem>
@@ -731,8 +733,8 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
 
   if (field.type === "boolean") {
     return (
-      <div className="flex items-center justify-between border border-zinc-700 px-4 h-12 bg-zinc-900">
-        <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-300">
+      <div className="flex items-center justify-between border border-zinc-800 px-4 h-12 bg-zinc-950">
+        <Label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
           {field.label}
         </Label>
         <Switch
@@ -757,10 +759,10 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
         step={field.step || "any"}
         onChange={(e) => onChange(e.target.value)}
         placeholder={readOnly ? "Auto" : field.default ?? ""}
-        className={`h-12 rounded-none border-zinc-700 focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 font-mono ${
+        className={`h-12 rounded-none border-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500/20 focus-visible:border-yellow-500 font-mono ${
           readOnly
             ? "bg-zinc-950 text-yellow-500 cursor-not-allowed"
-            : "bg-zinc-900 text-white placeholder:text-neutral-500"
+            : "bg-zinc-950 text-zinc-100 placeholder:text-zinc-600"
         }`}
       />
     </FieldShell>
@@ -773,10 +775,10 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
 function Step3({ loading, error, quote, selectedJobs, customer, onReset }) {
   return (
     <div className="space-y-6">
-      <div className="relative border border-neutral-800 bg-black overflow-hidden">
+      <div className="relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-black overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
         <div className="relative p-6 sm:p-10">
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-6">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
             <div className="flex items-center gap-2">
               <Terminal className="w-4 h-4 text-yellow-500" strokeWidth={2} />
               <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-neutral-400">
@@ -902,28 +904,28 @@ function QuoteReadout({ quote, customer, selectedJobs }) {
                 {currency(subtotal)}
               </div>
             </div>
-            <div className="border border-neutral-800">
-              <div className="grid grid-cols-12 px-3 py-2 bg-neutral-900 border-b border-neutral-800 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+            <div className="rounded-lg border border-zinc-800 overflow-hidden">
+              <div className="grid grid-cols-12 px-3 py-2 bg-zinc-900 border-b border-zinc-800 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
                 <span className="col-span-6">Item</span>
                 <span className="col-span-2 text-right">Qty</span>
                 <span className="col-span-2 text-right">Rate</span>
                 <span className="col-span-2 text-right">Total</span>
               </div>
-              <div className="divide-y divide-neutral-900">
+              <div className="divide-y divide-zinc-800">
                 {items.map((li, i) => (
                   <div
                     key={i}
                     data-testid={`wiz-line-${scopeId}-${i}`}
-                    className="grid grid-cols-12 px-3 py-3 text-xs hover:bg-neutral-950"
+                    className="grid grid-cols-12 px-3 py-3 text-xs hover:bg-zinc-900"
                   >
                     <div className="col-span-6">
-                      <div className="text-neutral-200">{li.label}</div>
-                      <div className="text-neutral-500 text-[11px] mt-0.5">{li.detail}</div>
+                      <div className="text-zinc-200">{li.label}</div>
+                      <div className="text-zinc-500 text-[11px] mt-0.5">{li.detail}</div>
                     </div>
-                    <span className="col-span-2 text-right text-neutral-400 font-mono">
+                    <span className="col-span-2 text-right text-zinc-400 font-mono">
                       {li.qty} {li.unit}
                     </span>
-                    <span className="col-span-2 text-right text-neutral-400 font-mono">
+                    <span className="col-span-2 text-right text-zinc-400 font-mono">
                       {currency(li.unit_cost)}
                     </span>
                     <span className="col-span-2 text-right text-yellow-500 font-semibold font-mono">
@@ -937,14 +939,14 @@ function QuoteReadout({ quote, customer, selectedJobs }) {
         );
       })}
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-neutral-800">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-zinc-800 rounded-lg overflow-hidden">
         <Stat label="Labour" value={currency(quote.labor_total)} />
         <Stat label="Materials" value={currency(quote.materials_total)} />
         <Stat label="Contingency" value={currency(quote.contingency_total)} />
         <Stat label="GST" value={currency(quote.gst)} />
       </div>
 
-      <div className="border border-yellow-500/60 bg-yellow-500/5 p-5">
+      <div className="rounded-lg border border-yellow-500/60 bg-yellow-500/5 p-5">
         <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
           Total Range (incl. GST)
         </div>
@@ -1001,11 +1003,11 @@ function QuoteReadout({ quote, customer, selectedJobs }) {
 
 function Stat({ label, value }) {
   return (
-    <div className="bg-neutral-950 p-4">
-      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+    <div className="bg-zinc-950 p-4">
+      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
         {label}
       </div>
-      <div className="mt-1 font-mono text-base text-neutral-100 font-semibold">
+      <div className="mt-1 font-mono text-base text-zinc-100 font-semibold">
         {value}
       </div>
     </div>
