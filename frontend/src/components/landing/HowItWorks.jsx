@@ -45,9 +45,12 @@ export default function HowItWorks() {
             </h2>
           </div>
           <div className="md:col-span-7 md:col-start-6 text-neutral-400 leading-relaxed self-end">
-            Built around how you actually quote — fast, on a phone, between jobs.
-            TerrainPRO replaces the back-of-envelope hustle with a defensible,
-            line-itemed estimate that wins more work.
+            Quote on your phone from the cab or review the pipeline on your
+            laptop. TerrainPRO kills the back-of-envelope hustle by building
+            precise, line-itemed estimates. Our adaptive AI constantly learns,
+            automatically tracking down live material rates from the closest
+            suppliers to your job location so your margins are always locked
+            in.
           </div>
         </div>
 
