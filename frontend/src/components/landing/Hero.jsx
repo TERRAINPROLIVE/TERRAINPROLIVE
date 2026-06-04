@@ -47,8 +47,6 @@ export default function Hero() {
           Quote in
           <br />
           <span className="text-yellow-500">15 mins.</span>
-          <br />
-          Win it by smoko.
         </motion.h1>
 
         <motion.p
