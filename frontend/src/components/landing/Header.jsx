@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles, Mountain } from "lucide-react";
 
@@ -21,7 +22,8 @@ const SOCIALS = [
   },
 ];
 
-export default function Header({ onTryEstimator }) {
+export default function Header() {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -164,7 +166,7 @@ export default function Header({ onTryEstimator }) {
                   data-testid="menu-start-trial"
                   onClick={() => {
                     setOpen(false);
-                    onTryEstimator?.();
+                    navigate("/signup");
                   }}
                   className="group w-full inline-flex items-center justify-center gap-3 py-4 px-6 rounded-lg bg-yellow-500 text-black font-black uppercase tracking-wider border-2 border-black shadow-[0_4px_0_0_#000] transition-all duration-150 hover:bg-white active:translate-y-[2px] active:shadow-[0_2px_0_0_#000]"
                 >

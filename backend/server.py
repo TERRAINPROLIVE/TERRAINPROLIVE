@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,12 +6,15 @@ import os
 import json
 import logging
 import re
+import math
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional, Literal
 import uuid
 from datetime import datetime, timezone, timedelta
 
+import bcrypt
+import jwt
 import httpx
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
@@ -838,6 +841,157 @@ async def suppliers_nearby(
         cached=False,
         suppliers=trimmed,
     )
+
+
+# ============================================================================
+# Authentication — JWT email/password + 7-day trial
+# ============================================================================
+JWT_ALGORITHM = "HS256"
+TRIAL_DAYS = 7
+TOKEN_TTL_DAYS = 7
+
+
+def _jwt_secret() -> str:
+    return os.environ["JWT_SECRET"]
+
+
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return False
+
+
+def create_access_token(user_id: str, email: str) -> str:
+    payload = {
+        "sub": user_id,
+        "email": email,
+        "type": "access",
+        "exp": datetime.now(timezone.utc) + timedelta(days=TOKEN_TTL_DAYS),
+    }
+    return jwt.encode(payload, _jwt_secret(), algorithm=JWT_ALGORITHM)
+
+
+def _parse_dt(value) -> Optional[datetime]:
+    if isinstance(value, datetime):
+        return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    if isinstance(value, str):
+        try:
+            dt = datetime.fromisoformat(value)
+            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        except ValueError:
+            return None
+    return None
+
+
+def _public_user(doc: dict) -> dict:
+    """Shape a user document for client consumption, with live trial status."""
+    now = datetime.now(timezone.utc)
+    expires = _parse_dt(doc.get("trial_expires_at"))
+    trial_active = bool(expires and now < expires)
+    if expires:
+        remaining_seconds = (expires - now).total_seconds()
+        days_remaining = max(0, math.ceil(remaining_seconds / 86400)) if remaining_seconds > 0 else 0
+    else:
+        days_remaining = 0
+    return {
+        "id": doc["id"],
+        "name": doc.get("name"),
+        "phone": doc.get("phone"),
+        "email": doc.get("email"),
+        "trial_expires_at": doc.get("trial_expires_at"),
+        "trial_active": trial_active,
+        "days_remaining": days_remaining,
+        "created_at": doc.get("created_at"),
+    }
+
+
+async def get_current_user(request: Request) -> dict:
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header[7:] if auth_header.startswith("Bearer ") else None
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        payload = jwt.decode(token, _jwt_secret(), algorithms=[JWT_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Session expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if payload.get("type") != "access":
+        raise HTTPException(status_code=401, detail="Invalid token type")
+    user = await db.users.find_one({"id": payload.get("sub")})
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    user.pop("_id", None)
+    return user
+
+
+class RegisterRequest(BaseModel):
+    name: str = Field(..., min_length=2, max_length=120)
+    phone: str = Field(..., min_length=6, max_length=40)
+    email: EmailStr
+    password: str = Field(..., min_length=6, max_length=128)
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=1, max_length=128)
+
+
+class AuthResponse(BaseModel):
+    token: str
+    user: dict
+
+
+@api_router.post("/auth/register", response_model=AuthResponse)
+async def auth_register(req: RegisterRequest):
+    email_lower = req.email.lower().strip()
+    existing = await db.users.find_one({"email": email_lower})
+    if existing and existing.get("password_hash"):
+        raise HTTPException(status_code=409, detail="Email already registered. Please log in.")
+
+    now = datetime.now(timezone.utc)
+    trial_expires = now + timedelta(days=TRIAL_DAYS)
+    doc = {
+        "id": existing["id"] if existing else str(uuid.uuid4()),
+        "name": req.name.strip(),
+        "phone": req.phone.strip(),
+        "email": email_lower,
+        "password_hash": hash_password(req.password),
+        "trial_started_at": now.isoformat(),
+        "trial_expires_at": trial_expires.isoformat(),
+        "email_verified": False,
+        "created_at": (existing.get("created_at") if existing else now.isoformat()),
+    }
+    if existing:
+        await db.users.update_one({"id": existing["id"]}, {"$set": doc})
+    else:
+        await db.users.insert_one(doc)
+
+    token = create_access_token(doc["id"], email_lower)
+    return AuthResponse(token=token, user=_public_user(doc))
+
+
+@api_router.post("/auth/login", response_model=AuthResponse)
+async def auth_login(req: LoginRequest):
+    email_lower = req.email.lower().strip()
+    user = await db.users.find_one({"email": email_lower})
+    if not user or not user.get("password_hash"):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if not verify_password(req.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    token = create_access_token(user["id"], email_lower)
+    return AuthResponse(token=token, user=_public_user(user))
+
+
+@api_router.get("/auth/me")
+async def auth_me(user: dict = Depends(get_current_user)):
+    return _public_user(user)
 
 
 app.include_router(api_router)

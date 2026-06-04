@@ -1,4 +1,5 @@
 import { Check, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const TIERS = [
   {
@@ -128,17 +129,27 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="#waitlist"
-                data-testid={`pricing-cta-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
-                className={`mt-8 inline-flex items-center justify-center h-12 font-semibold uppercase tracking-[0.15em] text-xs ${
-                  t.highlight
-                    ? "bg-yellow-500 text-black btn-industrial"
-                    : "border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
-                }`}
-              >
-                {t.cta}
-              </a>
+              {t.cta === "Talk to Sales" ? (
+                <a
+                  href="#waitlist"
+                  data-testid={`pricing-cta-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
+                  className="mt-8 inline-flex items-center justify-center h-12 font-semibold uppercase tracking-[0.15em] text-xs border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+                >
+                  {t.cta}
+                </a>
+              ) : (
+                <Link
+                  to="/signup"
+                  data-testid={`pricing-cta-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
+                  className={`mt-8 inline-flex items-center justify-center h-12 font-semibold uppercase tracking-[0.15em] text-xs ${
+                    t.highlight
+                      ? "bg-yellow-500 text-black btn-industrial"
+                      : "border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+                  }`}
+                >
+                  {t.cta}
+                </Link>
+              )}
             </div>
           ))}
         </div>

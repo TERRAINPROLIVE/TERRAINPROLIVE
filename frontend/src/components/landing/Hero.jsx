@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Sparkles, Play } from "lucide-react";
 import Marquee from "react-fast-marquee";
+import { useNavigate } from "react-router-dom";
 
 const TICKER_ITEMS = [
   "AI QUOTING",
@@ -14,7 +15,8 @@ const TICKER_ITEMS = [
 const HERO_BG =
   "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/b6feb06c1e22eb535e31a44dae30920128c69818aea25cf6f2f8021a10380ce0.png";
 
-export default function Hero({ onTryEstimator }) {
+export default function Hero() {
+  const navigate = useNavigate();
   return (
     <section
       id="top"
@@ -76,7 +78,7 @@ export default function Hero({ onTryEstimator }) {
         >
           <button
             type="button"
-            onClick={onTryEstimator}
+            onClick={() => navigate("/signup")}
             data-testid="hero-primary-cta"
             className="group relative inline-flex items-center justify-center gap-3 py-4 px-8 sm:py-5 sm:px-10 bg-zinc-900/80 backdrop-blur-sm border-2 border-yellow-500 text-yellow-500 font-black uppercase tracking-widest text-sm sm:text-base transition-all duration-200 hover:bg-yellow-500 hover:text-black hover:shadow-[0_0_24px_rgba(234,179,8,0.45)]"
           >
