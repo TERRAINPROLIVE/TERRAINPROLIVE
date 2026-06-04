@@ -57,21 +57,28 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors"
+              className="relative bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors overflow-hidden"
             >
-              <div className="flex items-start justify-between mb-6">
-                <span className="font-mono text-xs text-yellow-500 tracking-[0.25em] font-semibold">
-                  / {s.n}
-                </span>
+              {/* Watermark step number */}
+              <span
+                aria-hidden
+                className="pointer-events-none select-none absolute -top-2 right-4 font-display text-7xl sm:text-8xl font-extrabold text-zinc-700/40 tracking-tight leading-none"
+              >
+                {s.n}
+              </span>
+
+              <div className="relative flex items-start mb-6">
                 <s.icon
                   className="w-7 h-7 text-neutral-400 group-hover:text-yellow-500 transition-colors"
                   strokeWidth={1.5}
                 />
               </div>
-              <h3 className="font-display uppercase text-2xl tracking-tight mb-3 text-white">
+              <h3 className="relative font-display uppercase text-2xl tracking-tight mb-3 text-white">
                 {s.title}
               </h3>
-              <p className="text-neutral-300 leading-relaxed text-sm">{s.body}</p>
+              <p className="relative text-neutral-300 leading-relaxed text-sm">
+                {s.body}
+              </p>
             </motion.div>
           ))}
         </div>
