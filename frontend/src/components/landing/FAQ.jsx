@@ -40,42 +40,38 @@ export default function FAQ() {
       className="relative py-24 sm:py-32 border-t border-neutral-900"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
-          <div className="md:col-span-5">
-            <span className="font-mono text-xs uppercase tracking-[0.3em] text-yellow-500">
-              [ FAQ ]
-            </span>
-            <h2 className="mt-4 font-display uppercase text-4xl sm:text-5xl tracking-tight">
-              Straight answers.
-              <br />
-              No fluff.
-            </h2>
-          </div>
-          <div className="md:col-span-7">
-            <Accordion type="single" collapsible className="w-full">
-              {FAQS.map((f, i) => (
-                <AccordionItem
-                  key={i}
-                  value={`faq-${i}`}
-                  data-testid={`faq-item-${i}`}
-                  className="border-b border-neutral-800"
-                >
-                  <AccordionTrigger className="text-left font-display uppercase text-base sm:text-lg tracking-tight py-5 hover:no-underline hover:text-yellow-500">
-                    <span className="flex items-center gap-4">
-                      <span className="font-mono text-xs text-yellow-500 tracking-[0.2em]">
-                        / 0{i + 1}
-                      </span>
-                      <span>{f.q}</span>
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-neutral-400 leading-relaxed text-sm pl-12 pr-4 pb-6">
-                    {f.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+        <div className="mb-12">
+          <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
+            [ FAQ ]
+          </span>
+          <p className="mt-4 text-neutral-400 leading-relaxed max-w-xl">
+            Straight answers. No fluff. Everything Aussie tradies ask before
+            they put TerrainPRO on the tools.
+          </p>
         </div>
+
+        <Accordion type="single" collapsible className="w-full">
+          {FAQS.map((f, i) => (
+            <AccordionItem
+              key={i}
+              value={`faq-${i}`}
+              data-testid={`faq-item-${i}`}
+              className="border-b border-neutral-800"
+            >
+              <AccordionTrigger className="text-left font-display uppercase text-base sm:text-lg tracking-tight py-5 hover:no-underline hover:text-yellow-500">
+                <span className="flex items-center gap-4">
+                  <span className="font-mono text-xs text-yellow-500 tracking-[0.2em]">
+                    / 0{i + 1}
+                  </span>
+                  <span>{f.q}</span>
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-neutral-400 leading-relaxed text-sm pl-12 pr-4 pb-6">
+                {f.a}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );
