@@ -22,6 +22,9 @@ import {
   Gem,
   Download,
   Save,
+  Percent,
+  Receipt,
+  HardHat,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -92,6 +95,57 @@ export default function EstimatorWizard() {
   const [quote, setQuote] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Editable Step-3 model
+  const [editItems, setEditItems] = useState([]);
+  const [markupPct, setMarkupPct] = useState(20);
+
+  const updateEditItem = (key, field, value) =>
+    setEditItems((items) =>
+      items.map((it) => (it.key === key ? { ...it, [field]: value } : it))
+    );
+
+  const isLabourItem = (it) => /\b(hr|hrs|hour|hours|day|days)\b/i.test(it.unit || "");
+  const itemTotal = (it) => (parseFloat(it.qty) || 0) * (parseFloat(it.unit_cost) || 0);
+
+  const computed = useMemo(() => {
+    const materials = editItems.filter((it) => !isLabourItem(it));
+    const labour = editItems.filter((it) => isLabourItem(it));
+    const materialsTotal = materials.reduce((s, it) => s + itemTotal(it), 0);
+    const labourTotal = labour.reduce((s, it) => s + itemTotal(it), 0);
+    const subtotal = materialsTotal + labourTotal;
+    const markupAmt = subtotal * ((parseFloat(markupPct) || 0) / 100);
+    const preGst = subtotal + markupAmt;
+    const gst = preGst * 0.1;
+    const total = preGst + gst;
+    return { materials, labour, materialsTotal, labourTotal, subtotal, markupAmt, preGst, gst, total };
+  }, [editItems, markupPct]);
+
+  const computedQuote = useMemo(() => {
+    if (!quote) return null;
+    const r = (n) => Math.round((Number(n) || 0) * 100) / 100;
+    return {
+      ...quote,
+      line_items: editItems.map((it) => ({
+        scope: it.scope,
+        label: it.label,
+        detail: it.detail,
+        unit: it.unit,
+        qty: parseFloat(it.qty) || 0,
+        unit_cost: parseFloat(it.unit_cost) || 0,
+        total: r(itemTotal(it)),
+      })),
+      materials_total: r(computed.materialsTotal),
+      labor_total: r(computed.labourTotal),
+      contingency_total: r(computed.markupAmt),
+      markup_pct: parseFloat(markupPct) || 0,
+      subtotal: r(computed.subtotal),
+      gst: r(computed.gst),
+      total: r(computed.total),
+      total_low: r(computed.total),
+      total_high: r(computed.total),
+    };
+  }, [quote, editItems, markupPct, computed]);
 
   const toggleJob = (id) =>
     setSelectedJobIds((cur) => {
@@ -189,7 +243,19 @@ export default function EstimatorWizard() {
       );
       setQuote(data);
       setSaved(false);
-      toast.success("Quote ready. Scroll to see the breakdown.");
+      setMarkupPct(20);
+      setEditItems(
+        (data.line_items || []).map((li, i) => ({
+          key: `${li.scope || "general"}-${i}`,
+          scope: li.scope || "general",
+          label: li.label || "Item",
+          detail: li.detail || "",
+          unit: li.unit || "",
+          qty: li.qty != null ? String(li.qty) : "",
+          unit_cost: li.unit_cost != null ? String(li.unit_cost) : "",
+        }))
+      );
+      toast.success("Quote ready. Adjust the line items and margin below.");
     } catch (err) {
       const msg =
         err?.code === "ECONNABORTED"
@@ -209,6 +275,8 @@ export default function EstimatorWizard() {
     setQuote(null);
     setError(null);
     setSaved(false);
+    setEditItems([]);
+    setMarkupPct(20);
   };
 
   const selectedJobsForExport = () => jobsByIds(selectedJobIds);
@@ -217,7 +285,7 @@ export default function EstimatorWizard() {
     if (!quote) return;
     try {
       generateQuotePdf({
-        quote,
+        quote: computedQuote || quote,
         customer: {
           full_name: customer.full_name,
           address: [
@@ -244,7 +312,7 @@ export default function EstimatorWizard() {
     setSaving(true);
     try {
       await axios.post(`${API}/quotes`, {
-        quote,
+        quote: computedQuote || quote,
         customer: {
           full_name: customer.full_name,
           phone: customer.phone || null,
@@ -261,6 +329,11 @@ export default function EstimatorWizard() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleGenerateFinal = async () => {
+    if (!saved) await handleSaveQuote();
+    handleExportPdf();
   };
 
   return (
@@ -361,10 +434,15 @@ export default function EstimatorWizard() {
               customer={customer}
               onReset={reset}
               onRetry={submit}
-              onExportPdf={handleExportPdf}
               onSave={handleSaveQuote}
+              onGenerateFinal={handleGenerateFinal}
               saving={saving}
               saved={saved}
+              editItems={editItems}
+              updateEditItem={updateEditItem}
+              markupPct={markupPct}
+              setMarkupPct={setMarkupPct}
+              computed={computed}
             />
           </motion.div>
         )}
@@ -885,158 +963,405 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
 /* ============================================================
    Step 3 — AI quote output
    ============================================================ */
-function Step3({ loading, error, quote, selectedJobs, customer, onReset, onRetry, onExportPdf, onSave, saving, saved }) {
+function Step3({
+  loading,
+  error,
+  quote,
+  selectedJobs,
+  customer,
+  onReset,
+  onRetry,
+  onSave,
+  onGenerateFinal,
+  saving,
+  saved,
+  editItems,
+  updateEditItem,
+  markupPct,
+  setMarkupPct,
+  computed,
+}) {
   return (
     <div className="space-y-6">
-      <div className="relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-black overflow-hidden">
-        <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
-        <div className="relative p-6 sm:p-10">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
-            <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-yellow-500" strokeWidth={2} />
-              <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-neutral-400">
-                terrainpro://terminal
+      {(loading || error) && (
+        <div className="relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-black overflow-hidden">
+          <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+          <div className="relative p-6 sm:p-10">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
+              <div className="flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-yellow-500" strokeWidth={2} />
+                <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-neutral-400">
+                  terrainpro://terminal
+                </span>
+              </div>
+              <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-yellow-500">
+                {loading ? "ANALYZING" : error ? "ERROR" : "IDLE"}
               </span>
             </div>
-            <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-yellow-500">
-              {loading ? "ANALYZING" : quote ? "READY" : error ? "ERROR" : "IDLE"}
-            </span>
-          </div>
 
-          <AnimatePresence mode="wait">
-            {loading && (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="font-mono text-sm space-y-2 text-neutral-300"
-              >
-                <Line>$ terrainpro --multi-quote --scopes={selectedJobs.length}</Line>
-                <Line delay={0.1}>→ parsing customer: {customer.full_name || "(anon)"}</Line>
-                <Line delay={0.3}>→ resolving regional rates for {customer.suburb ? `${customer.suburb}, ${customer.state}` : "site"}...</Line>
-                <Line delay={0.6}>→ sizing plant, materials, labour across {selectedJobs.length} scope{selectedJobs.length === 1 ? "" : "s"}...</Line>
-                <Line delay={0.9}>→ querying gpt-5.2 estimator...</Line>
-                <Line delay={1.3}>→ assembling consolidated line items...</Line>
-                <div className="flex items-center gap-2 mt-3 text-yellow-500">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>computing</span>
-                  <span className="caret" />
-                </div>
-                <Line delay={1.6}>
-                  <span className="text-neutral-500">
-                    // this usually takes 20–40 seconds — hang tight, don't refresh
-                  </span>
-                </Line>
-              </motion.div>
-            )}
-
-            {error && !loading && (
-              <motion.div
-                key="err"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="space-y-4"
-              >
-                <div className="border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-300 flex gap-3">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>{error}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={onRetry}
-                  data-testid="wiz-retry"
-                  className="inline-flex items-center justify-center gap-2 h-11 px-6 bg-yellow-500 text-black font-bold uppercase tracking-[0.15em] text-xs btn-industrial"
+            <AnimatePresence mode="wait">
+              {loading && (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="font-mono text-sm space-y-2 text-neutral-300"
                 >
-                  <Sparkles className="w-4 h-4" /> Try again
-                </button>
-              </motion.div>
-            )}
-
-            {quote && !loading && (
-              <QuoteReadout
-                quote={quote}
-                customer={customer}
-                selectedJobs={selectedJobs}
-              />
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={onReset}
-          data-testid="wiz-reset"
-          className="inline-flex items-center justify-center gap-2 h-12 px-6 border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 font-semibold uppercase tracking-[0.15em] text-xs transition-colors"
-        >
-          <X className="w-4 h-4" /> Start a new quote
-        </button>
-        {quote && !loading && (
-          <>
-            <button
-              type="button"
-              onClick={onExportPdf}
-              data-testid="wiz-export-pdf"
-              className="inline-flex items-center justify-center gap-2 h-12 px-6 border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 font-semibold uppercase tracking-[0.15em] text-xs transition-colors"
-            >
-              <Download className="w-4 h-4" /> Export to PDF
-            </button>
-            <button
-              type="button"
-              onClick={onSave}
-              disabled={saving || saved}
-              data-testid="wiz-save-quote"
-              className="inline-flex items-center justify-center gap-2 h-12 px-6 bg-yellow-500 text-black font-bold uppercase tracking-[0.15em] text-xs btn-industrial disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : saved ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <Save className="w-4 h-4" />
+                  <Line>$ terrainpro --multi-quote --scopes={selectedJobs.length}</Line>
+                  <Line delay={0.1}>→ parsing customer: {customer.full_name || "(anon)"}</Line>
+                  <Line delay={0.3}>→ resolving regional rates for {customer.suburb ? `${customer.suburb}, ${customer.state}` : "site"}...</Line>
+                  <Line delay={0.6}>→ sizing plant, materials, labour across {selectedJobs.length} scope{selectedJobs.length === 1 ? "" : "s"}...</Line>
+                  <Line delay={0.9}>→ querying gpt-5.2 estimator...</Line>
+                  <Line delay={1.3}>→ assembling consolidated line items...</Line>
+                  <div className="flex items-center gap-2 mt-3 text-yellow-500">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>computing</span>
+                    <span className="caret" />
+                  </div>
+                  <Line delay={1.6}>
+                    <span className="text-neutral-500">
+                      // this usually takes 20–40 seconds — hang tight, don't refresh
+                    </span>
+                  </Line>
+                </motion.div>
               )}
-              {saved ? "Saved" : "Save Quote"}
-            </button>
-          </>
-        )}
-      </div>
+
+              {error && !loading && (
+                <motion.div key="err" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  <div className="border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-300 flex gap-3">
+                    <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onRetry}
+                    data-testid="wiz-retry"
+                    className="inline-flex items-center justify-center gap-2 h-11 px-6 bg-yellow-500 text-black font-bold uppercase tracking-[0.15em] text-xs btn-industrial"
+                  >
+                    <Sparkles className="w-4 h-4" /> Try again
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
 
       {quote && !loading && (
-        <>
-          {/* Spacer so the sticky banner never hides content */}
-          <div className="h-20" aria-hidden />
-          <motion.div
-            initial={{ y: 60, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            data-testid="sticky-total-banner"
-            className="fixed bottom-0 inset-x-0 z-50 border-t-2 border-yellow-500 bg-black/95 backdrop-blur-sm"
-          >
-            <div className="max-w-7xl mx-auto px-5 lg:px-8">
-              <div className="px-3 h-16 grid grid-cols-12 items-center">
-                <div className="col-span-6 flex items-center gap-3 min-w-0">
-                  <span className="w-2 h-2 bg-yellow-500 animate-pulse shrink-0" />
-                  <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] text-zinc-400 truncate">
-                    Total incl. GST
-                  </span>
-                </div>
-                <div className="col-start-7 col-span-6 flex items-baseline justify-start gap-2 sm:gap-3 font-display">
-                  <span className="text-base sm:text-xl text-yellow-500 font-black tracking-tight">
-                    {currency(quote.total_low)}
-                  </span>
-                  <span className="text-zinc-600">→</span>
-                  <span className="text-base sm:text-xl text-yellow-500 font-black tracking-tight">
-                    {currency(quote.total_high)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </>
+        <EditableQuoteBreakdown
+          quote={quote}
+          customer={customer}
+          items={editItems}
+          updateItem={updateEditItem}
+          markupPct={markupPct}
+          setMarkupPct={setMarkupPct}
+          computed={computed}
+          onReset={onReset}
+          onSave={onSave}
+          onGenerateFinal={onGenerateFinal}
+          saving={saving}
+          saved={saved}
+        />
       )}
     </div>
+  );
+}
+
+const MINI_INPUT =
+  "h-9 w-full rounded-none bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-mono px-2 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+
+function EditableLineRow({ item, updateItem }) {
+  const total = (parseFloat(item.qty) || 0) * (parseFloat(item.unit_cost) || 0);
+  return (
+    <div
+      data-testid={`wiz-line-${item.key}`}
+      className="grid grid-cols-12 gap-2 px-3 py-3 items-center hover:bg-zinc-900/40 transition-colors"
+    >
+      <div className="col-span-12 sm:col-span-5">
+        <div className="text-sm text-zinc-200">{item.label}</div>
+        {item.detail && (
+          <div className="text-[11px] text-zinc-500 mt-0.5 line-clamp-2">{item.detail}</div>
+        )}
+      </div>
+      <div className="col-span-4 sm:col-span-2">
+        <div className="flex items-center gap-1.5">
+          <input
+            type="number"
+            min="0"
+            step="any"
+            value={item.qty}
+            onChange={(e) => updateItem(item.key, "qty", e.target.value)}
+            data-testid={`wiz-qty-${item.key}`}
+            className={MINI_INPUT}
+          />
+          {item.unit && (
+            <span className="font-mono text-[10px] uppercase text-zinc-500 shrink-0">{item.unit}</span>
+          )}
+        </div>
+      </div>
+      <div className="col-span-4 sm:col-span-2">
+        <div className="flex items-center">
+          <span className="font-mono text-xs text-zinc-500 pr-1">$</span>
+          <input
+            type="number"
+            min="0"
+            step="any"
+            value={item.unit_cost}
+            onChange={(e) => updateItem(item.key, "unit_cost", e.target.value)}
+            data-testid={`wiz-rate-${item.key}`}
+            className={MINI_INPUT}
+          />
+        </div>
+      </div>
+      <div
+        data-testid={`wiz-linetotal-${item.key}`}
+        className="col-span-4 sm:col-span-3 text-right font-mono text-sm text-yellow-500 font-semibold"
+      >
+        {currency(total)}
+      </div>
+    </div>
+  );
+}
+
+function TierSection({ title, icon: Icon, total, items, updateItem, empty }) {
+  return (
+    <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+        <div className="flex items-center gap-3">
+          <Icon className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
+          <span className="font-display uppercase text-base tracking-tight text-white">{title}</span>
+        </div>
+        <span className="font-mono text-sm text-yellow-500">{currency(total)}</span>
+      </div>
+      {items.length > 0 && (
+        <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-2 bg-zinc-950/60 border-b border-zinc-800 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+          <span className="col-span-5">Item</span>
+          <span className="col-span-2">Qty</span>
+          <span className="col-span-2">Rate</span>
+          <span className="col-span-3 text-right">Total</span>
+        </div>
+      )}
+      <div className="divide-y divide-zinc-800/70">
+        {items.map((it) => (
+          <EditableLineRow key={it.key} item={it} updateItem={updateItem} />
+        ))}
+      </div>
+      {items.length === 0 && (
+        <div className="px-5 py-6 text-center text-xs text-zinc-500">{empty}</div>
+      )}
+    </div>
+  );
+}
+
+function TotalLine({ label, value, testid }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-zinc-400">{label}</span>
+      <span data-testid={testid} className="font-mono text-zinc-100">{value}</span>
+    </div>
+  );
+}
+
+function LiveTotals({ computed, markupPct }) {
+  return (
+    <div data-testid="wiz-live-totals" className="rounded-lg border-2 border-yellow-500 bg-zinc-950 p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Receipt className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
+        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">Live Totals</span>
+      </div>
+      <div className="space-y-2.5">
+        <TotalLine label="Subtotal" value={currency(computed.subtotal)} testid="total-subtotal" />
+        <TotalLine label={`Markup (${parseFloat(markupPct) || 0}%)`} value={currency(computed.markupAmt)} testid="total-markup" />
+        <TotalLine label="GST (10%)" value={currency(computed.gst)} testid="total-gst" />
+      </div>
+      <div className="mt-4 pt-4 border-t border-zinc-800 flex items-end justify-between gap-3">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-400">Total AUD</span>
+        <span data-testid="total-final" className="font-display text-3xl text-yellow-500 font-black tracking-tight leading-none">
+          {currency(computed.total)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function EditableQuoteBreakdown({
+  quote,
+  customer,
+  items,
+  updateItem,
+  markupPct,
+  setMarkupPct,
+  computed,
+  onReset,
+  onSave,
+  onGenerateFinal,
+  saving,
+  saved,
+}) {
+  return (
+    <motion.div
+      key="quote"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      data-testid="wiz-quote-readout"
+      className="space-y-6"
+    >
+      {/* Summary */}
+      <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-5">
+        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
+          Quote {quote.id?.slice(0, 8)} · {customer.full_name || "Customer"}
+        </div>
+        <p className="mt-3 text-sm text-neutral-300 leading-relaxed">{quote.summary}</p>
+        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+          Everything below is editable — adjust quantities, rates and your margin to fine-tune the quote.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT — editable tiers */}
+        <div className="lg:col-span-8 space-y-6">
+          <TierSection
+            title="Material Costs"
+            icon={Box}
+            total={computed.materialsTotal}
+            items={computed.materials}
+            updateItem={updateItem}
+            empty="No material line items in this quote."
+          />
+          <TierSection
+            title="Labour & Earthmoving"
+            icon={HardHat}
+            total={computed.labourTotal}
+            items={computed.labour}
+            updateItem={updateItem}
+            empty="No labour or machinery line items in this quote."
+          />
+
+          {/* Margin & Markup */}
+          <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Percent className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
+                <span className="font-display uppercase text-base tracking-tight text-white">Margin &amp; Markup</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={markupPct}
+                  onChange={(e) => setMarkupPct(e.target.value)}
+                  data-testid="wiz-markup-input"
+                  className="h-9 w-16 rounded-none bg-zinc-950 border border-zinc-800 text-yellow-500 text-sm font-mono px-2 text-right focus:border-yellow-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="text-yellow-500 font-bold">%</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="50"
+              step="1"
+              value={parseFloat(markupPct) || 0}
+              onChange={(e) => setMarkupPct(e.target.value)}
+              data-testid="wiz-markup-slider"
+              className="w-full accent-yellow-500 cursor-pointer"
+            />
+            <div className="flex justify-between mt-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
+              <span>0%</span>
+              <span className="text-zinc-400">Applied across all totals</span>
+              <span>50%</span>
+            </div>
+          </div>
+
+          {quote.assumptions?.length > 0 && (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-5">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-2">
+                // Assumptions
+              </div>
+              <ul className="space-y-1.5 text-xs text-neutral-400">
+                {quote.assumptions.map((a, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-yellow-500">→</span>
+                    <span>{a}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <NearbySuppliers customer={customer} />
+        </div>
+
+        {/* RIGHT — live totals + actions (sticky on desktop) */}
+        <aside className="lg:col-span-4 lg:sticky lg:top-28 space-y-4">
+          <LiveTotals computed={computed} markupPct={markupPct} />
+
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={saving || saved}
+            data-testid="wiz-save-quote"
+            className="w-full inline-flex items-center justify-center gap-2 h-12 px-6 border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 font-semibold uppercase tracking-[0.15em] text-xs transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {saving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : saved ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            {saved ? "Draft Saved" : "Save Draft / Re-Calculate"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onGenerateFinal}
+            data-testid="wiz-generate-final"
+            className="w-full inline-flex items-center justify-center gap-2 h-14 px-6 bg-yellow-500 text-black font-black uppercase tracking-[0.15em] text-xs btn-industrial"
+          >
+            Generate Final Client Quote <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
+          </button>
+
+          <button
+            type="button"
+            onClick={onReset}
+            data-testid="wiz-reset"
+            className="w-full inline-flex items-center justify-center gap-2 h-10 text-neutral-500 hover:text-neutral-200 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors"
+          >
+            <X className="w-3.5 h-3.5" /> Start a new quote
+          </button>
+        </aside>
+      </div>
+
+      {/* Mobile sticky total bar */}
+      <div className="h-24 lg:hidden" aria-hidden />
+      <div
+        data-testid="sticky-total-banner"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-50 border-t-2 border-yellow-500 bg-black/95 backdrop-blur-sm"
+      >
+        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-zinc-400">
+              Total incl. GST
+            </div>
+            <div data-testid="sticky-total" className="font-display text-2xl text-yellow-500 font-black tracking-tight leading-none">
+              {currency(computed.total)}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onGenerateFinal}
+            data-testid="wiz-generate-final-mobile"
+            className="shrink-0 inline-flex items-center justify-center gap-2 h-12 px-5 bg-yellow-500 text-black font-black uppercase tracking-[0.14em] text-xs btn-industrial"
+          >
+            Generate <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -1050,158 +1375,6 @@ function Line({ children, delay = 0 }) {
     >
       {children}
     </motion.div>
-  );
-}
-
-function QuoteReadout({ quote, customer, selectedJobs }) {
-  // Group line items by scope
-  const groups = {};
-  (quote.line_items || []).forEach((li) => {
-    const k = li.scope || "general";
-    if (!groups[k]) groups[k] = [];
-    groups[k].push(li);
-  });
-  const orderedScopeIds = selectedJobs.map((j) => j.id).filter((id) => groups[id]);
-  const remaining = Object.keys(groups).filter((k) => !orderedScopeIds.includes(k));
-  const scopeOrder = [...orderedScopeIds, ...remaining];
-
-  return (
-    <motion.div
-      key="quote"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      data-testid="wiz-quote-readout"
-      className="space-y-8 text-neutral-200"
-    >
-      <div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
-          Quote {quote.id?.slice(0, 8)} · {customer.full_name || "Customer"}
-        </div>
-        <p className="mt-3 text-sm text-neutral-300 leading-relaxed">{quote.summary}</p>
-      </div>
-
-      {scopeOrder.map((scopeId) => {
-        const items = groups[scopeId];
-        const scopeJob = selectedJobs.find((j) => j.id === scopeId);
-        const subtotal = items.reduce((s, li) => s + (li.total || 0), 0);
-        return (
-          <div key={scopeId}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
-                {scopeJob ? scopeJob.label : scopeId}
-              </div>
-              <div className="font-mono text-sm text-neutral-300">
-                {currency(subtotal)}
-              </div>
-            </div>
-            <div className="rounded-lg border border-zinc-800 overflow-hidden">
-              <div className="grid grid-cols-12 px-3 py-2 bg-zinc-900 border-b border-zinc-800 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                <span className="col-span-6">Item</span>
-                <span className="col-span-2 text-right">Qty</span>
-                <span className="col-span-2 text-right">Rate</span>
-                <span className="col-span-2 text-right">Total</span>
-              </div>
-              <div className="divide-y divide-zinc-800">
-                {items.map((li, i) => (
-                  <div
-                    key={i}
-                    data-testid={`wiz-line-${scopeId}-${i}`}
-                    className="grid grid-cols-12 px-3 py-3 text-xs hover:bg-zinc-900"
-                  >
-                    <div className="col-span-6">
-                      <div className="text-zinc-200">{li.label}</div>
-                      <div className="text-zinc-500 text-[11px] mt-0.5">{li.detail}</div>
-                    </div>
-                    <span className="col-span-2 text-right text-zinc-400 font-mono">
-                      {li.qty} {li.unit}
-                    </span>
-                    <span className="col-span-2 text-right text-zinc-400 font-mono">
-                      {currency(li.unit_cost)}
-                    </span>
-                    <span className="col-span-2 text-right text-yellow-500 font-semibold font-mono">
-                      {currency(li.total)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-zinc-800 rounded-lg overflow-hidden">
-        <Stat label="Labour" value={currency(quote.labor_total)} />
-        <Stat label="Materials" value={currency(quote.materials_total)} />
-        <Stat label="Contingency" value={currency(quote.contingency_total)} />
-        <Stat label="GST" value={currency(quote.gst)} />
-      </div>
-
-      <div className="rounded-lg border border-yellow-500/60 bg-yellow-500/5 p-5">
-        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
-          Total Range (incl. GST)
-        </div>
-        <div className="mt-2 flex items-baseline gap-3 flex-wrap">
-          <span className="font-display text-3xl sm:text-4xl text-yellow-500">
-            {currency(quote.total_low)}
-          </span>
-          <span className="text-neutral-500">→</span>
-          <span className="font-display text-3xl sm:text-4xl text-yellow-500">
-            {currency(quote.total_high)}
-          </span>
-        </div>
-        <div className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
-          {quote.timeline_estimate} · confidence: {quote.confidence}
-        </div>
-      </div>
-
-      {quote.assumptions?.length > 0 && (
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-2">
-            // Assumptions
-          </div>
-          <ul className="space-y-1.5 text-xs text-neutral-400">
-            {quote.assumptions.map((a, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="text-yellow-500">→</span>
-                <span>{a}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {quote.next_steps?.length > 0 && (
-        <div className="border-t border-neutral-800 pt-5">
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-2">
-            // Next steps
-          </div>
-          <ul className="space-y-1.5 text-xs text-neutral-300">
-            {quote.next_steps.map((s, i) => (
-              <li key={i} className="flex gap-2">
-                <ArrowRight className="w-3 h-3 text-yellow-500 mt-1 flex-shrink-0" />
-                <span>{s}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <NearbySuppliers customer={customer} />
-    </motion.div>
-  );
-}
-
-function Stat({ label, value }) {
-  return (
-    <div className="bg-zinc-950 p-4">
-      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
-        {label}
-      </div>
-      <div className="mt-1 font-mono text-base text-zinc-100 font-semibold">
-        {value}
-      </div>
-    </div>
   );
 }
 
