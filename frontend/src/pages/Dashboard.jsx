@@ -98,16 +98,16 @@ export default function Dashboard() {
     <AppShell>
       <main
         data-testid="business-dashboard"
-        className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-8 py-6 sm:py-10"
+        className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-8 pt-4 sm:pt-5 pb-6 sm:pb-10"
       >
         {/* 1. HEADER & IDENTITY BLOCK */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
             <div>
               <span className="md:hidden font-mono text-[10px] sm:text-xs uppercase tracking-[0.3em] text-yellow-500">
                 TERRAIN PRO // Business Dashboard
               </span>
-              <h1 className="mt-2 sm:mt-3 font-display uppercase text-2xl sm:text-4xl tracking-tight">
+              <h1 className="mt-2 sm:mt-3 lg:mt-0 font-display uppercase text-2xl sm:text-4xl tracking-tight">
                 G'day,{" "}
                 <span className="text-yellow-500">
                   {user?.name?.split(" ")[0] || "Tradie"}
@@ -118,7 +118,7 @@ export default function Dashboard() {
             {/* Desktop: side-by-side info grid */}
             <div
               data-testid="business-meta"
-              className="hidden lg:grid rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4 grid-cols-2 gap-x-8 gap-y-3 min-w-[280px]"
+              className="hidden lg:grid lg:mt-14 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4 grid-cols-2 gap-x-8 gap-y-3 min-w-[280px]"
             >
               <Meta label="Business" value={BUSINESS.name} />
               <Meta label="Location" value={BUSINESS.location} />
