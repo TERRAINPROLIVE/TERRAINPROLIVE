@@ -910,6 +910,38 @@ function Step3({ loading, error, quote, selectedJobs, customer, onReset, onRetry
           <X className="w-4 h-4" /> Start a new quote
         </button>
       </div>
+
+      {quote && !loading && (
+        <>
+          {/* Spacer so the sticky banner never hides content */}
+          <div className="h-20" aria-hidden />
+          <motion.div
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            data-testid="sticky-total-banner"
+            className="fixed bottom-0 inset-x-0 z-50 border-t-2 border-yellow-500 bg-black/95 backdrop-blur-sm"
+          >
+            <div className="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="w-2 h-2 bg-yellow-500 animate-pulse shrink-0" />
+                <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] text-zinc-400 truncate">
+                  Total incl. GST
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2 sm:gap-3 font-display">
+                <span className="text-lg sm:text-2xl text-yellow-500 font-black tracking-tight">
+                  {currency(quote.total_low)}
+                </span>
+                <span className="text-zinc-600">→</span>
+                <span className="text-lg sm:text-2xl text-yellow-500 font-black tracking-tight">
+                  {currency(quote.total_high)}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
     </div>
   );
 }
