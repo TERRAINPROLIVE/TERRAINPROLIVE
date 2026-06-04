@@ -317,7 +317,12 @@ export default function Dashboard() {
               <ActionLink icon={FileText} label="View Saved Invoices" testid="action-invoices" />
               <ActionLink icon={Users} label="Manage Client Profiles" testid="action-clients" />
               <ActionLink icon={Map} label="Check Supplier Map" testid="action-suppliers" />
-              <ActionLink icon={HardHat} label="Preferred Pro's" testid="action-preferred-pros" />
+              <ActionLink
+                icon={HardHat}
+                label="Preferred Pro's"
+                testid="action-preferred-pros"
+                onClick={() => navigate("/directory")}
+              />
               <ActionLink icon={FolderClock} label="Quote History" testid="action-history" />
             </div>
           </aside>
@@ -1022,11 +1027,12 @@ function BusinessMetaEditable() {
   );
 }
 
-function ActionLink({ icon: Icon, label, testid }) {
+function ActionLink({ icon: Icon, label, testid, onClick }) {
   return (
     <button
       type="button"
       data-testid={testid}
+      onClick={onClick}
       className="group w-full inline-flex items-center gap-3 h-12 px-4 rounded-lg border border-zinc-800 text-neutral-300 hover:bg-zinc-900 hover:text-white hover:border-zinc-700 transition-colors"
     >
       <Icon className="w-4 h-4 text-yellow-500 group-hover:text-yellow-400 transition-colors" strokeWidth={1.8} />

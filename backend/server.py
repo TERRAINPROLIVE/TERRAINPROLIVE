@@ -1121,6 +1121,58 @@ async def update_saved_quote(
     return doc
 
 
+# ---------- Preferred Pro's Directory ----------
+PRO_DIRECTORY_SEED = [
+    {"business_name": "Ironbark Earthworks", "trade": "excavation", "service_area": "Brisbane North & Moreton Bay", "phone": "0412 884 220", "email": "ops@ironbarkearthworks.com.au", "website": "ironbarkearthworks.com.au", "verified": True, "years": 14, "blurb": "Bulk excavation, site cuts and detailed trenching. 5–20t excavators with experienced operators and full insurance."},
+    {"business_name": "Hudson Concrete Co.", "trade": "concreting", "service_area": "Gold Coast & Logan", "phone": "0438 110 765", "email": "quotes@hudsonconcrete.com.au", "website": "hudsonconcrete.com.au", "verified": True, "years": 11, "blurb": "Exposed aggregate, coloured and plain driveways, slabs and pathways. Crisp finishes, on-time pours."},
+    {"business_name": "Greenline Landscapes", "trade": "landscaping", "service_area": "Brisbane West (Toowong–Kenmore)", "phone": "0401 552 318", "email": "hello@greenlinelandscapes.com.au", "website": "greenlinelandscapes.com.au", "verified": True, "years": 9, "blurb": "Full soft & hardscape builds — turf, retaining, decks and irrigation. Award-winning residential transformations."},
+    {"business_name": "Tidal Plumbing & Gas", "trade": "plumbing", "service_area": "Sunshine Coast", "phone": "0455 902 144", "email": "service@tidalplumbing.com.au", "website": "tidalplumbing.com.au", "verified": True, "years": 16, "blurb": "Licensed plumbers for new builds, drainage and gas fit-off. Reliable trade partner for site works."},
+    {"business_name": "Voltify Electrical", "trade": "electrical", "service_area": "Brisbane Metro", "phone": "0466 318 901", "email": "admin@voltify.com.au", "website": "voltify.com.au", "verified": True, "years": 8, "blurb": "Domestic & commercial wiring, switchboards, EV chargers and site power. Master Electricians member."},
+    {"business_name": "Hardwood & Co. Carpentry", "trade": "carpentry", "service_area": "Ipswich & Scenic Rim", "phone": "0421 770 562", "email": "build@hardwoodandco.com.au", "website": "hardwoodandco.com.au", "verified": True, "years": 13, "blurb": "Decks, pergolas, framing and finish carpentry. Chippies who turn up and finish clean."},
+    {"business_name": "BorderLine Fencing", "trade": "fencing", "service_area": "Redlands & Bayside", "phone": "0407 264 880", "email": "info@borderlinefencing.com.au", "website": "", "verified": False, "years": 6, "blurb": "Timber, Colorbond and pool fencing. Fast turnarounds on residential and acreage boundaries."},
+    {"business_name": "Stonecraft Paving", "trade": "paving", "service_area": "Gold Coast Hinterland", "phone": "0432 615 209", "email": "jobs@stonecraftpaving.com.au", "website": "stonecraftpaving.com.au", "verified": True, "years": 10, "blurb": "Permeable paving, driveways and feature courtyards. Precision laying with sealed, lasting finishes."},
+    {"business_name": "CanopyCare Arborists", "trade": "arborist", "service_area": "Brisbane & Lockyer Valley", "phone": "0419 803 117", "email": "team@canopycare.com.au", "website": "canopycare.com.au", "verified": True, "years": 12, "blurb": "Qualified arborists for removals, pruning and stump grinding. Site clearing for landscaping and builds."},
+    {"business_name": "Apex Plant Hire", "trade": "plant_hire", "service_area": "South-East QLD (wide load)", "phone": "0400 991 230", "email": "hire@apexplant.com.au", "website": "apexplant.com.au", "verified": True, "years": 18, "blurb": "Wet & dry hire — bobcats, excavators, tippers and rollers. Operators available with all tickets current."},
+    {"business_name": "DeepCut Excavations", "trade": "excavation", "service_area": "Toowoomba & Darling Downs", "phone": "0438 442 117", "email": "office@deepcut.com.au", "website": "", "verified": False, "years": 7, "blurb": "Rural pads, dams and driveway cuts. Competitive day rates across the Downs."},
+    {"business_name": "Sundown Sparkies", "trade": "electrical", "service_area": "Sunshine Coast & Noosa", "phone": "0414 209 776", "email": "book@sundownsparkies.com.au", "website": "sundownsparkies.com.au", "verified": True, "years": 9, "blurb": "Solar, outdoor lighting and landscape power. Tidy work and quick site call-outs."},
+    {"business_name": "Coastal Concrete Cutters", "trade": "concreting", "service_area": "Brisbane Bayside", "phone": "0447 660 312", "email": "cut@coastalcutters.com.au", "website": "", "verified": False, "years": 5, "blurb": "Core drilling, sawing and demo. The crew to call when the slab needs to come up."},
+    {"business_name": "Roots & Shoots Landscaping", "trade": "landscaping", "service_area": "Logan & Beaudesert", "phone": "0423 558 901", "email": "grow@rootsandshoots.com.au", "website": "rootsandshoots.com.au", "verified": True, "years": 8, "blurb": "Native gardens, retaining walls and acreage tidy-ups. Great for full landscape handovers."},
+]
+
+
+@api_router.get("/directory")
+async def list_directory(
+    trade: Optional[str] = None,
+    q: Optional[str] = None,
+    user: dict = Depends(get_current_user),
+):
+    if await db.pro_directory.count_documents({}) == 0:
+        await db.pro_directory.insert_many(
+            [{**p, "id": str(uuid.uuid4())} for p in PRO_DIRECTORY_SEED]
+        )
+
+    query = {}
+    if trade and trade != "all":
+        query["trade"] = trade
+
+    out = []
+    async for d in db.pro_directory.find(query):
+        d.pop("_id", None)
+        out.append(d)
+
+    if q:
+        ql = q.lower()
+        out = [
+            p
+            for p in out
+            if ql
+            in f"{p.get('business_name', '')} {p.get('service_area', '')} {p.get('blurb', '')}".lower()
+        ]
+
+    out.sort(key=lambda p: (not p.get("verified", False), p.get("business_name", "")))
+    return out
+
+
 app.include_router(api_router)
 
 app.add_middleware(
