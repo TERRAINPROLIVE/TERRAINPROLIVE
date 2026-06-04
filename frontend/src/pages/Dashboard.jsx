@@ -14,12 +14,14 @@ import {
   Clock,
   Check,
   Pencil,
+  ChevronDown,
+  Building2,
 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 
-// Sample business profile + records (placeholder data — wire to API later)
+// Sample business profile (placeholder data — wire to API later)
 const BUSINESS = {
   name: "Apex Landscaping",
   location: "Brisbane, QLD",
@@ -62,6 +64,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [quotes, setQuotes] = useState(null);
+  const [metaOpen, setMetaOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -93,67 +96,130 @@ export default function Dashboard() {
 
   return (
     <AppShell>
-      <main data-testid="business-dashboard" className="max-w-7xl mx-auto px-5 lg:px-8 py-10">
+      <main
+        data-testid="business-dashboard"
+        className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-8 py-6 sm:py-10"
+      >
         {/* 1. HEADER & IDENTITY BLOCK */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
-          <div>
-            <span className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.3em] text-yellow-500">
-              TERRAIN PRO // Business Dashboard
-            </span>
-            <h1 className="mt-3 font-display uppercase text-3xl sm:text-4xl tracking-tight">
-              G'day, <span className="text-yellow-500">{user?.name?.split(" ")[0] || "Tradie"}</span>
-            </h1>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+            <div>
+              <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.3em] text-yellow-500">
+                TERRAIN PRO // Business Dashboard
+              </span>
+              <h1 className="mt-2 sm:mt-3 font-display uppercase text-2xl sm:text-4xl tracking-tight">
+                G'day,{" "}
+                <span className="text-yellow-500">
+                  {user?.name?.split(" ")[0] || "Tradie"}
+                </span>
+              </h1>
+            </div>
+
+            {/* Desktop: side-by-side info grid */}
+            <div
+              data-testid="business-meta"
+              className="hidden lg:grid rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4 grid-cols-2 gap-x-8 gap-y-3 min-w-[280px]"
+            >
+              <Meta label="Business" value={BUSINESS.name} />
+              <Meta label="Location" value={BUSINESS.location} />
+              <Meta label="Registration" value={BUSINESS.abn} />
+              <Meta label="Crew Size" value={BUSINESS.size} />
+            </div>
           </div>
 
-          <div
-            data-testid="business-meta"
-            className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4 grid grid-cols-2 gap-x-8 gap-y-3 min-w-[280px]"
-          >
-            <Meta label="Business" value={BUSINESS.name} />
-            <Meta label="Location" value={BUSINESS.location} />
-            <Meta label="Registration" value={BUSINESS.abn} />
-            <Meta label="Crew Size" value={BUSINESS.size} />
+          {/* Mobile: collapsible "Business Info" dropdown */}
+          <div className="lg:hidden mt-4">
+            <button
+              type="button"
+              onClick={() => setMetaOpen((o) => !o)}
+              data-testid="business-meta-toggle"
+              aria-expanded={metaOpen}
+              className="w-full flex items-center justify-between rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-4 py-3"
+            >
+              <span className="flex items-center gap-2 min-w-0">
+                <Building2 className="w-4 h-4 text-yellow-500 shrink-0" strokeWidth={1.8} />
+                <span className="font-display uppercase text-sm tracking-tight text-white truncate">
+                  {BUSINESS.name}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 truncate">
+                  · {BUSINESS.location}
+                </span>
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-neutral-400 shrink-0 transition-transform duration-200 ${
+                  metaOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {metaOpen && (
+              <div
+                data-testid="business-meta-mobile"
+                className="mt-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-4 py-4 grid grid-cols-2 gap-x-6 gap-y-3"
+              >
+                <Meta label="Business" value={BUSINESS.name} />
+                <Meta label="Location" value={BUSINESS.location} />
+                <Meta label="Registration" value={BUSINESS.abn} />
+                <Meta label="Crew Size" value={BUSINESS.size} />
+              </div>
+            )}
           </div>
         </div>
 
-        {/* 2. PRIMARY KPI METRICS + LABOUR RATE */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        {/* Mobile-priority CTA: top of screen below header */}
+        <button
+          type="button"
+          onClick={() => navigate("/quote")}
+          data-testid="action-new-quote-mobile"
+          className="lg:hidden w-full inline-flex items-center justify-center gap-2 h-14 mb-6 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-sm border-2 border-black btn-industrial"
+        >
+          <Plus className="w-4 h-4" strokeWidth={3} />
+          Start a New Quote
+        </button>
+
+        {/* 2. KPI METRICS — 2x2 on mobile, 4-up on desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
           {KPIS.map((k) => (
             <div
               key={k.label}
               data-testid={`kpi-${k.label.toLowerCase().replace(/\s+/g, "-")}`}
-              className={`group relative rounded-lg border border-zinc-800 border-l-2 bg-zinc-900/40 p-6 hover:bg-zinc-900 transition-colors ${
-                k.accent === "muted" ? "border-l-zinc-700" : "border-l-yellow-500 hover:border-l-yellow-400"
+              className={`group relative rounded-lg border border-zinc-800 border-l-2 bg-zinc-900/40 p-4 sm:p-6 hover:bg-zinc-900 transition-colors ${
+                k.accent === "muted"
+                  ? "border-l-zinc-700"
+                  : "border-l-yellow-500 hover:border-l-yellow-400"
               }`}
             >
-              <div className="flex items-start justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-neutral-500 leading-tight">
                   {k.label}
                 </span>
                 <k.icon
-                  className={`w-5 h-5 transition-colors ${
-                    k.accent === "muted" ? "text-neutral-600" : "text-yellow-500 group-hover:text-yellow-400"
+                  className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-colors ${
+                    k.accent === "muted"
+                      ? "text-neutral-600"
+                      : "text-yellow-500 group-hover:text-yellow-400"
                   }`}
                   strokeWidth={1.8}
                 />
               </div>
-              <div className="mt-4 font-display text-4xl sm:text-5xl font-black tracking-tight leading-none text-white">
+              <div className="mt-3 sm:mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-none text-white">
                 {k.value}
               </div>
-              <div className="mt-2 text-sm text-neutral-400">{k.sub}</div>
+              <div className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-neutral-400 leading-snug">
+                {k.sub}
+              </div>
             </div>
           ))}
 
           <LabourRateCard />
         </div>
 
-        {/* 3. MAIN CONTENT SPLIT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* LEFT — Recent quotes */}
-          <section className="lg:col-span-8 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6">
+        {/* 3. COMMAND CENTRE — 70/30 split on desktop, stacked on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* LEFT 70% — Recent quotes */}
+          <section className="lg:col-span-8 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-              <h2 className="font-display uppercase text-xl tracking-tight text-white">
-                Recent AI Quotes & Estimations
+              <h2 className="font-display uppercase text-lg sm:text-xl tracking-tight text-white">
+                Recent AI Quotes &amp; Estimations
               </h2>
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
@@ -167,7 +233,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Desktop: full data table */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left" data-testid="quotes-table">
                 <thead>
                   <tr className="border-b border-zinc-800 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
@@ -191,13 +258,7 @@ export default function Dashboard() {
                       <td className="py-4 pr-4 text-sm text-neutral-300">{q.scope}</td>
                       <td className="py-4 pr-4 font-mono text-sm text-yellow-500">{q.total}</td>
                       <td className="py-4 pr-4">
-                        <span
-                          className={`inline-block border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] ${
-                            STATUS_STYLES[q.status] || STATUS_STYLES.Draft
-                          }`}
-                        >
-                          {q.status}
-                        </span>
+                        <StatusTag status={q.status} />
                       </td>
                       <td className="py-4 font-mono text-xs text-neutral-400">{q.date}</td>
                     </tr>
@@ -212,25 +273,38 @@ export default function Dashboard() {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile/Tablet: quote cards */}
+            <div className="lg:hidden space-y-3" data-testid="quotes-cards">
+              {filtered.map((q, i) => (
+                <QuoteCard key={i} q={q} index={i} />
+              ))}
+              {filtered.length === 0 && (
+                <div className="py-10 text-center text-sm text-neutral-500">
+                  No quotes match "{query}".
+                </div>
+              )}
+            </div>
           </section>
 
-          {/* RIGHT — Quick actions */}
-          <aside className="lg:col-span-4 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6">
-            <h2 className="font-display uppercase text-xl tracking-tight text-white mb-5">
-              Quick Actions & Workflows
+          {/* RIGHT 30% — Sticky action panel (desktop) */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-28 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-4 sm:p-6">
+            <h2 className="font-display uppercase text-lg sm:text-xl tracking-tight text-white mb-5">
+              Quick Actions &amp; Workflows
             </h2>
 
+            {/* Primary CTA shown here on desktop only (mobile has the top button) */}
             <button
               type="button"
               onClick={() => navigate("/quote")}
               data-testid="action-new-quote"
-              className="w-full inline-flex items-center justify-center gap-2 h-14 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-sm border-2 border-black btn-industrial"
+              className="hidden lg:inline-flex w-full items-center justify-center gap-2 h-14 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-sm border-2 border-black btn-industrial"
             >
               <Plus className="w-4 h-4" strokeWidth={3} />
               Start a New Quote
             </button>
 
-            <div className="mt-4 space-y-3">
+            <div className="lg:mt-4 space-y-3">
               <ActionLink icon={FileText} label="View Saved Invoices" testid="action-invoices" />
               <ActionLink icon={Users} label="Manage Client Profiles" testid="action-clients" />
               <ActionLink icon={Map} label="Check Supplier Map" testid="action-suppliers" />
@@ -240,6 +314,43 @@ export default function Dashboard() {
         </div>
       </main>
     </AppShell>
+  );
+}
+
+function StatusTag({ status }) {
+  return (
+    <span
+      className={`inline-block border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] ${
+        STATUS_STYLES[status] || STATUS_STYLES.Draft
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function QuoteCard({ q, index }) {
+  return (
+    <div
+      data-testid={`quote-card-${index}`}
+      className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-4 active:bg-zinc-900 transition-colors"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <span className="font-display uppercase text-sm tracking-tight text-white truncate">
+          {q.client}
+        </span>
+        <StatusTag status={q.status} />
+      </div>
+      <p className="mt-2 text-sm text-neutral-400 line-clamp-2">{q.scope}</p>
+      <div className="mt-3 flex items-end justify-between gap-3">
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+          {q.date}
+        </span>
+        <span className="font-mono text-base font-semibold text-yellow-500 text-right">
+          {q.total}
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -277,19 +388,22 @@ function LabourRateCard() {
   return (
     <div
       data-testid="kpi-labour-rate"
-      className="group relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6 hover:bg-zinc-900 transition-colors"
+      className="group relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-4 sm:p-6 hover:bg-zinc-900 transition-colors"
     >
-      <div className="flex items-start justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+      <div className="flex items-start justify-between gap-2">
+        <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-neutral-500 leading-tight">
           Labour Rate
         </span>
-        <Clock className="w-5 h-5 text-yellow-500 group-hover:text-yellow-400 transition-colors" strokeWidth={1.8} />
+        <Clock
+          className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-yellow-500 group-hover:text-yellow-400 transition-colors"
+          strokeWidth={1.8}
+        />
       </div>
 
       {editing ? (
-        <div className="mt-4">
+        <div className="mt-3 sm:mt-4">
           <div className="flex items-center gap-2">
-            <span className="font-display text-3xl font-black text-yellow-500">$</span>
+            <span className="font-display text-2xl sm:text-3xl font-black text-yellow-500">$</span>
             <Input
               data-testid="labour-rate-input"
               type="number"
@@ -299,37 +413,35 @@ function LabourRateCard() {
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && save()}
               placeholder="95"
-              className="h-11 w-24 rounded-none bg-neutral-950 border-neutral-800 text-white text-lg font-mono focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+              className="h-10 w-20 sm:w-24 rounded-none bg-neutral-950 border-neutral-800 text-white text-base sm:text-lg font-mono focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
             />
             <button
               type="button"
               data-testid="labour-rate-save"
               onClick={save}
               disabled={saving}
-              className="h-11 w-11 grid place-items-center bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition-colors"
+              className="h-10 w-10 grid place-items-center bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition-colors"
             >
               <Check className="w-4 h-4" strokeWidth={3} />
             </button>
           </div>
-          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+          <div className="mt-2 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-neutral-500">
             AUD per hour (ex GST)
           </div>
         </div>
       ) : (
         <>
-          <div className="mt-4 flex items-baseline gap-1">
-            <span className="font-display text-4xl sm:text-5xl font-black tracking-tight leading-none text-white">
+          <div className="mt-3 sm:mt-4 flex items-baseline gap-1">
+            <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-none text-white">
               {rate != null ? `$${rate}` : "—"}
             </span>
-            {rate != null && (
-              <span className="font-mono text-sm text-neutral-500">/hr</span>
-            )}
+            {rate != null && <span className="font-mono text-xs sm:text-sm text-neutral-500">/hr</span>}
           </div>
           <button
             type="button"
             data-testid="labour-rate-edit"
             onClick={startEdit}
-            className="mt-2 inline-flex items-center gap-1.5 text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
+            className="mt-1.5 sm:mt-2 inline-flex items-center gap-1.5 text-xs sm:text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
           >
             <Pencil className="w-3 h-3" />
             {rate != null ? "Edit rate" : "Set your rate"}
@@ -340,7 +452,8 @@ function LabourRateCard() {
   );
 }
 
-function Meta({ label, value }) {  return (
+function Meta({ label, value }) {
+  return (
     <div className="leading-tight">
       <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">{label}</div>
       <div className="mt-1 font-display uppercase text-sm tracking-tight text-white">{value}</div>
