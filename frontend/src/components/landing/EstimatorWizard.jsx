@@ -19,6 +19,7 @@ import {
   MapPin,
   ExternalLink,
   Store,
+  Gem,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,7 +41,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-const TRADE_ICON = { Landscaping: Leaf, Concreting: Box, Earthmoving: Truck };
+const TRADE_ICON = {
+  Landscaping: Leaf,
+  "Decorative Rocks & Pebbles": Gem,
+  Concreting: Box,
+  Earthmoving: Truck,
+};
 
 const currency = (n) =>
   "$" + Math.round(Number(n) || 0).toLocaleString("en-AU");
@@ -649,6 +655,22 @@ function Step2({
 function JobMeasurements({ job, values, setField }) {
   const Icon = TRADE_ICON[job.trade] || Box;
 
+  // Live area / volume summary when the job uses length + width inputs
+  const hasAreaInputs =
+    job.fields.some((f) => f.key === "length_m") &&
+    job.fields.some((f) => f.key === "width_m");
+  const L = parseFloat(values.length_m);
+  const W = parseFloat(values.width_m);
+  const depthMm = parseFloat(
+    values.depth_mm ?? values.thickness_mm ?? values.target_depth_mm
+  );
+  const area =
+    Number.isFinite(L) && Number.isFinite(W) && L > 0 && W > 0 ? L * W : null;
+  const volume =
+    area != null && Number.isFinite(depthMm) && depthMm > 0
+      ? (area * depthMm) / 1000
+      : null;
+
   return (
     <div
       data-testid={`measurements-${job.id}`}
@@ -686,6 +708,26 @@ function JobMeasurements({ job, values, setField }) {
             />
           ))}
         </div>
+
+        {hasAreaInputs && (
+          <div
+            data-testid={`measure-summary-${job.id}`}
+            className="mt-5 flex items-center justify-between gap-4 rounded-lg border border-zinc-800 bg-zinc-950 px-5 py-4"
+          >
+            <div>
+              <div className="text-xs font-mono text-zinc-500">TOTAL AREA:</div>
+              <div className="mt-1 text-lg font-bold text-white">
+                {area != null ? `${area.toFixed(1)} m²` : "—"}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs font-mono text-zinc-500">ESTIMATED VOLUME:</div>
+              <div className="mt-1 text-lg font-bold text-yellow-500">
+                {volume != null ? `${volume.toFixed(1)} m³` : "—"}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -758,7 +800,7 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
         min={field.min}
         step={field.step || "any"}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={readOnly ? "Auto" : field.default ?? ""}
+        placeholder={readOnly ? "Auto" : field.placeholder ?? (field.default != null ? String(field.default) : "")}
         className={`h-12 rounded-none border-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500/20 focus-visible:border-yellow-500 font-mono ${
           readOnly
             ? "bg-zinc-950 text-yellow-500 cursor-not-allowed"

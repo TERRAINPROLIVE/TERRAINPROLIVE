@@ -154,6 +154,62 @@ export const JOB_GROUPS = [
     ],
   },
   {
+    trade: "Decorative Rocks & Pebbles",
+    icon: "Gem",
+    jobs: [
+      {
+        id: "riverstone_pebbles",
+        label: "Riverstone & Organic River Pebbles (20mm–40mm)",
+        description: "Natural river pebble groundcover laid over weed membrane.",
+        fields: [
+          { key: "length_m", label: "Length", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "width_m", label: "Width", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "depth_mm", label: "Target depth", unit: "mm", type: "number", min: 0, placeholder: "100" },
+        ],
+      },
+      {
+        id: "white_quartz",
+        label: "Premium White Quartz / Snow White",
+        description: "Bright white quartz feature stone for beds and borders.",
+        fields: [
+          { key: "length_m", label: "Length", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "width_m", label: "Width", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "depth_mm", label: "Target depth", unit: "mm", type: "number", min: 0, placeholder: "100" },
+        ],
+      },
+      {
+        id: "charcoal_basalt",
+        label: "Charcoal Volcanic Lava & Tumbled Basalt",
+        description: "Dark charcoal basalt for modern, high-contrast groundcover.",
+        fields: [
+          { key: "length_m", label: "Length", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "width_m", label: "Width", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "depth_mm", label: "Target depth", unit: "mm", type: "number", min: 0, placeholder: "100" },
+        ],
+      },
+      {
+        id: "sunset_gold_sandstone",
+        label: "Sunset Gold / Tumbled Sandstone",
+        description: "Warm gold tumbled sandstone for paths and feature beds.",
+        fields: [
+          { key: "length_m", label: "Length", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "width_m", label: "Width", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "depth_mm", label: "Target depth", unit: "mm", type: "number", min: 0, placeholder: "100" },
+        ],
+      },
+      {
+        id: "scoria_volcanic_mulch",
+        label: "Scoria / Volcanic Mulch Replacement",
+        description: "Lightweight red/black scoria as a long-life mulch alternative.",
+        fields: [
+          { key: "length_m", label: "Length", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "width_m", label: "Width", unit: "m", type: "number", min: 0, step: 0.1, placeholder: "0.0" },
+          { key: "depth_mm", label: "Target depth", unit: "mm", type: "number", min: 0, placeholder: "75" },
+        ],
+      },
+    ],
+  },
+  {
     trade: "Concreting",
     icon: "Box",
     jobs: [
