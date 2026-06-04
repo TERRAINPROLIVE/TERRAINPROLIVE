@@ -103,7 +103,7 @@ export default function Dashboard() {
         {/* 1. HEADER & IDENTITY BLOCK */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col gap-5 lg:grid lg:grid-cols-4 lg:gap-5 lg:items-start">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 lg:mt-14">
               <span className="md:hidden font-mono text-[10px] sm:text-xs uppercase tracking-[0.3em] text-yellow-500">
                 TERRAIN PRO // Business Dashboard
               </span>
