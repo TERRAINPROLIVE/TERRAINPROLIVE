@@ -1021,6 +1021,43 @@ async def update_profile(req: ProfileUpdate, user: dict = Depends(get_current_us
     return _public_user(user)
 
 
+class SaveQuoteRequest(BaseModel):
+    quote: dict
+    customer: dict
+    scope_summary: Optional[str] = Field(default=None, max_length=400)
+
+
+@api_router.post("/quotes")
+async def save_quote(req: SaveQuoteRequest, user: dict = Depends(get_current_user)):
+    q = req.quote or {}
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "quote_ref": q.get("id"),
+        "client": req.customer.get("full_name") or "Customer",
+        "scope_summary": req.scope_summary or (q.get("summary") or "")[:200],
+        "total_low": q.get("total_low"),
+        "total_high": q.get("total_high"),
+        "status": "Draft",
+        "customer": req.customer,
+        "quote": q,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.saved_quotes.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.get("/quotes")
+async def list_quotes(user: dict = Depends(get_current_user)):
+    cursor = db.saved_quotes.find({"user_id": user["id"]}).sort("created_at", -1).limit(50)
+    out = []
+    async for d in cursor:
+        d.pop("_id", None)
+        out.append(d)
+    return out
+
+
 app.include_router(api_router)
 
 app.add_middleware(

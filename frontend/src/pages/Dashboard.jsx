@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { toast } from "sonner";
 import {
   Plus,
@@ -32,7 +33,7 @@ const KPIS = [
   { label: "Recent Enquiries", value: "3", sub: "Awaiting first response", icon: Inbox, accent: "muted" },
 ];
 
-const QUOTES = [
+const SAMPLE_QUOTES = [
   {
     client: "Melinda Rankine",
     scope: "Turf, Irrigation & Fencing",
@@ -41,6 +42,13 @@ const QUOTES = [
     date: "June 5",
   },
 ];
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+const fmtMoney = (n) =>
+  typeof n === "number"
+    ? n.toLocaleString("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 })
+    : "—";
 
 const STATUS_STYLES = {
   Draft: "border-zinc-700 text-neutral-300",
@@ -53,8 +61,33 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [quotes, setQuotes] = useState(null);
 
-  const filtered = QUOTES.filter((q) =>
+  useEffect(() => {
+    let active = true;
+    axios
+      .get(`${API}/quotes`)
+      .then(({ data }) => {
+        if (!active) return;
+        const mapped = (data || []).map((q) => ({
+          client: q.client || "Customer",
+          scope: q.scope_summary || "—",
+          total: `${fmtMoney(q.total_low)} - ${fmtMoney(q.total_high)}`,
+          status: q.status || "Draft",
+          date: q.created_at
+            ? new Date(q.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })
+            : "",
+        }));
+        setQuotes(mapped);
+      })
+      .catch(() => setQuotes([]));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const rows = quotes && quotes.length ? quotes : SAMPLE_QUOTES;
+  const filtered = rows.filter((q) =>
     `${q.client} ${q.scope} ${q.status}`.toLowerCase().includes(query.toLowerCase())
   );
 

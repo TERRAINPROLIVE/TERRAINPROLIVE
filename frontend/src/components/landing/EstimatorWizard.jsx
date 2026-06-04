@@ -20,6 +20,8 @@ import {
   ExternalLink,
   Store,
   Gem,
+  Download,
+  Save,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +41,7 @@ import { JOB_GROUPS, JOB_LOOKUP, jobsByIds } from "@/lib/jobCatalog";
 import { AU_STATES } from "@/lib/auSuburbs";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { generateQuotePdf } from "@/lib/quotePdf";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const TRADE_ICON = {
@@ -87,6 +90,8 @@ export default function EstimatorWizard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [quote, setQuote] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const toggleJob = (id) =>
     setSelectedJobIds((cur) => {
@@ -182,6 +187,7 @@ export default function EstimatorWizard() {
         { timeout: 120000 }
       );
       setQuote(data);
+      setSaved(false);
       toast.success("Quote ready. Scroll to see the breakdown.");
     } catch (err) {
       const msg =
@@ -201,6 +207,56 @@ export default function EstimatorWizard() {
     setStep(1);
     setQuote(null);
     setError(null);
+    setSaved(false);
+  };
+
+  const selectedJobsForExport = () => jobsByIds(selectedJobIds);
+
+  const handleExportPdf = () => {
+    if (!quote) return;
+    try {
+      generateQuotePdf({
+        quote,
+        customer: {
+          full_name: customer.full_name,
+          address: [
+            customer.street,
+            [customer.suburb, customer.state, customer.postcode].filter(Boolean).join(" "),
+          ]
+            .filter(Boolean)
+            .join(", "),
+        },
+        selectedJobs: selectedJobsForExport(),
+        business: { name: user?.name ? `${user.name}'s Quote` : "TerrainPRO" },
+      });
+      toast.success("PDF downloaded.");
+    } catch {
+      toast.error("Couldn't generate the PDF. Please try again.");
+    }
+  };
+
+  const handleSaveQuote = async () => {
+    if (!quote || saving || saved) return;
+    setSaving(true);
+    try {
+      await axios.post(`${API}/quotes`, {
+        quote,
+        customer: {
+          full_name: customer.full_name,
+          phone: customer.phone || null,
+          email: customer.email || null,
+        },
+        scope_summary: jobsByIds(selectedJobIds)
+          .map((j) => j.label)
+          .join(", "),
+      });
+      setSaved(true);
+      toast.success("Quote saved to your dashboard.");
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || "Couldn't save the quote.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -301,6 +357,10 @@ export default function EstimatorWizard() {
               customer={customer}
               onReset={reset}
               onRetry={submit}
+              onExportPdf={handleExportPdf}
+              onSave={handleSaveQuote}
+              saving={saving}
+              saved={saved}
             />
           </motion.div>
         )}
@@ -821,7 +881,7 @@ function MeasurementField({ jobId, field, value, onChange, readOnly }) {
 /* ============================================================
    Step 3 — AI quote output
    ============================================================ */
-function Step3({ loading, error, quote, selectedJobs, customer, onReset, onRetry }) {
+function Step3({ loading, error, quote, selectedJobs, customer, onReset, onRetry, onExportPdf, onSave, saving, saved }) {
   return (
     <div className="space-y-6">
       <div className="relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-black overflow-hidden">
@@ -900,7 +960,7 @@ function Step3({ loading, error, quote, selectedJobs, customer, onReset, onRetry
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3">
         <button
           type="button"
           onClick={onReset}
@@ -909,6 +969,34 @@ function Step3({ loading, error, quote, selectedJobs, customer, onReset, onRetry
         >
           <X className="w-4 h-4" /> Start a new quote
         </button>
+        {quote && !loading && (
+          <>
+            <button
+              type="button"
+              onClick={onExportPdf}
+              data-testid="wiz-export-pdf"
+              className="inline-flex items-center justify-center gap-2 h-12 px-6 border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 font-semibold uppercase tracking-[0.15em] text-xs transition-colors"
+            >
+              <Download className="w-4 h-4" /> Export to PDF
+            </button>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={saving || saved}
+              data-testid="wiz-save-quote"
+              className="inline-flex items-center justify-center gap-2 h-12 px-6 bg-yellow-500 text-black font-bold uppercase tracking-[0.15em] text-xs btn-industrial disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {saving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : saved ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {saved ? "Saved" : "Save Quote"}
+            </button>
+          </>
+        )}
       </div>
 
       {quote && !loading && (

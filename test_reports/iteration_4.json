@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 4 — Saved quotes (POST/GET /api/quotes) + Estimator Step 3 Save/Export PDF buttons + Dashboard 'Recent AI Quotes' integration. Backend pytest 5/5 PASS: POST /api/quotes (auth) persists doc with id, client, total_low/high, status='Draft', created_at, quote_ref echoing inner quote.id and no _id leakage; POST without Authorization -> 401; GET /api/quotes returns user-scoped list sorted by created_at desc; GET without Authorization -> 401; cross-user isolation confirmed (another user's saved quote is NOT visible in demo's list). Frontend Playwright (demo@terrainpro.com): login -> /dashboard -> /quote, Step1 (Melinda Rankine, Narangba, street, job-chip-riverstone_pebbles) -> Step2 (length=9, width=5, depth=100) -> Generate; AI quote rendered in ~25s; wiz-export-pdf click triggered a real file download (page.on('download') fired) with NO pageerrors and toast 'PDF downloaded.'; wiz-save-quote click showed 'Quote saved to your dashboard.' toast, button became disabled and label switched to 'Saved'; navigated to /dashboard and quotes-table now shows the new MELINDA RANKINE / Riverstone & Organic River Pebbles row with $3,247 - $3,734 / DRAFT / 4 June at the top of the table. Auth regression already covered in iteration_3 (test_auth.py). Total backend: 14/14 PASS (9 auth + 5 quotes). Frontend: 100% on the requested flow.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_quotes.py",
+    "/app/backend/tests/test_auth.py",
+    "/app/test_reports/pytest/quotes_results.xml",
+    "/app/test_reports/pytest/auth_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py SaveQuoteRequest uses typed `quote: dict` / `customer: dict` (no pydantic schema for nested customer). That keeps the API permissive but means a malformed customer (e.g. missing full_name) silently stores client='Customer' with no validation error. Consider a small CustomerPersist model with full_name required.",
+    "server.py /api/quotes save_quote does not validate or persist totals as numbers — if a frontend ever sends total_low as a string the dashboard sort/format will misbehave. Coerce/validate q.get('total_low/high') to float.",
+    "server.py /api/quotes list_quotes hard-caps at 50 items with no pagination (skip/limit) and no count endpoint — fine for MVP, but a heavy demo user will silently lose older quotes from the table.",
+    "EstimatorWizard.jsx handleSaveQuote: on success it sets saved=true but never stores the returned doc.id; if a user wanted to immediately PATCH/delete the just-saved quote there's no handle. Minor.",
+    "Dashboard.jsx falls back to a hardcoded sample row when GET /api/quotes returns []. Useful for demo but please feature-flag or remove before production so empty-state isn't confused with real data.",
+    "Dashboard table renders client names via CSS uppercase only (data is mixed case in DB) — purely cosmetic, but be aware Playwright text assertions need case-insensitive checks (this caught me).",
+    "server.py CORS allow_credentials=True together with allow_origins='*' (default) is rejected by browsers in spec-strict mode; current preview works because the SPA uses Bearer tokens, but tighten CORS_ORIGINS env in prod."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_quotes.py"
+  ],
+  "success_rate": { "backend": "100% (5/5 saved-quote tests, 9/9 auth from prev = 14/14 total)", "frontend": "100% (login -> wizard -> generate -> export PDF -> save -> dashboard row)" },
+  "test_credentials": "demo@terrainpro.com / trade1234. Plus QA-created users via /api/auth/register (qa_<uuid>@test.com / secret123).",
+  "seed_data_creation": "Tests insert ~4 docs into db.saved_quotes under the demo user (clients: Melinda Rankine x2, TEST_AAA, TEST_BBB) and 1 doc under a fresh qa_* user. No cleanup performed; safe to delete by user_id or client LIKE 'TEST_%'.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend quote tests: pytest backend/tests/test_quotes.py (uses REACT_APP_BACKEND_URL). Auth tests still at backend/tests/test_auth.py. Frontend testids confirmed: wiz-customer-name/suburb/street, job-chip-riverstone_pebbles, mfield-riverstone_pebbles-length_m/width_m/depth_mm, wiz-next, wiz-export-pdf, wiz-save-quote (becomes disabled + 'Saved'), quotes-table on /dashboard. AI generation latency ~20-30s; allow 90s wait. PDF download verified via Playwright page.on('download'). Dashboard renders client names in CSS uppercase — use case-insensitive substring or innerText.toUpperCase() in assertions.",
+  "rca of the issue": "n/a — all flows green."
+}
