@@ -104,6 +104,7 @@ class MultiQuoteRequest(BaseModel):
     scopes: List[JobScope] = Field(..., min_length=1, max_length=12)
     complexity: Literal["low", "medium", "high"] = "medium"
     notes: Optional[str] = Field(default=None, max_length=2000)
+    labour_rate: Optional[float] = Field(default=None, ge=0, le=1000)
 
 
 class QuoteResponse(BaseModel):
@@ -351,6 +352,7 @@ async def multi_generate_quote(req: MultiQuoteRequest):
         "scopes": [s.model_dump() for s in req.scopes],
         "complexity": req.complexity,
         "notes": req.notes,
+        "labour_rate_aud_per_hour": req.labour_rate,
     }
 
     chat = LlmChat(
@@ -359,12 +361,21 @@ async def multi_generate_quote(req: MultiQuoteRequest):
         system_message=MULTI_SYSTEM_PROMPT,
     ).with_model("openai", "gpt-5.2")
 
+    rate_instruction = (
+        f"IMPORTANT: This tradie's own labour rate is AUD ${req.labour_rate:.0f}/hr ex GST. "
+        "Use THIS rate for all labour/crew line items (unit 'hrs' or 'day' = rate x 8) instead of generic defaults, "
+        "and keep the labour_total consistent with it.\n\n"
+        if req.labour_rate
+        else ""
+    )
+
     user_msg = UserMessage(
         text=(
             "Generate a consolidated AUD quote for the following customer covering ALL scopes. "
             "Group line_items by scope using the job_type id. Factor in travel from the business "
             "address to the customer's job site if both are provided. Respond with JSON only.\n\n"
-            f"Brief:\n{json.dumps(payload, indent=2, default=str)}"
+            + rate_instruction
+            + f"Brief:\n{json.dumps(payload, indent=2, default=str)}"
         )
     )
 
@@ -904,6 +915,7 @@ def _public_user(doc: dict) -> dict:
         "name": doc.get("name"),
         "phone": doc.get("phone"),
         "email": doc.get("email"),
+        "hourly_rate": doc.get("hourly_rate"),
         "trial_expires_at": doc.get("trial_expires_at"),
         "trial_active": trial_active,
         "days_remaining": days_remaining,
@@ -991,6 +1003,21 @@ async def auth_login(req: LoginRequest):
 
 @api_router.get("/auth/me")
 async def auth_me(user: dict = Depends(get_current_user)):
+    return _public_user(user)
+
+
+class ProfileUpdate(BaseModel):
+    hourly_rate: Optional[float] = Field(default=None, ge=0, le=1000)
+
+
+@api_router.put("/auth/profile")
+async def update_profile(req: ProfileUpdate, user: dict = Depends(get_current_user)):
+    updates = {}
+    if req.hourly_rate is not None:
+        updates["hourly_rate"] = round(float(req.hourly_rate), 2)
+    if updates:
+        await db.users.update_one({"id": user["id"]}, {"$set": updates})
+        user = {**user, **updates}
     return _public_user(user)
 
 

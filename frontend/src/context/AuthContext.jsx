@@ -61,8 +61,14 @@ export function AuthProvider({ children }) {
     setUser(false);
   };
 
+  const updateProfile = async (payload) => {
+    const { data } = await axios.put(`${API}/auth/profile`, payload);
+    setUser(data);
+    return data;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, register, login, logout, refresh: fetchMe }}>
+    <AuthContext.Provider value={{ user, register, login, logout, updateProfile, refresh: fetchMe }}>
       {children}
     </AuthContext.Provider>
   );

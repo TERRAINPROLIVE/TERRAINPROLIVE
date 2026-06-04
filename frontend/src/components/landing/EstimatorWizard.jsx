@@ -37,6 +37,7 @@ import {
 
 import { JOB_GROUPS, JOB_LOOKUP, jobsByIds } from "@/lib/jobCatalog";
 import { AU_STATES } from "@/lib/auSuburbs";
+import { useAuth } from "@/context/AuthContext";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const TRADE_ICON = { Landscaping: Leaf, Concreting: Box, Earthmoving: Truck };
@@ -60,6 +61,7 @@ function evalComputed(expr, values) {
 }
 
 export default function EstimatorWizard() {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [customer, setCustomer] = useState({
     full_name: "",
@@ -166,6 +168,7 @@ export default function EstimatorWizard() {
         scopes,
         complexity,
         notes: notes || null,
+        labour_rate: user?.hourly_rate ?? null,
       });
       setQuote(data);
       toast.success("Quote ready. Scroll to see the breakdown.");

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import {
   Plus,
   Search,
@@ -9,6 +10,9 @@ import {
   FolderClock,
   TrendingUp,
   Inbox,
+  Clock,
+  Check,
+  Pencil,
 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { useAuth } from "@/context/AuthContext";
@@ -79,8 +83,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 2. PRIMARY KPI METRICS */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+        {/* 2. PRIMARY KPI METRICS + LABOUR RATE */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           {KPIS.map((k) => (
             <div
               key={k.label}
@@ -106,6 +110,8 @@ export default function Dashboard() {
               <div className="mt-2 text-sm text-neutral-400">{k.sub}</div>
             </div>
           ))}
+
+          <LabourRateCard />
         </div>
 
         {/* 3. MAIN CONTENT SPLIT */}
@@ -204,8 +210,104 @@ export default function Dashboard() {
   );
 }
 
-function Meta({ label, value }) {
+function LabourRateCard() {
+  const { user, updateProfile } = useAuth();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const rate = user?.hourly_rate;
+
+  const startEdit = () => {
+    setValue(rate != null ? String(rate) : "");
+    setEditing(true);
+  };
+
+  const save = async () => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0) {
+      toast.error("Enter a valid hourly rate.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateProfile({ hourly_rate: num });
+      toast.success("Labour rate saved. The estimator will factor it in.");
+      setEditing(false);
+    } catch {
+      toast.error("Couldn't save rate. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
+    <div
+      data-testid="kpi-labour-rate"
+      className="group relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6 hover:bg-zinc-900 transition-colors"
+    >
+      <div className="flex items-start justify-between">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+          Labour Rate
+        </span>
+        <Clock className="w-5 h-5 text-yellow-500 group-hover:text-yellow-400 transition-colors" strokeWidth={1.8} />
+      </div>
+
+      {editing ? (
+        <div className="mt-4">
+          <div className="flex items-center gap-2">
+            <span className="font-display text-3xl font-black text-yellow-500">$</span>
+            <Input
+              data-testid="labour-rate-input"
+              type="number"
+              min="0"
+              autoFocus
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && save()}
+              placeholder="95"
+              className="h-11 w-24 rounded-none bg-neutral-950 border-neutral-800 text-white text-lg font-mono focus-visible:ring-1 focus-visible:ring-yellow-500 focus-visible:border-yellow-500"
+            />
+            <button
+              type="button"
+              data-testid="labour-rate-save"
+              onClick={save}
+              disabled={saving}
+              className="h-11 w-11 grid place-items-center bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition-colors"
+            >
+              <Check className="w-4 h-4" strokeWidth={3} />
+            </button>
+          </div>
+          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+            AUD per hour (ex GST)
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="mt-4 flex items-baseline gap-1">
+            <span className="font-display text-4xl sm:text-5xl font-black tracking-tight leading-none text-white">
+              {rate != null ? `$${rate}` : "—"}
+            </span>
+            {rate != null && (
+              <span className="font-mono text-sm text-neutral-500">/hr</span>
+            )}
+          </div>
+          <button
+            type="button"
+            data-testid="labour-rate-edit"
+            onClick={startEdit}
+            className="mt-2 inline-flex items-center gap-1.5 text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
+          >
+            <Pencil className="w-3 h-3" />
+            {rate != null ? "Edit rate" : "Set your rate"}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Meta({ label, value }) {  return (
     <div className="leading-tight">
       <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">{label}</div>
       <div className="mt-1 font-display uppercase text-sm tracking-tight text-white">{value}</div>
