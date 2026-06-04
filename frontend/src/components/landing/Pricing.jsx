@@ -73,11 +73,6 @@ export default function Pricing() {
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
             [ Pricing ]
           </span>
-          <h2 className="mt-4 font-display uppercase text-4xl sm:text-5xl tracking-tight">
-            Priced like a tool,
-            <br />
-            not a subscription trap.
-          </h2>
           <p className="mt-6 text-neutral-400 max-w-2xl mx-auto">
             One quote you win pays for the year. Cancel any time — no lock-in,
             no exit fees, no BS.
