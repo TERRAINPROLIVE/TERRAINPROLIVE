@@ -48,6 +48,14 @@ Aussie tradies (sole traders, 2–10 person crews, contractors) running earthmov
 
 ## Backlog
 P0 — none (MVP + trial auth complete)
-P1 — Branded PDF quote export, save-quote-by-email, returning-user dashboard with saved quotes
+P1 — save-quote-by-email, returning-user dashboard with saved quotes
 P1 — Decouple JWT TTL from trial length; password reset (/forgot-password, /reset-password)
 P2 — Custom rates library, Xero/MYOB export, variation deltas, voice-to-job input, Stripe upgrade on trial expiry
+
+## Implemented (2026-06-04) — Editable Step 3, Saved-Quote View, Profile ABN, UI polish
+- **Step 3 fully editable rebuild**: three-tier breakdown — Material Costs + Labour & Earthmoving (auto-classified by unit hr/day) with inline editable QTY & RATE per row (instant per-row total), plus a global Margin & Markup slider/% input. Live Totals sidebar (Subtotal → Markup → GST 10% → Total AUD) recalculates instantly. Actions: "Save Draft / Re-Calculate" + primary "Generate Final Client Quote →" (saves + exports branded PDF). Mobile sticky total bar. Edited values flow into Save and PDF (parent `computed`/`computedQuote` model in EstimatorWizard.jsx).
+- **Saved-quote detail view**: dashboard rows/cards are clickable → `SavedQuoteDetail` modal (total range, scope summary, grouped line items, totals breakdown, assumptions, Export PDF + close). Fixed "can't save multiple" — estimator resets `saved` on each new generation; backend inserts a new record per save.
+- **Profile ABN + Business Name**: added to PUT /api/auth/profile and /auth/me; editable on dashboard business-meta block (pencil → inputs → save); printed on exported quote PDFs.
+- **Dashboard cleanup**: removed hardcoded sample-quote fallback (now shows real data / proper empty state); `wiz-reset` now fully clears wizard state (customer, jobs, measurements, complexity, notes).
+- **UI polish**: trial banner text smaller + reworded "Trial Active // N Days Remaining"; dashboard header alignment (G'day heading + Business box in shared 4-col grid, business logo placeholder); signup page compacted to single-screen (no scroll) with new subtitle + Home button; landing header → sleek circular hamburger (mobile + web) with Estimator/Features/Pricing/Contact dropdown; industrial concrete watermark background ("YOUR PROJECT," / "OUR TERRAIN.") on AppShell + signup.
+- Tested: testing_agent iteration_5 — backend 19/19 (9 auth + 5 quotes + 5 profile/multi-save), frontend 11/11 functional checks. Live recalc math verified (markup = subtotal×pct, GST = (subtotal+markup)×0.10).

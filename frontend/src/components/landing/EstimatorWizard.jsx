@@ -277,6 +277,19 @@ export default function EstimatorWizard() {
     setSaved(false);
     setEditItems([]);
     setMarkupPct(20);
+    setCustomer({
+      full_name: "",
+      phone: "",
+      email: "",
+      street: "",
+      suburb: "",
+      state: "QLD",
+      postcode: "",
+    });
+    setSelectedJobIds([]);
+    setMeasurements({});
+    setComplexity("medium");
+    setNotes("");
   };
 
   const selectedJobsForExport = () => jobsByIds(selectedJobIds);

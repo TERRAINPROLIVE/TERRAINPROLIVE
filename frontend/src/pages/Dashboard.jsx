@@ -41,16 +41,6 @@ const KPIS = [
   { label: "Recent Enquiries", value: "3", sub: "Awaiting first response", icon: Inbox, accent: "muted" },
 ];
 
-const SAMPLE_QUOTES = [
-  {
-    client: "Melinda Rankine",
-    scope: "Turf, Irrigation & Fencing",
-    total: "$12,400 - $14,500",
-    status: "Draft",
-    date: "June 5",
-  },
-];
-
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const fmtMoney = (n) =>
@@ -97,10 +87,13 @@ export default function Dashboard() {
     };
   }, []);
 
-  const rows = quotes && quotes.length ? quotes : SAMPLE_QUOTES;
+  const rows = quotes || [];
   const filtered = rows.filter((q) =>
     `${q.client} ${q.scope} ${q.status}`.toLowerCase().includes(query.toLowerCase())
   );
+  const emptyMsg = query
+    ? `No quotes match "${query}".`
+    : "No saved quotes yet — generate one from the estimator.";
 
   return (
     <AppShell>
@@ -280,7 +273,7 @@ export default function Dashboard() {
                   {filtered.length === 0 && (
                     <tr>
                       <td colSpan={5} className="py-10 text-center text-sm text-neutral-500">
-                        No quotes match "{query}".
+                        {emptyMsg}
                       </td>
                     </tr>
                   )}
@@ -295,7 +288,7 @@ export default function Dashboard() {
               ))}
               {filtered.length === 0 && (
                 <div className="py-10 text-center text-sm text-neutral-500">
-                  No quotes match "{query}".
+                  {emptyMsg}
                 </div>
               )}
             </div>
