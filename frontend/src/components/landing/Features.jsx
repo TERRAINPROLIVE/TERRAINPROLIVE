@@ -5,45 +5,51 @@ import {
   Truck,
   FileText,
   Smartphone,
+  Plus,
 } from "lucide-react";
 
 const FEATURES = [
   {
-    spec: "SPEC-01",
     icon: Box,
-    title: "Pour-Ready Quotes",
+    title: "Intelligent Scope-to-Math Translation",
     body:
-      "Concrete strength, reo spacing, formwork, broom finish — all priced from the same brief you'd scribble on a beam.",
+      "It replaces messy back-of-envelope sketches. Speak or type raw site dimensions, and the system instantly calculates complex engineering variables — like reinforcement, mix strengths and base materials — without you looking up a single chart.",
   },
   {
-    spec: "SPEC-02",
     icon: Calculator,
-    title: "Material AI Calculation",
+    title: "Live Geo-Pricing Radar",
     body:
-      "Pulls live rates for concrete, road base, geo-fabric, mulch, pavers and reo — by location and supplier.",
+      "No more relying on out-of-date rate sheets. The app uses your job's exact GPS coordinates to pull real-time material costs from the nearest local supply yards, locking in your margins against sudden market price spikes.",
   },
   {
-    spec: "SPEC-03",
     icon: Truck,
-    title: "Plant & Spoil Logic",
+    title: "Automated Site Physics & Haulage",
     body:
-      "Knows excavator capacity, tipper loads and dump fees. Quotes spoil removal without ringing your mate.",
+      "It takes the guesswork out of earthmoving logistics. By factoring in truck capacities, soil expansion ratios and live local tipping fees, it automatically prices site cuts and spoil removal accurately so you don't lose profit at the dump.",
   },
   {
-    spec: "SPEC-04",
     icon: FileText,
-    title: "Branded PDF Quotes",
+    title: "One-Tap Professional Proposals",
     body:
-      "GST-inclusive, line-itemed, with assumptions, exclusions and signed acceptance — emailed in one tap.",
+      "It transforms raw project figures into airtight commercial bids. In seconds, the app generates a polished, GST-inclusive PDF breakdown complete with standard exclusions, legal assumptions and a digital sign-off area ready for your client's phone.",
   },
   {
-    spec: "SPEC-05",
     icon: Smartphone,
-    title: "Phone-First",
+    title: "High-Vibration Field Design",
     body:
-      "Quote from the cab. Voice input, offline drafts, dead-simple form. No laptop, no admin, no excuses.",
+      "Built for a dusty truck cab, not a quiet office desk. It focuses on rapid voice-to-text inputs, offline drafts for poor reception zones and high-contrast layouts so you can secure winning bids before you even turn the ignition key.",
   },
 ];
+
+function Crosshair({ position }) {
+  return (
+    <Plus
+      aria-hidden
+      className={`absolute ${position} w-3 h-3 text-zinc-700 pointer-events-none`}
+      strokeWidth={1.5}
+    />
+  );
+}
 
 export default function Features() {
   return (
@@ -68,21 +74,17 @@ export default function Features() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {FEATURES.map((f, i) => (
             <motion.div
-              key={f.spec}
+              key={f.title}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.4, delay: i * 0.06 }}
-              data-testid={`feature-card-${f.spec.toLowerCase()}`}
+              data-testid={`feature-card-${i + 1}`}
               className="relative bg-zinc-900/40 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors"
             >
-              {/* Watermark spec */}
-              <span
-                aria-hidden
-                className="pointer-events-none select-none absolute top-3 right-4 font-display text-5xl sm:text-6xl font-extrabold text-zinc-600/70 tracking-tight leading-none"
-              >
-                {f.spec}
-              </span>
+              {/* Blueprint crosshairs */}
+              <Crosshair position="top-2 left-2" />
+              <Crosshair position="bottom-2 right-2" />
 
               <div className="relative z-10 flex items-start mb-5">
                 <f.icon
