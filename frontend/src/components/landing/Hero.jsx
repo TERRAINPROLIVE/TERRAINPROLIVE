@@ -74,20 +74,14 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
-          className="mt-10 flex flex-col sm:flex-row items-center sm:items-stretch gap-4"
+          className="mt-10 flex flex-col sm:flex-row gap-4"
         >
           <button
             type="button"
             onClick={() => navigate("/signup")}
             data-testid="hero-primary-cta"
-            className="group relative inline-flex items-center justify-center gap-3 py-3 px-6 sm:py-5 sm:px-10 bg-zinc-900/80 backdrop-blur-sm border-2 border-yellow-500 text-yellow-500 font-black uppercase tracking-widest text-sm sm:text-base transition-all duration-200 hover:bg-yellow-500 hover:text-black hover:shadow-[0_0_24px_rgba(234,179,8,0.45)]"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 py-4 px-8 rounded-lg bg-[#F5A623] text-zinc-900 font-black uppercase tracking-widest text-sm sm:text-base shadow-[0_10px_30px_-5px_rgba(245,166,35,0.5)] hover:bg-[#ffb733] hover:shadow-[0_14px_38px_-4px_rgba(245,166,35,0.65)] transition-all duration-200"
           >
-            {/* Corner brackets */}
-            <span aria-hidden className="absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 border-yellow-500" />
-            <span aria-hidden className="absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 border-yellow-500" />
-            <span aria-hidden className="absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 border-yellow-500" />
-            <span aria-hidden className="absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 border-yellow-500" />
-
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>Start Free Trial</span>
           </button>
@@ -95,14 +89,8 @@ export default function Hero() {
           <a
             href="#how"
             data-testid="hero-secondary-cta"
-            className="group relative inline-flex items-center justify-center gap-3 py-3 px-6 sm:py-5 sm:px-10 bg-zinc-900/80 backdrop-blur-sm border-2 border-white text-white font-black uppercase tracking-widest text-sm sm:text-base transition-all duration-200 hover:bg-white hover:text-black hover:shadow-[0_0_24px_rgba(255,255,255,0.3)]"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 py-4 px-8 rounded-lg border-2 border-white text-white font-black uppercase tracking-widest text-sm sm:text-base bg-transparent hover:bg-white/10 transition-all duration-200"
           >
-            {/* Corner brackets */}
-            <span aria-hidden className="absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 border-white" />
-            <span aria-hidden className="absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 border-white" />
-            <span aria-hidden className="absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 border-white" />
-            <span aria-hidden className="absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 border-white" />
-
             <Play className="w-4 h-4" strokeWidth={2.5} />
             <span>Watch Demo</span>
           </a>
