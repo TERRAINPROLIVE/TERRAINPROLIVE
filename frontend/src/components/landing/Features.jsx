@@ -48,7 +48,7 @@ const FEATURES = [
 ];
 
 const FEATURE_IMG =
-  "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/8a5426a3c4fd7ffff49172e78e3e71be6d7343b360d6f04e51aafa9149109697.png";
+  "https://customer-assets.emergentagent.com/job_quick-quote-ai-2/artifacts/p7m417v3_slab-edited.jpg";
 
 export default function Features() {
   return (
