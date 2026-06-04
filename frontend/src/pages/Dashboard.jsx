@@ -16,6 +16,7 @@ import {
   Pencil,
   ChevronDown,
   Building2,
+  Image as ImageIcon,
 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { useAuth } from "@/context/AuthContext";
@@ -107,12 +108,21 @@ export default function Dashboard() {
               <span className="md:hidden font-mono text-[10px] sm:text-xs uppercase tracking-[0.3em] text-yellow-500">
                 TERRAIN PRO // Business Dashboard
               </span>
-              <h1 className="mt-2 sm:mt-3 lg:mt-0 font-display uppercase text-2xl sm:text-4xl tracking-tight">
-                G'day,{" "}
-                <span className="text-yellow-500">
-                  {user?.name?.split(" ")[0] || "Tradie"}
-                </span>
-              </h1>
+              <div className="mt-2 sm:mt-3 lg:mt-0 flex items-center gap-3 sm:gap-4">
+                <div
+                  data-testid="business-logo-placeholder"
+                  className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 grid place-items-center rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40"
+                  title="Add your business logo"
+                >
+                  <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" strokeWidth={1.6} />
+                </div>
+                <h1 className="font-display uppercase text-2xl sm:text-4xl tracking-tight leading-none">
+                  G'day,{" "}
+                  <span className="text-yellow-500">
+                    {user?.name?.split(" ")[0] || "Tradie"}
+                  </span>
+                </h1>
+              </div>
             </div>
 
             {/* Desktop: side-by-side info grid */}
