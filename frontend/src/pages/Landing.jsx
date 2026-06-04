@@ -1,33 +1,33 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
+import LogoMarquee from "@/components/landing/LogoMarquee";
+import SloganMarquee from "@/components/landing/SloganMarquee";
+import HowItWorks from "@/components/landing/HowItWorks";
+import Features from "@/components/landing/Features";
+import UseCases from "@/components/landing/UseCases";
+import Pricing from "@/components/landing/Pricing";
+import Testimonials from "@/components/landing/Testimonials";
+import FAQ from "@/components/landing/FAQ";
+import Waitlist from "@/components/landing/Waitlist";
+import Footer from "@/components/landing/Footer";
 import ChatBot from "@/components/landing/ChatBot";
 import Estimator from "@/components/landing/Estimator";
 
 export default function Landing() {
   const [estimatorOpen, setEstimatorOpen] = useState(false);
 
-  // Lock body scroll while landing is mounted
-  useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    const prevHtml = html.style.overflow;
-    const prevBody = body.style.overflow;
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-    return () => {
-      html.style.overflow = prevHtml;
-      body.style.overflow = prevBody;
-    };
-  }, []);
-
-  // Re-allow scrolling when overlay is open (so wizard content scrolls inside it)
+  // Lock body scroll only while overlay is open
   useEffect(() => {
     if (estimatorOpen) {
+      const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
     }
   }, [estimatorOpen]);
 
@@ -42,13 +42,22 @@ export default function Landing() {
   return (
     <div
       data-testid="landing-page"
-      className="relative h-screen overflow-hidden bg-[#0a0a0a] text-[#fafafa]"
+      className="relative bg-[#0a0a0a] text-[#fafafa]"
     >
       <Header />
-      <main className="h-full">
+      <main>
         <Hero onTryEstimator={() => setEstimatorOpen(true)} />
+        <LogoMarquee />
+        <SloganMarquee />
+        <HowItWorks />
+        <Features />
+        <UseCases />
+        <Pricing />
+        <Testimonials />
+        <FAQ />
+        <Waitlist />
       </main>
-
+      <Footer />
       <ChatBot />
 
       <AnimatePresence>
