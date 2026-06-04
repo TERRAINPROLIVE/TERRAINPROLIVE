@@ -23,13 +23,13 @@ export default function Hero({ onTryEstimator }) {
 
       {/* Top tickertape — live + trades */}
       <div className="absolute top-16 sm:top-20 inset-x-0 z-10 border-y border-yellow-500/30 bg-black/70 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-center gap-2 sm:gap-4 font-mono text-[7px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.25em] text-neutral-400 whitespace-nowrap">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-center gap-2 sm:gap-4 font-mono font-semibold text-[7px] sm:text-[10px] uppercase tracking-[0.18em] sm:tracking-[0.32em] text-neutral-300 whitespace-nowrap">
           <span className="flex items-center gap-1.5 sm:gap-2">
             <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 animate-pulse" />
             <span>LIVE</span>
           </span>
           <span className="text-neutral-700">|</span>
-          <span className="text-yellow-500 tracking-[0.15em] sm:tracking-[0.3em]">
+          <span className="text-yellow-500 tracking-[0.22em] sm:tracking-[0.38em]">
             Concreting · Landscaping · Earthmoving
           </span>
         </div>
