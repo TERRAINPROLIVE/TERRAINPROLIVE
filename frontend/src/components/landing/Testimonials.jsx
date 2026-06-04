@@ -33,7 +33,7 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="mb-16">
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-yellow-500">
-            [ Field Reports ]
+            [ Talk of the Town ]
           </span>
           <h2 className="mt-4 font-display uppercase text-4xl sm:text-5xl tracking-tight max-w-2xl">
             Tradies running it
