@@ -32,6 +32,6 @@
   "seed_data_creation": "Each pytest run inserts 1 quote (single) + 1 quote (multi) into db.quotes, and 1 waitlist row in db.waitlist (idempotent on duplicate). Test emails use random uuid prefix. UI test added 1 multi-quote to db.quotes.",
   "retest_needed": false,
   "main_agent_can_self_test": true,
-  "context_for_next_testing_agent": "Backend test file /app/backend/tests/backend_test.py is reusable. AI multi-quote takes ~15-25s (AI_TIMEOUT=90 fixture). The Playwright text assertion for 'Total Range' must be case-insensitive — rendered text is uppercase via CSS (e.g., use total_html.lower()). Public URL: https://quick-quote-ai-2.preview.emergentagent.com. Verified scope-grouped line items: slab=6 items, retaining_wall=6 items, total range $14,524→$15,976 (real gpt-5.2 output).",
+  "context_for_next_testing_agent": "Backend test file /app/backend/tests/backend_test.py is reusable. AI multi-quote takes ~15-25s (AI_TIMEOUT=90 fixture). The Playwright text assertion for 'Total Range' must be case-insensitive — rendered text is uppercase via CSS (e.g., use total_html.lower()). Public URL: https://blueprint-build-15.preview.emergentagent.com. Verified scope-grouped line items: slab=6 items, retaining_wall=6 items, total range $14,524→$15,976 (real gpt-5.2 output).",
   "rca of the issue": "n/a — no functional issues found."
 }
