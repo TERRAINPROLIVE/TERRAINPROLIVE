@@ -30,7 +30,17 @@ Aussie tradies (sole traders, 2–10 person crews, contractors) running earthmov
 - Mobile responsive header with hamburger menu, shadcn Select / Slider / Checkbox / Textarea / Accordion / Toast usage
 - Tested: 11/11 backend, 100% frontend (testing_agent_v3 iteration_1)
 
+## Implemented (2026-06) — 7-Day Auth-Gated Free Trial
+- JWT email/password auth (bcrypt + PyJWT, Bearer token in Authorization header; token stored in localStorage `terrainpro:token`).
+- Endpoints: POST /api/auth/register (name, phone, email, password) -> token + user, sets trial_expires_at = now + 7 days, auto-login; POST /api/auth/login; GET /api/auth/me (returns trial_active, days_remaining, trial_expires_at).
+- Frontend routes: /signup (Name, Mobile, Email, Password + "[ NO CREDIT CARD REQUIRED — 7 DAYS FREE ACCESS ]" badge), /login, /dashboard (ProtectedRoute) = AI Quote Estimator workspace with top banner "[ SYSTEM STATUS: TRIAL ACTIVE // N DAYS REMAINING ]"; trial-expired lock screen with View Plans CTA.
+- All "Start Free Trial" CTAs (hero, hamburger menu, Pricing trial tiers) route to /signup.
+- JWT_SECRET added to backend/.env. Demo user: demo@terrainpro.com / trade1234.
+- Tested: 9/9 backend auth + 9/9 frontend e2e (testing_agent iteration_3), zero issues.
+- Many landing styling refinements: mountain logo lockup, ticker tape marquee, consistent left-aligned section headers + bento cards across Process/Capabilities/UseCases/Pricing/Testimonials/FAQ/EarlyAccess, Watch Demo CTA, industrial "You Ready" menu toggle.
+
 ## Backlog
-P0 — none (MVP complete)
-P1 — Branded PDF quote export, save-quote-by-email, login (sole trader dashboard)
-P2 — Custom rates library, Xero/MYOB export, variation deltas, voice-to-job input
+P0 — none (MVP + trial auth complete)
+P1 — Branded PDF quote export, save-quote-by-email, returning-user dashboard with saved quotes
+P1 — Decouple JWT TTL from trial length; password reset (/forgot-password, /reset-password)
+P2 — Custom rates library, Xero/MYOB export, variation deltas, voice-to-job input, Stripe upgrade on trial expiry
