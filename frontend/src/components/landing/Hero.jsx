@@ -91,7 +91,7 @@ export default function Hero({ onTryEstimator }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5"
         >
           {[
             { v: "8 mins", k: "Average Quote Time" },
@@ -101,13 +101,15 @@ export default function Hero({ onTryEstimator }) {
           ].map((s, i) => (
             <div
               key={i}
-              className="relative bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors"
+              className="relative bg-zinc-900/50 border border-zinc-800 border-l-2 border-l-yellow-500 rounded-lg p-4 sm:p-6 group hover:bg-zinc-900 hover:border-l-yellow-400 transition-colors"
             >
               <div className="relative z-10">
-                <div className="font-display text-4xl sm:text-5xl font-black text-white tracking-tight leading-none">
+                <div className="font-display text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-none">
                   {s.v}
                 </div>
-                <div className="mt-3 text-sm text-zinc-400">{s.k}</div>
+                <div className="mt-2 sm:mt-3 text-xs sm:text-sm text-zinc-400">
+                  {s.k}
+                </div>
               </div>
             </div>
           ))}
