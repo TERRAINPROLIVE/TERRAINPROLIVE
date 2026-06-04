@@ -111,19 +111,17 @@ export default function Header() {
           aria-label="Toggle menu"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className={`md:hidden group inline-flex items-center justify-center py-3 px-4 sm:py-4 sm:px-5 font-black uppercase tracking-wider rounded-sm border-2 border-black transition-all duration-150 active:translate-y-[3px] active:shadow-[0_2px_0_0_#000] ${
+          className={`md:hidden flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-150 ${
             open
-              ? "bg-white text-black shadow-[0_5px_0_0_#000] hover:bg-yellow-400"
-              : "bg-yellow-500 text-black shadow-[0_5px_0_0_#000] hover:bg-white"
+              ? "bg-yellow-500 text-black border-yellow-500"
+              : "bg-neutral-800 text-white border-neutral-700 hover:border-amber-400"
           }`}
         >
-          <span className="w-7 h-7 sm:w-9 sm:h-9 grid place-items-center border-2 border-black/80 bg-black/5 group-hover:bg-black/10 transition-colors">
-            {open ? (
-              <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={3} />
-            ) : (
-              <Menu className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={3} />
-            )}
-          </span>
+          {open ? (
+            <X className="w-5 h-5" strokeWidth={2} />
+          ) : (
+            <Menu className="w-5 h-5" strokeWidth={2} />
+          )}
         </button>
       </div>
 
