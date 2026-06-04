@@ -63,11 +63,9 @@ export default function Hero({ onTryEstimator }) {
           data-testid="hero-title"
           className="font-display uppercase text-4xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight max-w-5xl"
         >
-          Australian Tradies
+          <span className="text-yellow-500">#1</span> Quoting Tool
           <br />
-          Quote Faster With
-          <br />
-          <span className="text-yellow-500">Terrain PRO</span>
+          For Aussie Tradies
         </motion.h1>
 
         <motion.div
