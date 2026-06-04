@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Hammer, Facebook, Instagram, ArrowUpRight } from "lucide-react";
+import { Menu, X, Hammer, Facebook, Instagram, ArrowUpRight, Sparkles } from "lucide-react";
 
 const NAV = [
   { label: "How It Works", href: "#how", external: false },
@@ -21,7 +21,7 @@ const SOCIALS = [
   },
 ];
 
-export default function Header() {
+export default function Header({ onTryEstimator }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -158,6 +158,24 @@ export default function Header() {
                   </a>
                 ))}
               </nav>
+
+              <div className="px-5 pt-5">
+                <button
+                  type="button"
+                  data-testid="menu-start-trial"
+                  onClick={() => {
+                    setOpen(false);
+                    onTryEstimator?.();
+                  }}
+                  className="group w-full inline-flex items-center justify-center gap-3 py-4 px-6 rounded-lg bg-yellow-500 text-black font-black uppercase tracking-wider border-2 border-black shadow-[0_4px_0_0_#000] transition-all duration-150 hover:bg-white active:translate-y-[2px] active:shadow-[0_2px_0_0_#000]"
+                >
+                  <Sparkles className="w-4 h-4" strokeWidth={2.5} />
+                  Start Free Trial
+                </button>
+                <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                  Sign in to the quote tool
+                </p>
+              </div>
 
               <div className="px-5 py-5">
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-3">

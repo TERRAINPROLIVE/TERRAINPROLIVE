@@ -43,7 +43,7 @@ export default function Landing() {
       data-testid="landing-page"
       className="relative bg-[#0a0a0a] text-[#fafafa]"
     >
-      <Header />
+      <Header onTryEstimator={() => setEstimatorOpen(true)} />
       <main>
         <Hero onTryEstimator={() => setEstimatorOpen(true)} />
         <SloganMarquee />
