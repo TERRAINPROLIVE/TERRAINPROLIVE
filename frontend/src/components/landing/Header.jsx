@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles, Mountain } from "lucide-react";
 
 const NAV = [
-  { label: "How It Works", href: "#how", external: false },
+  { label: "Estimator", href: "#estimator", external: false },
+  { label: "Features", href: "#features", external: false },
   { label: "Pricing", href: "#pricing", external: false },
-  { label: "Contact", href: "#waitlist", external: false },
 ];
 
 const SOCIALS = [
@@ -83,12 +83,35 @@ export default function Header() {
           </div>
         </a>
 
+        {/* Desktop horizontal navbar */}
+        <nav data-testid="desktop-nav" className="hidden md:flex items-center gap-8 lg:gap-10">
+          {NAV.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              data-testid={`nav-${item.label.toLowerCase()}`}
+              className="font-mono text-xs uppercase tracking-[0.22em] text-neutral-400 hover:text-white transition-colors duration-150"
+            >
+              {item.label}
+            </a>
+          ))}
+          <button
+            type="button"
+            data-testid="nav-start-trial"
+            onClick={() => navigate("/signup")}
+            className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-yellow-500 text-yellow-500 font-black uppercase tracking-[0.18em] text-xs hover:bg-yellow-500 hover:text-black transition-colors duration-150"
+          >
+            Start Free Trial
+          </button>
+        </nav>
+
+        {/* Mobile hamburger */}
         <button
           data-testid="menu-toggle"
           aria-label="Toggle menu"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className={`group inline-flex items-center justify-center py-3 px-4 sm:py-4 sm:px-5 font-black uppercase tracking-wider rounded-sm border-2 border-black transition-all duration-150 active:translate-y-[3px] active:shadow-[0_2px_0_0_#000] ${
+          className={`md:hidden group inline-flex items-center justify-center py-3 px-4 sm:py-4 sm:px-5 font-black uppercase tracking-wider rounded-sm border-2 border-black transition-all duration-150 active:translate-y-[3px] active:shadow-[0_2px_0_0_#000] ${
             open
               ? "bg-white text-black shadow-[0_5px_0_0_#000] hover:bg-yellow-400"
               : "bg-yellow-500 text-black shadow-[0_5px_0_0_#000] hover:bg-white"
