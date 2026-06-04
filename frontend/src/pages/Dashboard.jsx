@@ -102,8 +102,8 @@ export default function Dashboard() {
       >
         {/* 1. HEADER & IDENTITY BLOCK */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-            <div>
+          <div className="flex flex-col gap-5 lg:grid lg:grid-cols-4 lg:gap-5 lg:items-start">
+            <div className="lg:col-span-2">
               <span className="md:hidden font-mono text-[10px] sm:text-xs uppercase tracking-[0.3em] text-yellow-500">
                 TERRAIN PRO // Business Dashboard
               </span>
@@ -118,7 +118,7 @@ export default function Dashboard() {
             {/* Desktop: side-by-side info grid */}
             <div
               data-testid="business-meta"
-              className="hidden lg:grid lg:mt-14 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4 grid-cols-2 gap-x-8 gap-y-3 min-w-[280px]"
+              className="hidden lg:grid lg:col-span-2 lg:col-start-3 lg:mt-14 rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4 grid-cols-2 gap-x-8 gap-y-3"
             >
               <Meta label="Business" value={BUSINESS.name} />
               <Meta label="Location" value={BUSINESS.location} />
