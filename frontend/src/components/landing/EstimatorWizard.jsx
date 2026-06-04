@@ -634,7 +634,7 @@ function Step1({
 const WIZ_INPUT =
   "h-12 rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 transition-colors focus-visible:border-yellow-500 focus-visible:ring-2 focus-visible:ring-yellow-500/20";
 const WIZ_TRIGGER =
-  "h-12 rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 transition-colors focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20";
+  "h-12 rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 transition-colors focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 min-w-0 [&>span]:truncate";
 const WIZ_CONTENT = "bg-zinc-950 border-zinc-800 text-zinc-100 rounded-none";
 const WIZ_ITEM = "rounded-none text-zinc-100 focus:bg-yellow-500 focus:text-black";
 const WIZ_CARD =
