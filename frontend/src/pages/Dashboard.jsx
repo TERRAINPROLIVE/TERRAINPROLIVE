@@ -21,6 +21,7 @@ import {
   Download,
   RotateCcw,
   Save,
+  HardHat,
 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { useAuth } from "@/context/AuthContext";
@@ -316,6 +317,7 @@ export default function Dashboard() {
               <ActionLink icon={FileText} label="View Saved Invoices" testid="action-invoices" />
               <ActionLink icon={Users} label="Manage Client Profiles" testid="action-clients" />
               <ActionLink icon={Map} label="Check Supplier Map" testid="action-suppliers" />
+              <ActionLink icon={HardHat} label="Find An Operator" testid="action-find-operator" />
               <ActionLink icon={FolderClock} label="Quote History" testid="action-history" />
             </div>
           </aside>
