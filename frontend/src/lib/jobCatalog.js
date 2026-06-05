@@ -243,6 +243,7 @@ export const JOB_GROUPS = [
             options: ["Broom", "Steel trowel", "Exposed aggregate", "Stencilled", "Polished", "Coloured oxide"],
             default: "Broom",
           },
+          { key: "waterproof_underlay", label: "Waterproof underlay below slab?", type: "boolean", default: true },
         ],
       },
       {
@@ -360,7 +361,7 @@ export const JOB_GROUPS = [
         fields: [
           { key: "pad_area_sqm", label: "Pad area", unit: "m²", type: "number", min: 1 },
           { key: "roadbase_depth_mm", label: "Roadbase depth", unit: "mm", type: "number", default: 150 },
-          { key: "geofabric", label: "Geofabric under pad?", type: "boolean", default: true },
+          { key: "waterproof_underlay", label: "Waterproof underlay under pad?", type: "boolean", default: true },
         ],
       },
       {
