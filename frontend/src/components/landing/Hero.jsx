@@ -104,7 +104,7 @@ export default function Hero() {
           className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5"
         >
           {[
-            { v: "8 mins", k: "Average Quote Time" },
+            { v: "10 mins", k: "Average Quote Time" },
             { v: "94%", k: "Accuracy Rate" },
             { v: "3.2x", k: "More Jobs Won" },
             { v: "Self Optimising", k: "With Every Quote" },
