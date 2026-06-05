@@ -46,7 +46,6 @@ const CASES = [
 export default function UseCases() {
   return (
     <section
-      id="capabilities"
       data-testid="use-cases"
       className="relative py-24 sm:py-32 border-t border-neutral-900"
     >

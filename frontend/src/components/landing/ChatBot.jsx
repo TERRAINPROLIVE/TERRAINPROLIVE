@@ -140,7 +140,7 @@ export default function ChatBot() {
             onClick={() => setOpen(true)}
             data-testid="chatbot-launcher"
             aria-label="Open Toolbox Talks"
-            className="fixed bottom-[104px] right-4 sm:bottom-4 z-40 w-11 h-11 rounded-full bg-[#F5A623] text-black grid place-items-center shadow-[0_10px_30px_-4px_rgba(245,166,35,0.55)] hover:brightness-110 active:scale-95 transition-all"
+            className="fixed bottom-[112px] right-4 sm:bottom-8 z-40 w-11 h-11 rounded-full bg-[#F5A623] text-black grid place-items-center shadow-[0_10px_30px_-4px_rgba(245,166,35,0.55)] hover:brightness-110 active:scale-95 transition-all"
           >
             <span className="text-xl leading-none" role="img" aria-label="toolbox">
               🛠️
