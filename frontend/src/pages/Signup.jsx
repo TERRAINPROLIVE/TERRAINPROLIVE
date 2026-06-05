@@ -81,15 +81,14 @@ export default function Signup() {
         <div className="flex items-center justify-between gap-3 mb-5">
           <Link to="/" data-testid="signup-logo" className="flex items-center gap-3">
             <img
-              src="/terrainpro-logo.png"
+              src="/terrainpro-logo-full.png"
               alt="TerrainPRO"
               data-testid="signup-logo-img"
-              className="w-12 h-12 object-contain shrink-0 select-none"
+              className="h-12 w-auto object-contain shrink-0 select-none"
               draggable={false}
             />
-            <span className="font-display uppercase text-2xl font-black tracking-wide leading-none">
-              <span className="text-white">Terrain</span>
-              <span className="text-yellow-500">PRO</span>
+            <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-[0.25em] border-l border-yellow-500/30 pl-3 leading-none">
+              AI Estimator
             </span>
           </Link>
 
