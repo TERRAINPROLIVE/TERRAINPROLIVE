@@ -82,19 +82,19 @@ export default function Header() {
         <nav
           data-testid="desktop-nav"
           aria-label="Primary"
-          className="hidden md:flex items-center gap-7 lg:gap-9 nav-float"
+          className="hidden md:flex items-center gap-9 lg:gap-11 nav-float"
         >
           {NAV.map((item, i) => (
             <a
               key={item.href}
               href={item.href}
               data-testid={`desktop-nav-${item.label.toLowerCase()}`}
-              className="group inline-flex items-center gap-2 font-mono uppercase text-[11px] tracking-[0.22em] text-white/85 hover:text-yellow-500 transition-colors duration-200"
+              className="group inline-flex items-baseline gap-2.5 font-mono uppercase text-[13px] lg:text-[14px] tracking-[0.22em] text-white/85 hover:text-yellow-500 transition-colors duration-200"
             >
               <span className="text-neutral-600 group-hover:text-yellow-500/70 transition-colors duration-200">
                 / 0{i + 1}
               </span>
-              <span className="font-display tracking-[0.15em] text-[13px] font-bold">
+              <span className="font-display tracking-[0.14em] text-[16px] lg:text-[18px] font-bold">
                 {item.label.toUpperCase()}
               </span>
             </a>
@@ -103,7 +103,7 @@ export default function Header() {
             type="button"
             data-testid="desktop-nav-cta"
             onClick={() => navigate("/signup")}
-            className="ml-2 inline-flex items-center gap-2 h-11 px-5 bg-yellow-500 text-black font-black uppercase tracking-[0.18em] text-[11px] btn-industrial transition-transform duration-150 hover:bg-yellow-400 active:translate-y-[1px]"
+            className="ml-2 inline-flex items-center gap-2 h-11 px-5 bg-yellow-500 text-black font-black uppercase tracking-[0.18em] text-[12px] btn-industrial transition-transform duration-150 hover:bg-yellow-400 active:translate-y-[1px]"
           >
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             Start Free Trial
