@@ -57,6 +57,8 @@ const TRADE_ICON = {
 const currency = (n) =>
   "$" + Math.round(Number(n) || 0).toLocaleString("en-AU");
 
+const isValidEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e || "").trim());
+
 function evalComputed(expr, values) {
   // Tiny expression evaluator: a*b/c, a*b, a+b. Operates on numeric keys.
   try {
@@ -176,6 +178,7 @@ export default function EstimatorWizard() {
     customer.street.trim().length >= 2 &&
     customer.suburb.trim().length >= 2 &&
     customer.state.trim().length >= 2 &&
+    (!customer.email.trim() || isValidEmail(customer.email)) &&
     selectedJobIds.length > 0;
 
   const canAdvanceStep2 = selectedJobs.every((j) => {
@@ -231,7 +234,7 @@ export default function EstimatorWizard() {
           customer: {
             full_name: customer.full_name.trim(),
             phone: customer.phone || null,
-            email: customer.email || null,
+            email: isValidEmail(customer.email) ? customer.email.trim() : null,
             address: composedAddress,
           },
           scopes,
@@ -257,12 +260,18 @@ export default function EstimatorWizard() {
       );
       toast.success("Quote ready. Adjust the line items and margin below.");
     } catch (err) {
-      const msg =
-        err?.code === "ECONNABORTED"
-          ? "The estimator took too long to respond. Please try again."
-          : err?.response?.data?.detail ||
-            err?.message ||
-            "Couldn't generate quote.";
+      const detail = err?.response?.data?.detail;
+      let msg;
+      if (err?.code === "ECONNABORTED") {
+        msg = "The estimator took too long to respond. Please try again.";
+      } else if (Array.isArray(detail)) {
+        msg =
+          "Some customer details look invalid (check the email and address), then try again.";
+      } else if (typeof detail === "string") {
+        msg = detail;
+      } else {
+        msg = err?.message || "Couldn't generate quote.";
+      }
       setError(msg);
       toast.error(msg);
     } finally {
@@ -583,7 +592,16 @@ function Step1({
               onChange={onChange("email")}
               placeholder="customer@email.com"
               className={inputCls}
+              aria-invalid={!!customer.email.trim() && !isValidEmail(customer.email)}
             />
+            {!!customer.email.trim() && !isValidEmail(customer.email) && (
+              <p
+                data-testid="wiz-email-error"
+                className="mt-1.5 font-mono text-[11px] text-red-400"
+              >
+                Enter a valid email or leave it blank.
+              </p>
+            )}
           </FieldShell>
           <FieldShell label="Suburb / town" required>
             <Input
