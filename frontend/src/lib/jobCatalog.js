@@ -50,6 +50,7 @@ export const JOB_GROUPS = [
             ],
           },
           { key: "ag_drainage", label: "Includes ag drainage?", type: "boolean", default: true },
+          { key: "geofabric", label: "Geofabric (drainage / soil separation)?", type: "boolean", default: true },
         ],
       },
       {
@@ -335,6 +336,7 @@ export const JOB_GROUPS = [
             type: "select",
             options: ["Off-site to tip", "Stockpile on-site", "Reuse as fill"],
           },
+          { key: "geofabric", label: "Geofabric (erosion / sediment control)?", type: "boolean", default: false },
         ],
       },
       {
