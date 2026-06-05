@@ -243,7 +243,7 @@ export const JOB_GROUPS = [
             options: ["Broom", "Steel trowel", "Exposed aggregate", "Stencilled", "Polished", "Coloured oxide"],
             default: "Broom",
           },
-          { key: "waterproof_underlay", label: "Waterproof underlay under concrete slab?", type: "boolean", default: true },
+          { key: "waterproof_underlay", label: "Waterproof underlay", type: "boolean", default: true },
         ],
       },
       {
