@@ -1,16 +1,6 @@
 import { motion } from "framer-motion";
 import { Sparkles, Play } from "lucide-react";
-import Marquee from "react-fast-marquee";
 import { useNavigate } from "react-router-dom";
-
-const TICKER_ITEMS = [
-  "AI QUOTING",
-  "CONCRETING",
-  "LANDSCAPING",
-  "EARTHMOVING",
-  "LINE-ITEM QUOTES",
-  "BUILT FOR AUSSIE TRADIES",
-];
 
 const HERO_BG =
   "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/b6feb06c1e22eb535e31a44dae30920128c69818aea25cf6f2f8021a10380ce0.png";
@@ -33,31 +23,8 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black" aria-hidden />
       <div className="absolute inset-0 grid-bg opacity-50" aria-hidden />
 
-      {/* Top tickertape — bold, equally-spaced infinite marquee */}
-      <div className="absolute top-16 sm:top-20 inset-x-0 z-10 border-y border-yellow-500/30 bg-black/70 backdrop-blur-sm">
-        <div className="flex items-center">
-          <span className="hidden sm:flex shrink-0 items-center gap-2 pl-6 pr-5 py-2.5 font-mono font-bold text-[10px] uppercase tracking-[0.3em] text-neutral-200 border-r border-yellow-500/30">
-            <span className="w-2 h-2 bg-green-500 animate-pulse" />
-            LIVE
-          </span>
-          <div className="marquee-fade flex-1 min-w-0">
-            <Marquee speed={42} gradient={false} autoFill className="py-2 sm:py-2.5">
-              {TICKER_ITEMS.map((item, i) => (
-                <span
-                  key={i}
-                  className="ml-7 sm:ml-10 inline-flex items-center gap-7 sm:gap-10 font-mono font-bold text-[10px] sm:text-xs uppercase tracking-[0.3em] text-neutral-200"
-                >
-                  <span aria-hidden className="w-1.5 h-1.5 rotate-45 bg-yellow-500 shrink-0" />
-                  {item}
-                </span>
-              ))}
-            </Marquee>
-          </div>
-        </div>
-      </div>
-
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-20 sm:pb-28 pt-32 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-20 sm:pb-28 pt-20 sm:pt-24 w-full">
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
