@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Mountain, LogOut, Lock, ArrowRight } from "lucide-react";
+import { LogOut, Lock, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AppShell({ children, label = "Business Dashboard" }) {
@@ -49,9 +49,13 @@ export default function AppShell({ children, label = "Business Dashboard" }) {
       <header className="sticky top-0 z-40 bg-black border-b border-neutral-800">
         <div className="relative max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between gap-3">
           <Link to="/dashboard" className="flex items-center gap-2.5 shrink-0" data-testid="shell-logo">
-            <div className="w-9 h-9 bg-yellow-500 grid place-items-center shrink-0">
-              <Mountain className="w-5 h-5 text-black" strokeWidth={2.4} />
-            </div>
+            <img
+              src="/terrainpro-logo.png"
+              alt="TerrainPRO"
+              data-testid="shell-logo-img"
+              className="w-9 h-9 object-contain shrink-0 select-none"
+              draggable={false}
+            />
             <span className="font-display uppercase text-xl font-black tracking-wide leading-none">
               <span className="text-white">Terrain</span>
               <span className="text-yellow-500">PRO</span>

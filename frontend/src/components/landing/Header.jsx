@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles, Mountain } from "lucide-react";
+import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles } from "lucide-react";
 
 const NAV = [
   { label: "Estimator", href: "#estimator", external: false },
@@ -69,10 +69,13 @@ export default function Header() {
           data-testid="logo-link"
           className="flex items-center gap-3 group"
         >
-          <div className="relative w-11 h-11 sm:w-14 sm:h-14 bg-yellow-500 grid place-items-center shrink-0">
-            <Mountain className="w-6 h-6 sm:w-8 sm:h-8 text-black" strokeWidth={2.4} />
-            <span aria-hidden className="absolute inset-0 border-2 border-black/10" />
-          </div>
+          <img
+            src="/terrainpro-logo.png"
+            alt="TerrainPRO"
+            data-testid="header-logo-img"
+            className="w-11 h-11 sm:w-14 sm:h-14 object-contain shrink-0 select-none"
+            draggable={false}
+          />
           <div className="flex flex-col leading-none">
             <span className="font-display uppercase text-2xl font-black sm:text-3xl tracking-wide">
               <span className="text-white">Terrain</span>

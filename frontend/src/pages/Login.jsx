@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, Mountain } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,9 +42,13 @@ export default function Login() {
         className="relative w-full max-w-md rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-950 p-6 sm:p-8"
       >
         <Link to="/" data-testid="login-logo" className="flex items-center gap-3 mb-8">
-          <div className="relative w-11 h-11 bg-yellow-500 grid place-items-center shrink-0">
-            <Mountain className="w-6 h-6 text-black" strokeWidth={2.4} />
-          </div>
+          <img
+            src="/terrainpro-logo.png"
+            alt="TerrainPRO"
+            data-testid="login-logo-img"
+            className="w-11 h-11 object-contain shrink-0 select-none"
+            draggable={false}
+          />
           <span className="font-display uppercase text-2xl font-black tracking-wide leading-none">
             <span className="text-white">Terrain</span>
             <span className="text-yellow-500">PRO</span>
