@@ -5,8 +5,8 @@ import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles } from "lucide-rea
 
 const NAV = [
   { label: "Capabilities", href: "#features" },
-  { label: "Features", href: "#features" },
   { label: "Pricing", href: "#pricing" },
+  { label: "Contact", href: "#waitlist" },
 ];
 
 const SOCIALS = [
