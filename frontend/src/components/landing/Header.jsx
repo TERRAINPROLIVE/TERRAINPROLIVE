@@ -57,14 +57,14 @@ export default function Header() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
         {/* Left — Logo */}
         <a href="#top" data-testid="logo-link" className="flex items-center gap-3 group">
           <img
             src="/terrainpro-logo-full.png"
             alt="TerrainPRO"
             data-testid="header-logo-img"
-            className="h-12 sm:h-16 w-auto object-contain shrink-0 select-none"
+            className="h-14 sm:h-20 w-auto object-contain shrink-0 select-none"
             draggable={false}
           />
           <span className="font-mono text-[10px] sm:text-xs text-yellow-500 uppercase tracking-[0.25em] border-l border-yellow-500/30 pl-3 hidden sm:inline-block">
