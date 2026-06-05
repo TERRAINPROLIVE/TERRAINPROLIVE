@@ -18,6 +18,12 @@ import jwt
 import httpx
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from emergentintegrations.payments.stripe.checkout import (
+    StripeCheckout,
+    CheckoutSessionRequest,
+    CheckoutSessionResponse,
+    CheckoutStatusResponse,
+)
 
 
 ROOT_DIR = Path(__file__).parent
@@ -901,7 +907,7 @@ def _parse_dt(value) -> Optional[datetime]:
 
 
 def _public_user(doc: dict) -> dict:
-    """Shape a user document for client consumption, with live trial status."""
+    """Shape a user document for client consumption, with live trial + subscription status."""
     now = datetime.now(timezone.utc)
     expires = _parse_dt(doc.get("trial_expires_at"))
     trial_active = bool(expires and now < expires)
@@ -910,6 +916,14 @@ def _public_user(doc: dict) -> dict:
         days_remaining = max(0, math.ceil(remaining_seconds / 86400)) if remaining_seconds > 0 else 0
     else:
         days_remaining = 0
+
+    sub_expires = _parse_dt(doc.get("subscription_expires_at"))
+    subscription_active = bool(sub_expires and now < sub_expires)
+    sub_days_remaining = (
+        max(0, math.ceil((sub_expires - now).total_seconds() / 86400))
+        if subscription_active else 0
+    )
+
     return {
         "id": doc["id"],
         "name": doc.get("name"),
@@ -921,6 +935,11 @@ def _public_user(doc: dict) -> dict:
         "trial_expires_at": doc.get("trial_expires_at"),
         "trial_active": trial_active,
         "days_remaining": days_remaining,
+        "subscription_active": subscription_active,
+        "subscription_plan": doc.get("subscription_plan"),
+        "subscription_expires_at": doc.get("subscription_expires_at"),
+        "subscription_days_remaining": sub_days_remaining,
+        "access_active": trial_active or subscription_active,
         "created_at": doc.get("created_at"),
     }
 
@@ -1171,6 +1190,196 @@ async def list_directory(
 
     out.sort(key=lambda p: (not p.get("verified", False), p.get("business_name", "")))
     return out
+
+
+# ============================================================================
+# Stripe Subscription Payments (TerrainPRO)
+# ============================================================================
+SUBSCRIPTION_PACKAGES = {
+    "sole_quoter": {"name": "Sole Quoter", "amount": 39.00, "currency": "aud", "days": 30},
+    "crew": {"name": "Crew (1-3 users)", "amount": 69.00, "currency": "aud", "days": 30},
+}
+
+
+def _get_stripe_checkout(host_url: str) -> StripeCheckout:
+    api_key = os.environ["STRIPE_API_KEY"]
+    webhook_url = f"{host_url.rstrip('/')}/api/webhook/stripe"
+    return StripeCheckout(api_key=api_key, webhook_url=webhook_url)
+
+
+class CheckoutCreateRequest(BaseModel):
+    package_id: Literal["sole_quoter", "crew"]
+    origin_url: str = Field(..., min_length=8, max_length=400)
+
+
+@api_router.post("/payments/checkout")
+async def create_checkout(
+    req: CheckoutCreateRequest,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    pkg = SUBSCRIPTION_PACKAGES[req.package_id]
+    origin = req.origin_url.rstrip("/")
+    success_url = f"{origin}/payment/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{origin}/dashboard?payment=cancelled"
+
+    host_url = str(request.base_url)
+    stripe_checkout = _get_stripe_checkout(host_url)
+    metadata = {
+        "user_id": user["id"],
+        "user_email": user["email"],
+        "package_id": req.package_id,
+        "plan_name": pkg["name"],
+        "source": "terrainpro_subscription",
+    }
+    checkout_req = CheckoutSessionRequest(
+        amount=pkg["amount"],
+        currency=pkg["currency"],
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata=metadata,
+    )
+    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_req)
+
+    now = datetime.now(timezone.utc)
+    await db.payment_transactions.insert_one({
+        "id": str(uuid.uuid4()),
+        "session_id": session.session_id,
+        "user_id": user["id"],
+        "user_email": user["email"],
+        "package_id": req.package_id,
+        "plan_name": pkg["name"],
+        "amount": pkg["amount"],
+        "currency": pkg["currency"],
+        "days_granted": pkg["days"],
+        "status": "initiated",
+        "payment_status": "pending",
+        "metadata": metadata,
+        "created_at": now.isoformat(),
+        "updated_at": now.isoformat(),
+    })
+
+    return {"url": session.url, "session_id": session.session_id}
+
+
+async def _apply_successful_payment(txn: dict) -> dict:
+    """Idempotently grant subscription based on a successful payment transaction."""
+    if txn.get("subscription_granted"):
+        return txn
+    pkg_id = txn.get("package_id")
+    pkg = SUBSCRIPTION_PACKAGES.get(pkg_id)
+    if not pkg:
+        return txn
+    user = await db.users.find_one({"id": txn["user_id"]})
+    if not user:
+        return txn
+
+    now = datetime.now(timezone.utc)
+    current_expiry = _parse_dt(user.get("subscription_expires_at"))
+    base = current_expiry if (current_expiry and current_expiry > now) else now
+    new_expiry = base + timedelta(days=pkg["days"])
+
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {
+            "subscription_plan": pkg_id,
+            "subscription_plan_name": pkg["name"],
+            "subscription_expires_at": new_expiry.isoformat(),
+            "subscription_last_paid_at": now.isoformat(),
+        }},
+    )
+    await db.payment_transactions.update_one(
+        {"session_id": txn["session_id"]},
+        {"$set": {
+            "subscription_granted": True,
+            "subscription_expires_at": new_expiry.isoformat(),
+            "updated_at": now.isoformat(),
+        }},
+    )
+    txn["subscription_granted"] = True
+    return txn
+
+
+@api_router.get("/payments/status/{session_id}")
+async def get_payment_status(
+    session_id: str,
+    request: Request,
+    user: dict = Depends(get_current_user),
+):
+    txn = await db.payment_transactions.find_one({"session_id": session_id})
+    if not txn:
+        raise HTTPException(status_code=404, detail="Payment session not found")
+    if txn["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Not your payment session")
+
+    host_url = str(request.base_url)
+    stripe_checkout = _get_stripe_checkout(host_url)
+    status_resp: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    await db.payment_transactions.update_one(
+        {"session_id": session_id},
+        {"$set": {
+            "status": status_resp.status,
+            "payment_status": status_resp.payment_status,
+            "updated_at": now_iso,
+        }},
+    )
+
+    if status_resp.payment_status == "paid" and not txn.get("subscription_granted"):
+        txn = await db.payment_transactions.find_one({"session_id": session_id})
+        await _apply_successful_payment(txn)
+
+    return {
+        "status": status_resp.status,
+        "payment_status": status_resp.payment_status,
+        "amount_total": status_resp.amount_total,
+        "currency": status_resp.currency,
+        "plan_name": txn.get("plan_name"),
+        "package_id": txn.get("package_id"),
+    }
+
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    body = await request.body()
+    signature = request.headers.get("Stripe-Signature", "")
+    host_url = str(request.base_url)
+    stripe_checkout = _get_stripe_checkout(host_url)
+    try:
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+    except Exception as e:
+        logger.error(f"Stripe webhook handle failed: {e}")
+        raise HTTPException(status_code=400, detail="Webhook verification failed")
+
+    session_id = getattr(webhook_response, "session_id", None)
+    payment_status = getattr(webhook_response, "payment_status", None)
+    event_type = getattr(webhook_response, "event_type", None)
+
+    if session_id:
+        txn = await db.payment_transactions.find_one({"session_id": session_id})
+        if txn:
+            await db.payment_transactions.update_one(
+                {"session_id": session_id},
+                {"$set": {
+                    "payment_status": payment_status or txn.get("payment_status"),
+                    "last_webhook_event": event_type,
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                }},
+            )
+            if payment_status == "paid" and not txn.get("subscription_granted"):
+                fresh = await db.payment_transactions.find_one({"session_id": session_id})
+                await _apply_successful_payment(fresh)
+
+    return {"received": True}
+
+
+@api_router.get("/payments/plans")
+async def list_plans():
+    return [
+        {"id": k, **v} for k, v in SUBSCRIPTION_PACKAGES.items()
+    ]
+
 
 
 app.include_router(api_router)

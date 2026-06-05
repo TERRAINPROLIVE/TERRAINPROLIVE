@@ -1,53 +1,45 @@
-import { Check, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Check } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const TIERS = [
   {
-    name: "Sole Trader",
-    price: "$0",
+    id: "sole_quoter",
+    name: "Sole Quoter",
+    price: "$39",
     period: "/ month",
-    sub: "Free during beta",
-    body: "For ABNs flying solo. Get tight quotes out the door without the admin headache.",
-    cta: "Start Free",
+    sub: "Single user • Cancel any time",
+    body: "For ABNs flying solo. Tight, line-itemed quotes out the door without the admin headache.",
+    cta: "Start Sole Quoter",
     highlight: false,
     perks: [
-      { ok: true, t: "20 AI quotes / month" },
-      { ok: true, t: "Branded PDF export" },
-      { ok: true, t: "Mobile-first quoting" },
-      { ok: false, t: "Multi-user crews" },
-      { ok: false, t: "Xero / MYOB sync" },
+      "Unlimited AI-generated quotes",
+      "Branded PDF export (with your ABN)",
+      "Quote save, edit & status tracking",
+      "Mobile-first quoting on the go",
+      "Toolbox Talks AI assistant",
     ],
   },
   {
+    id: "crew",
     name: "Crew",
-    price: "$79",
+    price: "$69",
     period: "/ month",
-    sub: "Per business, unlimited users",
-    body: "For 2–10 person crews running multiple jobs a week. Sync with the office.",
-    cta: "Start 14-day Trial",
+    sub: "1–3 users • Cancel any time",
+    body: "For 2–3 person crews running multiple jobs a week. Everyone on the same playbook.",
+    cta: "Start Crew",
     highlight: true,
     perks: [
-      { ok: true, t: "Unlimited AI quotes" },
-      { ok: true, t: "Branded PDF + email" },
-      { ok: true, t: "Multi-user with roles" },
-      { ok: true, t: "Xero / MYOB export" },
-      { ok: true, t: "Custom rates library" },
-    ],
-  },
-  {
-    name: "Contractor",
-    price: "Custom",
-    period: "",
-    sub: "Volume + enterprise",
-    body: "For builders and head contractors. SSO, audit trails, bulk variations.",
-    cta: "Talk to Sales",
-    highlight: false,
-    perks: [
-      { ok: true, t: "Everything in Crew" },
-      { ok: true, t: "SSO + audit logs" },
-      { ok: true, t: "API + integrations" },
-      { ok: true, t: "Dedicated success eng." },
-      { ok: true, t: "Custom AI tuning" },
+      "Everything in Sole Quoter",
+      "Up to 3 user seats",
+      "Shared quote library",
+      "Preferred Pro's directory access",
+      "Priority support",
     ],
   },
 ];
@@ -56,6 +48,28 @@ const HAZARD_BG =
   "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/8a6e0e28588a6d4a32a829f80e506465aa8ce8eedab9f19c94b543ac5bb6aa75.png";
 
 export default function Pricing() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(null);
+
+  const handleCta = async (tier) => {
+    if (!user) {
+      navigate("/signup");
+      return;
+    }
+    setBusy(tier.id);
+    try {
+      const { data } = await axios.post(`${API}/payments/checkout`, {
+        package_id: tier.id,
+        origin_url: window.location.origin,
+      });
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || "Couldn't start checkout. Try again.");
+      setBusy(null);
+    }
+  };
+
   return (
     <section
       id="pricing"
@@ -69,22 +83,21 @@ export default function Pricing() {
       />
       <div className="absolute inset-0 bg-black/70" aria-hidden />
 
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="relative max-w-5xl mx-auto px-6 lg:px-8">
         <div className="mb-12">
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
             <span className="opacity-50">[</span> Pricing <span className="opacity-50">]</span>
           </span>
           <p className="mt-4 text-neutral-400 leading-relaxed max-w-xl">
-            One quote you win pays for the year. Cancel any time — no lock-in,
-            no exit fees, no BS.
+            One quote you win pays for the year. Start with a 7-day free trial — no credit card. Cancel any time.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {TIERS.map((t) => (
             <div
-              key={t.name}
-              data-testid={`pricing-tier-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
+              key={t.id}
+              data-testid={`pricing-tier-${t.id}`}
               className={`relative flex flex-col rounded-lg p-8 sm:p-10 border transition-colors group ${
                 t.highlight
                   ? "border-yellow-500 border-l-2 border-l-yellow-500 bg-zinc-900 md:scale-[1.02] z-10"
@@ -97,62 +110,56 @@ export default function Pricing() {
                 </div>
               )}
               <div>
-                <h3 className="font-display uppercase text-2xl tracking-tight">
-                  {t.name}
-                </h3>
+                <h3 className="font-display uppercase text-2xl tracking-tight">{t.name}</h3>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="font-display text-5xl text-yellow-500">
-                    {t.price}
-                  </span>
+                  <span className="font-display text-5xl text-yellow-500">{t.price}</span>
                   <span className="text-neutral-500 text-sm">{t.period}</span>
                 </div>
-                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-                  {t.sub}
-                </p>
-                <p className="mt-5 text-sm text-neutral-400 leading-relaxed">
-                  {t.body}
-                </p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">{t.sub}</p>
+                <p className="mt-5 text-sm text-neutral-400 leading-relaxed">{t.body}</p>
               </div>
               <ul className="mt-8 space-y-3 flex-1">
                 {t.perks.map((p, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm">
-                    {p.ok ? (
-                      <Check className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                    ) : (
-                      <X className="w-4 h-4 text-neutral-700 mt-0.5 flex-shrink-0" />
-                    )}
-                    <span
-                      className={p.ok ? "text-neutral-200" : "text-neutral-600"}
-                    >
-                      {p.t}
-                    </span>
+                    <Check className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-neutral-200">{p}</span>
                   </li>
                 ))}
               </ul>
-              {t.cta === "Talk to Sales" ? (
-                <a
-                  href="#waitlist"
-                  data-testid={`pricing-cta-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
-                  className="mt-8 inline-flex items-center justify-center h-12 font-semibold uppercase tracking-[0.15em] text-xs border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+              {user ? (
+                <button
+                  type="button"
+                  disabled={!!busy}
+                  onClick={() => handleCta(t)}
+                  data-testid={`pricing-cta-${t.id}`}
+                  className={`mt-8 inline-flex items-center justify-center h-12 font-semibold uppercase tracking-[0.15em] text-xs ${
+                    t.highlight
+                      ? "bg-yellow-500 text-black btn-industrial"
+                      : "border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+                  } disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
-                  {t.cta}
-                </a>
+                  {busy === t.id ? "Redirecting..." : t.cta}
+                </button>
               ) : (
                 <Link
                   to="/signup"
-                  data-testid={`pricing-cta-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
+                  data-testid={`pricing-cta-${t.id}`}
                   className={`mt-8 inline-flex items-center justify-center h-12 font-semibold uppercase tracking-[0.15em] text-xs ${
                     t.highlight
                       ? "bg-yellow-500 text-black btn-industrial"
                       : "border border-neutral-700 text-neutral-200 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
                   }`}
                 >
-                  {t.cta}
+                  Start 7-Day Free Trial
                 </Link>
               )}
             </div>
           ))}
         </div>
+
+        <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+          Secure checkout via Stripe • Cancel any time • GST included
+        </p>
       </div>
     </section>
   );
