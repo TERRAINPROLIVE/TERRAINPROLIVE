@@ -84,7 +84,7 @@ export default function Signup() {
               src="/terrainpro-logo.png"
               alt="TerrainPRO"
               data-testid="signup-logo-img"
-              className="w-11 h-11 object-contain shrink-0 select-none"
+              className="w-12 h-12 object-contain shrink-0 select-none"
               draggable={false}
             />
             <span className="font-display uppercase text-2xl font-black tracking-wide leading-none">

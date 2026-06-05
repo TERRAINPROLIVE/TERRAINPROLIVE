@@ -53,7 +53,7 @@ export default function AppShell({ children, label = "Business Dashboard" }) {
               src="/terrainpro-logo.png"
               alt="TerrainPRO"
               data-testid="shell-logo-img"
-              className="w-9 h-9 object-contain shrink-0 select-none"
+              className="w-10 h-10 object-contain shrink-0 select-none"
               draggable={false}
             />
             <span className="font-display uppercase text-xl font-black tracking-wide leading-none">

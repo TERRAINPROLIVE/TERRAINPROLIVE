@@ -73,7 +73,7 @@ export default function Header() {
             src="/terrainpro-logo.png"
             alt="TerrainPRO"
             data-testid="header-logo-img"
-            className="w-11 h-11 sm:w-14 sm:h-14 object-contain shrink-0 select-none"
+            className="w-12 h-12 sm:w-[62px] sm:h-[62px] object-contain shrink-0 select-none"
             draggable={false}
           />
           <div className="flex flex-col leading-none">
