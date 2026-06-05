@@ -181,3 +181,25 @@ body {
     transform: translate(0, 0);
     box-shadow: 0 0 0 #000;
 }
+
+
+/* Subtle continuous float for the desktop nav bar; pauses cleanly on hover */
+@keyframes navFloat {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-2.5px); }
+    100% { transform: translateY(0); }
+}
+
+.nav-float {
+    animation: navFloat 5.5s ease-in-out infinite;
+    will-change: transform;
+}
+
+.nav-float:hover,
+.nav-float:focus-within {
+    animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-float { animation: none; }
+}
