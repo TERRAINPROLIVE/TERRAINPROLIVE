@@ -53,7 +53,7 @@ export default function UseCases() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="mb-12">
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-            <span className="opacity-50">[</span> The Old Way vs. The TerrainPRO Way <span className="opacity-50">]</span>
+            <span className="opacity-50">[</span> The Old Way vs. The Future <span className="opacity-50">]</span>
           </span>
           <p className="mt-4 text-neutral-400 leading-relaxed max-w-xl">
             You didn&apos;t get into the trade to sit behind a laptop all weekend.
