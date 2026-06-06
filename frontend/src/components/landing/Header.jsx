@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Facebook, Instagram, ArrowUpRight, Sparkles } from "lucide-react";
 
 const NAV = [
-  { label: "Capabilities", href: "#features" },
+  { label: "Key Features", href: "#features" },
   { label: "Pricing", href: "#pricing" },
   { label: "Contact", href: "#waitlist" },
 ];
