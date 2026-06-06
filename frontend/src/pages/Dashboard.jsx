@@ -50,11 +50,24 @@ const fmtMoney = (n) =>
     ? n.toLocaleString("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 })
     : "—";
 
+const fmtRange = (low, high) => {
+  const a = fmtMoney(low);
+  const b = fmtMoney(high);
+  if (a === "—" && b === "—") return "—";
+  if (a === b) return a;
+  return (
+    <>
+      {a}
+      <span className="text-neutral-500"> — {b}</span>
+    </>
+  );
+};
+
 const STATUS_STYLES = {
-  Draft: "border-zinc-700 text-neutral-300",
-  Sent: "border-blue-500/50 text-blue-300",
-  Won: "border-green-500/50 text-green-300",
-  Lost: "border-red-500/50 text-red-300",
+  Draft: "bg-zinc-800 text-yellow-500/90",
+  Sent: "bg-zinc-800 text-blue-300",
+  Won: "bg-zinc-800 text-green-300",
+  Lost: "bg-zinc-800 text-red-300",
 };
 
 export default function Dashboard() {
@@ -74,7 +87,7 @@ export default function Dashboard() {
         const mapped = (data || []).map((q) => ({
           client: q.client || "Customer",
           scope: q.scope_summary || "—",
-          total: `${fmtMoney(q.total_low)} - ${fmtMoney(q.total_high)}`,
+          total: fmtRange(q.total_low, q.total_high),
           status: q.status || "Draft",
           date: q.created_at
             ? new Date(q.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })
@@ -118,7 +131,7 @@ export default function Dashboard() {
                 >
                   <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" strokeWidth={1.6} />
                 </div>
-                <h1 className="font-display uppercase text-2xl sm:text-4xl tracking-tight leading-none">
+                <h1 className="font-display uppercase text-3xl sm:text-5xl font-bold tracking-tight leading-[0.95]">
                   G'day,{" "}
                   <span className="text-yellow-500">
                     {user?.name?.split(" ")[0] || "Tradie"}
@@ -176,7 +189,7 @@ export default function Dashboard() {
           type="button"
           onClick={() => navigate("/quote")}
           data-testid="action-new-quote-mobile"
-          className="lg:hidden w-full inline-flex items-center justify-center gap-2 h-14 mb-6 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-sm border-2 border-black btn-industrial"
+          className="lg:hidden w-full inline-flex items-center justify-center gap-3 py-4 px-8 mb-6 rounded-lg bg-[#F5A623] text-zinc-900 font-black uppercase tracking-widest text-sm sm:text-base shadow-[0_10px_30px_-5px_rgba(245,166,35,0.5)] hover:bg-[#ffb733] hover:shadow-[0_14px_38px_-4px_rgba(245,166,35,0.65)] transition-all duration-200"
         >
           <Plus className="w-4 h-4" strokeWidth={3} />
           Start a New Quote
@@ -188,13 +201,21 @@ export default function Dashboard() {
             <div
               key={k.label}
               data-testid={`kpi-${k.label.toLowerCase().replace(/\s+/g, "-")}`}
-              className={`group relative rounded-lg border border-zinc-800 border-l-2 bg-zinc-900/40 p-4 sm:p-6 hover:bg-zinc-900 transition-colors ${
+              className={`group relative overflow-hidden rounded-lg border border-zinc-800 border-l-2 border-t-2 bg-zinc-900/40 p-4 sm:p-6 hover:bg-zinc-900 transition-colors ${
                 k.accent === "muted"
-                  ? "border-l-zinc-700"
-                  : "border-l-yellow-500 hover:border-l-yellow-400"
+                  ? "border-l-zinc-700 border-t-zinc-700"
+                  : "border-l-yellow-500 border-t-yellow-500 hover:border-l-yellow-400 hover:border-t-yellow-400"
               }`}
             >
-              <div className="flex items-start justify-between gap-2">
+              {/* Watermark texture */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -bottom-4 -right-2 font-display uppercase font-bold text-[80px] sm:text-[110px] leading-none tracking-tighter text-white/[0.035] select-none whitespace-nowrap"
+              >
+                {k.value}
+              </span>
+
+              <div className="relative flex items-start justify-between gap-2">
                 <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-neutral-500 leading-tight">
                   {k.label}
                 </span>
@@ -207,10 +228,10 @@ export default function Dashboard() {
                   strokeWidth={1.8}
                 />
               </div>
-              <div className="mt-3 sm:mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-none text-white">
+              <div className="relative mt-3 sm:mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-none text-white">
                 {k.value}
               </div>
-              <div className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-neutral-400 leading-snug">
+              <div className="relative mt-1.5 sm:mt-2 text-xs sm:text-sm text-neutral-400 leading-snug">
                 {k.sub}
               </div>
             </div>
@@ -307,7 +328,7 @@ export default function Dashboard() {
               type="button"
               onClick={() => navigate("/quote")}
               data-testid="action-new-quote"
-              className="hidden lg:inline-flex w-full items-center justify-center gap-2 h-14 bg-yellow-500 text-black font-black uppercase tracking-[0.16em] text-sm border-2 border-black btn-industrial"
+              className="hidden lg:inline-flex w-full items-center justify-center gap-3 py-4 px-8 rounded-lg bg-[#F5A623] text-zinc-900 font-black uppercase tracking-widest text-sm sm:text-base shadow-[0_10px_30px_-5px_rgba(245,166,35,0.5)] hover:bg-[#ffb733] hover:shadow-[0_14px_38px_-4px_rgba(245,166,35,0.65)] transition-all duration-200"
             >
               <Plus className="w-4 h-4" strokeWidth={3} />
               Start a New Quote
@@ -343,7 +364,7 @@ export default function Dashboard() {
                       ...row,
                       status: updated.status || "Draft",
                       scope: updated.scope_summary || row.scope,
-                      total: `${fmtMoney(updated.total_low)} - ${fmtMoney(updated.total_high)}`,
+                      total: fmtRange(updated.total_low, updated.total_high),
                       raw: updated,
                     }
                   : row
@@ -359,7 +380,7 @@ export default function Dashboard() {
 function StatusTag({ status }) {
   return (
     <span
-      className={`inline-block border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] ${
+      className={`inline-block px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] font-semibold ${
         STATUS_STYLES[status] || STATUS_STYLES.Draft
       }`}
     >
@@ -852,9 +873,17 @@ function LabourRateCard() {
   return (
     <div
       data-testid="kpi-labour-rate"
-      className="group relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-4 sm:p-6 hover:bg-zinc-900 transition-colors"
+      className="group relative overflow-hidden rounded-lg border border-zinc-800 border-l-2 border-t-2 border-l-yellow-500 border-t-yellow-500 bg-zinc-900/40 p-4 sm:p-6 hover:bg-zinc-900 transition-colors"
     >
-      <div className="flex items-start justify-between gap-2">
+      {/* Watermark texture */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-4 -right-2 font-display uppercase font-bold text-[80px] sm:text-[110px] leading-none tracking-tighter text-white/[0.035] select-none whitespace-nowrap"
+      >
+        {rate != null ? `$${rate}` : "$0"}
+      </span>
+
+      <div className="relative flex items-start justify-between gap-2">
         <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-neutral-500 leading-tight">
           Labour Rate
         </span>
@@ -865,7 +894,7 @@ function LabourRateCard() {
       </div>
 
       {editing ? (
-        <div className="mt-3 sm:mt-4">
+        <div className="relative mt-3 sm:mt-4">
           <div className="flex items-center gap-2">
             <span className="font-display text-2xl sm:text-3xl font-black text-yellow-500">$</span>
             <Input
@@ -895,7 +924,7 @@ function LabourRateCard() {
         </div>
       ) : (
         <>
-          <div className="mt-3 sm:mt-4 flex items-baseline gap-1">
+          <div className="relative mt-3 sm:mt-4 flex items-baseline gap-1">
             <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-none text-white">
               {rate != null ? `$${rate}` : "—"}
             </span>
@@ -905,10 +934,10 @@ function LabourRateCard() {
             type="button"
             data-testid="labour-rate-edit"
             onClick={startEdit}
-            className="mt-1.5 sm:mt-2 inline-flex items-center gap-1.5 text-xs sm:text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
+            className="relative mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 border border-yellow-500/30 hover:border-yellow-500 bg-transparent hover:bg-yellow-500/10 text-[#F5A623] font-mono text-[10px] uppercase tracking-[0.2em] font-semibold transition-colors"
           >
-            <Pencil className="w-3 h-3" />
-            {rate != null ? "Edit rate" : "Set your rate"}
+            <Pencil className="w-3 h-3" strokeWidth={2.4} />
+            {rate != null ? "Edit Rate" : "Set Rate"}
           </button>
         </>
       )}
