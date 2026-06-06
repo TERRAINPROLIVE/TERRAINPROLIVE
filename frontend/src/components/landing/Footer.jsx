@@ -1,84 +1,160 @@
-import { Hammer } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+
+const PRODUCT_LINKS = [
+  { label: "Capabilities", href: "#estimator" },
+  { label: "Key Features", href: "#features" },
+  { label: "Pricing", href: "#pricing" },
+  { label: "How It Works", href: "#how" },
+];
+
+const TRADES_LINKS = [
+  { label: "Earthmoving", href: "#features" },
+  { label: "Concreting", href: "#features" },
+  { label: "Landscaping", href: "#features" },
+  { label: "Preferred Pros", to: "/directory" },
+];
+
+const CONTACT_LINKS = [
+  { label: "crew@terrainpro.com.au", href: "mailto:crew@terrainpro.com.au" },
+  { label: "1800 QUOTE-IT", href: "tel:18007868348" },
+  { label: "Get in Touch", href: "#waitlist" },
+];
+
+function ColumnLink({ item }) {
+  const cls =
+    "inline-block text-[13px] text-white/85 hover:text-[#ffb703] transition-colors duration-200 font-medium tracking-wide";
+  if (item.to) {
+    return (
+      <Link to={item.to} className={cls}>
+        {item.label}
+      </Link>
+    );
+  }
+  return (
+    <a href={item.href} className={cls}>
+      {item.label}
+    </a>
+  );
+}
+
+function ColumnHeading({ children }) {
+  return (
+    <h4
+      className="font-display text-[12px] font-bold uppercase tracking-[0.3em] text-[#ffb703] mb-5"
+    >
+      {children}
+    </h4>
+  );
+}
 
 export default function Footer() {
   return (
     <footer
       data-testid="site-footer"
-      className="relative bg-black border-t border-neutral-900"
+      className="relative bg-[#0b0b0b] text-white"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
+      {/* Yellow broken separator at top */}
+      <div
+        aria-hidden
+        className="h-[3px] w-full bg-[length:14px_3px] bg-repeat-x"
+        style={{
+          backgroundImage:
+            "linear-gradient(90deg, #ffb703 0 8px, transparent 8px 14px)",
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 sm:py-20">
+        {/* Main grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 items-start">
+          {/* Left — Brand block */}
           <div className="md:col-span-5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-yellow-500 flex items-center justify-center">
-                <Hammer className="w-5 h-5 text-black" strokeWidth={2.5} />
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="font-display text-xl uppercase tracking-tight">
-                  TerrainPRO
-                </span>
-                <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-[0.25em]">
-                  AI Estimator
-                </span>
-              </div>
-            </div>
-            <p className="mt-5 text-sm text-neutral-400 max-w-sm leading-relaxed">
+            <Link
+              to="/"
+              data-testid="footer-logo"
+              className="inline-flex items-center gap-3"
+            >
+              <img
+                src="/terrainpro-logo-full.png"
+                alt="TerrainPRO"
+                data-testid="footer-logo-img"
+                className="h-14 w-auto object-contain shrink-0 select-none"
+                draggable={false}
+              />
+            </Link>
+            <p className="mt-6 text-[13px] text-white/65 max-w-sm leading-relaxed">
               Built in Australia for the crews who actually do the work.
               Earthmoving, concreting, landscaping — quoted in seconds.
             </p>
+
+            <Link
+              to="/signup"
+              data-testid="footer-cta"
+              className="mt-7 inline-flex items-center gap-2 h-11 px-5 bg-[#ffb703] text-black font-black uppercase tracking-[0.18em] text-[11px] btn-industrial transition-all duration-150 hover:bg-[#ffc933] active:translate-y-[1px]"
+            >
+              Start Free Trial
+              <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.6} />
+            </Link>
           </div>
 
-          <div className="md:col-span-2">
-            <h4 className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-4">
-              Product
-            </h4>
-            <ul className="space-y-3 text-sm text-neutral-300">
-              <li>
-                <a href="#estimator" className="hover:text-yellow-500">
-                  Estimator
-                </a>
-              </li>
-              <li>
-                <a href="#features" className="hover:text-yellow-500">
-                  Features
-                </a>
-              </li>
-              <li>
-                <a href="#pricing" className="hover:text-yellow-500">
-                  Pricing
-                </a>
-              </li>
-            </ul>
-          </div>
+          {/* Spacer for layout balance on md+ */}
+          <div className="hidden md:block md:col-span-1" />
 
-          <div className="md:col-span-2">
-            <h4 className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-4">
-              Trades
-            </h4>
-            <ul className="space-y-3 text-sm text-neutral-300">
-              <li>Earthmoving</li>
-              <li>Concreting</li>
-              <li>Landscaping</li>
+          {/* Product */}
+          <nav
+            aria-label="Footer product links"
+            className="md:col-span-2"
+            data-testid="footer-col-product"
+          >
+            <ColumnHeading>Product</ColumnHeading>
+            <ul className="space-y-3">
+              {PRODUCT_LINKS.map((it) => (
+                <li key={it.label}>
+                  <ColumnLink item={it} />
+                </li>
+              ))}
             </ul>
-          </div>
+          </nav>
 
-          <div className="md:col-span-3">
-            <h4 className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-4">
-              Contact
-            </h4>
-            <ul className="space-y-3 text-sm text-neutral-300">
-              <li>crew@terrainpro.com.au</li>
-              <li>1800 QUOTE-IT</li>
-              <li className="text-neutral-500">Geelong · Brisbane · Sydney</li>
+          {/* Trades */}
+          <nav
+            aria-label="Footer trades links"
+            className="md:col-span-2"
+            data-testid="footer-col-trades"
+          >
+            <ColumnHeading>Trades</ColumnHeading>
+            <ul className="space-y-3">
+              {TRADES_LINKS.map((it) => (
+                <li key={it.label}>
+                  <ColumnLink item={it} />
+                </li>
+              ))}
             </ul>
-          </div>
+          </nav>
+
+          {/* Contact */}
+          <nav
+            aria-label="Footer contact links"
+            className="md:col-span-2"
+            data-testid="footer-col-contact"
+          >
+            <ColumnHeading>Contact</ColumnHeading>
+            <ul className="space-y-3">
+              {CONTACT_LINKS.map((it) => (
+                <li key={it.label}>
+                  <ColumnLink item={it} />
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
-        <div className="mt-14 pt-6 border-t border-neutral-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-600">
-            © {new Date().getFullYear()} TerrainPRO AI · ABN 00 000 000 000
+        {/* Utility bar */}
+        <div className="mt-14 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40">
+            © {new Date().getFullYear()} TerrainPRO AI · ABN 00 000 000 000 · Australia
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-600">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40">
             Built with the universal LLM key · GPT-5.2
           </p>
         </div>
