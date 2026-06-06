@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -484,14 +484,21 @@ function StepHeader({ step }) {
   ];
   return (
     <div className="mb-10">
-      <div className="rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 p-6 sm:p-8 mb-6">
-        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
+      <div className="relative overflow-hidden rounded-lg border border-zinc-800 border-l-2 border-t-2 border-l-yellow-500 border-t-yellow-500 bg-zinc-900/40 px-5 py-4 sm:px-6 sm:py-5 mb-6">
+        {/* Watermark step number */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-6 -right-3 font-display uppercase font-bold text-[120px] sm:text-[170px] leading-none tracking-tighter text-white/[0.035] select-none whitespace-nowrap"
+        >
+          0{step}
+        </span>
+        <div className="relative font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
           Step {step} of 3
         </div>
-        <h3 className="mt-2 font-display uppercase text-2xl sm:text-3xl tracking-tight">
+        <h3 className="relative mt-2 font-display uppercase text-2xl sm:text-3xl font-bold tracking-tight leading-[0.95]">
           {steps[step - 1].label}
         </h3>
-        <p className="mt-2 text-sm text-neutral-400">
+        <p className="relative mt-2 text-sm text-neutral-400 max-w-2xl">
           {step === 1 &&
             "Tell us who the quote's for and which trades apply. Pick every job that's part of the scope."}
           {step === 2 &&
@@ -509,12 +516,12 @@ function StepHeader({ step }) {
             <div
               key={s.n}
               data-testid={`step-indicator-${s.n}`}
-              className={`relative rounded-lg border border-l-2 p-4 transition-colors ${
+              className={`relative rounded-lg border border-l-2 border-t-2 px-4 py-3 transition-colors ${
                 active
-                  ? "border-yellow-500 border-l-yellow-500 bg-zinc-900"
+                  ? "border-yellow-500 border-l-yellow-500 border-t-yellow-500 bg-zinc-900"
                   : done
-                  ? "border-zinc-800 border-l-yellow-500 bg-zinc-900/40"
-                  : "border-zinc-800 border-l-zinc-700 bg-zinc-900/40"
+                  ? "border-zinc-800 border-l-yellow-500 border-t-yellow-500 bg-zinc-900/40"
+                  : "border-zinc-800 border-l-zinc-700 border-t-zinc-700 bg-zinc-900/40"
               }`}
             >
               <div className="flex items-center justify-between">
@@ -748,7 +755,7 @@ const WIZ_TRIGGER =
 const WIZ_CONTENT = "bg-zinc-950 border-zinc-800 text-zinc-100 rounded-none";
 const WIZ_ITEM = "rounded-none text-zinc-100 focus:bg-yellow-500 focus:text-black";
 const WIZ_CARD =
-  "rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40";
+  "rounded-lg border border-zinc-800 border-l-2 border-t-2 border-l-yellow-500 border-t-yellow-500 bg-zinc-900/40 overflow-hidden";
 
 function SectionHeader({ children }) {
   return (
@@ -795,7 +802,7 @@ function Step2({
         />
       ))}
 
-      <div className={`${WIZ_CARD} p-6 sm:p-8 space-y-5`}>
+      <div className={`${WIZ_CARD} p-5 sm:p-6 space-y-5`}>
         <SectionHeader>Job Complexity &amp; Notes</SectionHeader>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <FieldShell label="Complexity">
@@ -856,7 +863,7 @@ function JobMeasurements({ job, values, setField }) {
       data-testid={`measurements-${job.id}`}
       className={WIZ_CARD}
     >
-      <div className="flex items-center justify-between border-b border-zinc-800 px-6 sm:px-8 py-4">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-5 sm:px-6 py-3.5">
         <div className="flex items-center gap-3">
           <Icon className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
           <span className="text-xs font-bold uppercase tracking-widest text-yellow-500">
@@ -868,7 +875,7 @@ function JobMeasurements({ job, values, setField }) {
           </span>
         </div>
       </div>
-      <div className="p-6 sm:p-8">
+      <div className="p-5 sm:p-6">
         {job.description && (
           <p className="text-sm text-neutral-400 mb-6">{job.description}</p>
         )}
@@ -1052,7 +1059,7 @@ function Step3({
                   </div>
                   <Line delay={1.6}>
                     <span className="text-neutral-500">
-                      // this usually takes 20–40 seconds — hang tight, don't refresh
+                      // this usually takes 20–40 seconds — hang tight, don&apos;t refresh
                     </span>
                   </Line>
                 </motion.div>
@@ -1421,41 +1428,57 @@ const SUPPLIER_META = {
 };
 const SUPPLIER_ORDER = ["bunnings", "mitre10", "reece", "landscape", "nursery"];
 
-function NearbySuppliers({ customer }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [data, setData] = useState(null);
-
-  const fetchSuppliers = useCallback(async () => {
-    if (!customer?.suburb || !customer?.state) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await axios.get(`${API}/suppliers/nearby`, {
-        params: {
-          suburb: customer.suburb,
-          state: customer.state,
-          postcode: customer.postcode || "",
-          radius_km: 30,
-        },
-      });
-      setData(data);
-    } catch (err) {
-      setError(err?.response?.data?.detail || err?.message || "Couldn't fetch suppliers");
-    } finally {
-      setLoading(false);
-    }
-  }, [customer?.suburb, customer?.state, customer?.postcode]);
+function useSuppliersFetcher({ suburb, state, postcode, refreshTick }) {
+  const [state2, setState2] = useState({ loading: false, error: null, data: null });
 
   useEffect(() => {
-    fetchSuppliers();
-  }, [fetchSuppliers]);
+    if (!suburb || !state) return;
+    let cancelled = false;
+    setState2((s) => ({ ...s, loading: true, error: null }));
+    const run = async () => {
+      try {
+        const res = await axios.get(`${API}/suppliers/nearby`, {
+          params: { suburb, state, postcode: postcode || "", radius_km: 30 },
+        });
+        if (!cancelled) setState2({ loading: false, error: null, data: res.data });
+      } catch (err) {
+        if (!cancelled) {
+          setState2((s) => ({
+            ...s,
+            loading: false,
+            error: err?.response?.data?.detail || err?.message || "Couldn't fetch suppliers",
+          }));
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [suburb, state, postcode, refreshTick]);
 
-  const grouped = {};
-  (data?.suppliers || []).forEach((s) => {
-    if (!grouped[s.category]) grouped[s.category] = [];
-    grouped[s.category].push(s);
-  });
+  return state2;
+}
+
+function NearbySuppliers({ customer }) {
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  const suburb = customer?.suburb;
+  const state = customer?.state;
+  const postcode = customer?.postcode;
+
+  const { loading, error, data } = useSuppliersFetcher({ suburb, state, postcode, refreshTick });
+
+  const fetchSuppliers = () => setRefreshTick((n) => n + 1);
+
+  const grouped = useMemo(() => {
+    const g = {};
+    (data?.suppliers || []).forEach((s) => {
+      if (!g[s.category]) g[s.category] = [];
+      g[s.category].push(s);
+    });
+    return g;
+  }, [data]);
 
   return (
     <div
@@ -1600,7 +1623,7 @@ function StepNav({
         onClick={onNext}
         disabled={nextDisabled}
         data-testid="wiz-next"
-        className="inline-flex items-center justify-center gap-2 h-12 px-8 bg-yellow-500 text-black font-bold uppercase tracking-[0.18em] text-xs btn-industrial disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-3 py-4 px-8 rounded-lg bg-[#F5A623] text-zinc-900 font-black uppercase tracking-widest text-sm sm:text-base shadow-[0_10px_30px_-5px_rgba(245,166,35,0.5)] hover:bg-[#ffb733] hover:shadow-[0_14px_38px_-4px_rgba(245,166,35,0.65)] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-200"
       >
         <NextIcon className={`w-4 h-4 ${nextSpin ? "animate-spin" : ""}`} />
         {nextLabel}
