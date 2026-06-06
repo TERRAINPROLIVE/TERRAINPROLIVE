@@ -78,16 +78,13 @@ export default function Header() {
           aria-label="Primary"
           className="hidden md:flex items-center gap-9 lg:gap-11 nav-float"
         >
-          {NAV.map((item, i) => (
+          {NAV.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              data-testid={`desktop-nav-${item.label.toLowerCase()}`}
-              className="group inline-flex items-baseline gap-2.5 font-mono uppercase text-[13px] lg:text-[14px] tracking-[0.22em] text-white/85 hover:text-yellow-500 transition-colors duration-200"
+              data-testid={`desktop-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+              className="group inline-flex items-baseline font-mono uppercase text-[13px] lg:text-[14px] tracking-[0.22em] text-white/85 hover:text-yellow-500 transition-colors duration-200"
             >
-              <span className="text-neutral-600 group-hover:text-yellow-500/70 transition-colors duration-200">
-                / 0{i + 1}
-              </span>
               <span className="font-display tracking-[0.14em] text-[16px] lg:text-[18px] font-bold">
                 {item.label.toUpperCase()}
               </span>
