@@ -72,7 +72,7 @@ export default function UseCases() {
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
                 data-testid={`use-case-${c.spec.toLowerCase()}`}
-                className={`relative bg-zinc-900/40 border border-zinc-800 border-l-2 rounded-lg p-6 group transition-colors ${
+                className={`relative flex flex-col bg-zinc-900/40 border border-zinc-800 border-l-2 rounded-lg p-6 group transition-colors h-full ${
                   isMuted
                     ? "border-l-zinc-600 hover:bg-zinc-900/70 hover:border-l-zinc-500"
                     : "border-l-yellow-500 hover:bg-zinc-900 hover:border-l-yellow-400"
@@ -115,7 +115,7 @@ export default function UseCases() {
                   {c.body}
                 </p>
 
-                <div className="relative z-10 grid grid-cols-3 border-t border-zinc-800 pt-4 -mx-2">
+                <div className="relative z-10 mt-auto grid grid-cols-3 border-t border-zinc-800 pt-4 -mx-2">
                   {c.stats.map((s) => (
                     <div key={s.k} className="px-2 min-w-0">
                       <div
