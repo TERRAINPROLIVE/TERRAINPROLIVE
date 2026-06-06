@@ -74,7 +74,7 @@ export default function Hero() {
             { v: "10 mins", k: "Average Quote Time" },
             { v: "94%", k: "Accuracy Rate" },
             { v: "3.2x", k: "More Jobs Won" },
-            { v: "Self Optimising", k: "With Every Quote" },
+            { v: "Smart-Calculating", k: "With Every Quote" },
           ].map((s, i) => (
             <div
               key={i}
