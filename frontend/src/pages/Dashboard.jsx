@@ -132,7 +132,7 @@ export default function Dashboard() {
                   <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" strokeWidth={1.6} />
                 </div>
                 <h1 className="font-display uppercase text-3xl sm:text-5xl font-bold tracking-tight leading-[0.95]">
-                  G'day,{" "}
+                  G&apos;day,{" "}
                   <span className="text-yellow-500">
                     {user?.name?.split(" ")[0] || "Tradie"}
                   </span>
@@ -143,7 +143,7 @@ export default function Dashboard() {
             {/* Desktop: side-by-side info grid */}
             <div
               data-testid="business-meta"
-              className="hidden lg:block lg:col-span-2 lg:col-start-3 lg:mt-14 relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-5 py-4"
+              className="hidden lg:block lg:col-span-2 lg:col-start-3 lg:mt-14 relative rounded-lg border border-zinc-800 border-l-2 border-l-yellow-500 bg-zinc-900/40 px-4 py-3"
             >
               <BusinessMetaEditable />
             </div>
@@ -201,7 +201,7 @@ export default function Dashboard() {
             <div
               key={k.label}
               data-testid={`kpi-${k.label.toLowerCase().replace(/\s+/g, "-")}`}
-              className={`group relative overflow-hidden rounded-lg border border-zinc-800 border-l-2 border-t-2 bg-zinc-900/40 p-4 sm:p-6 hover:bg-zinc-900 transition-colors ${
+              className={`group relative overflow-hidden rounded-lg border border-zinc-800 border-l-2 border-t-2 bg-zinc-900/40 px-4 py-3.5 sm:px-5 sm:py-4 hover:bg-zinc-900 transition-colors ${
                 k.accent === "muted"
                   ? "border-l-zinc-700 border-t-zinc-700"
                   : "border-l-yellow-500 border-t-yellow-500 hover:border-l-yellow-400 hover:border-t-yellow-400"
@@ -210,7 +210,7 @@ export default function Dashboard() {
               {/* Watermark texture */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute -bottom-4 -right-2 font-display uppercase font-bold text-[80px] sm:text-[110px] leading-none tracking-tighter text-white/[0.035] select-none whitespace-nowrap"
+                className="pointer-events-none absolute -bottom-3 -right-2 font-display uppercase font-bold text-[72px] sm:text-[100px] leading-none tracking-tighter text-white/[0.035] select-none whitespace-nowrap"
               >
                 {k.value}
               </span>
@@ -334,17 +334,21 @@ export default function Dashboard() {
               Start a New Quote
             </button>
 
-            <div className="lg:mt-4 space-y-3">
-              <ActionLink icon={FileText} label="View Saved Invoices" testid="action-invoices" />
-              <ActionLink icon={Users} label="Manage Client Profiles" testid="action-clients" />
-              <ActionLink icon={Map} label="Check Supplier Map" testid="action-suppliers" />
-              <ActionLink
-                icon={HardHat}
-                label="Preferred Pro's"
-                testid="action-preferred-pros"
-                onClick={() => navigate("/directory")}
+            <div className="lg:mt-4">
+              <WorkflowsDropdown
+                items={[
+                  { icon: FileText, label: "View Saved Invoices", testid: "action-invoices" },
+                  { icon: Users, label: "Manage Client Profiles", testid: "action-clients" },
+                  { icon: Map, label: "Check Supplier Map", testid: "action-suppliers" },
+                  {
+                    icon: HardHat,
+                    label: "Preferred Pro's",
+                    testid: "action-preferred-pros",
+                    onClick: () => navigate("/directory"),
+                  },
+                  { icon: FolderClock, label: "Quote History", testid: "action-history" },
+                ]}
               />
-              <ActionLink icon={FolderClock} label="Quote History" testid="action-history" />
             </div>
           </aside>
         </div>
@@ -873,12 +877,12 @@ function LabourRateCard() {
   return (
     <div
       data-testid="kpi-labour-rate"
-      className="group relative overflow-hidden rounded-lg border border-zinc-800 border-l-2 border-t-2 border-l-yellow-500 border-t-yellow-500 bg-zinc-900/40 p-4 sm:p-6 hover:bg-zinc-900 transition-colors"
+      className="group relative overflow-hidden rounded-lg border border-zinc-800 border-l-2 border-t-2 border-l-yellow-500 border-t-yellow-500 bg-zinc-900/40 px-4 py-3.5 sm:px-5 sm:py-4 hover:bg-zinc-900 transition-colors"
     >
       {/* Watermark texture */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -bottom-4 -right-2 font-display uppercase font-bold text-[80px] sm:text-[110px] leading-none tracking-tighter text-white/[0.035] select-none whitespace-nowrap"
+        className="pointer-events-none absolute -bottom-3 -right-2 font-display uppercase font-bold text-[72px] sm:text-[100px] leading-none tracking-tighter text-white/[0.035] select-none whitespace-nowrap"
       >
         {rate != null ? `$${rate}` : "$0"}
       </span>
@@ -948,8 +952,8 @@ function LabourRateCard() {
 function Meta({ label, value }) {
   return (
     <div className="leading-tight">
-      <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">{label}</div>
-      <div className="mt-1 font-display uppercase text-sm tracking-tight text-white">{value}</div>
+      <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-neutral-500/80">{label}</div>
+      <div className="mt-0.5 font-display uppercase text-sm tracking-tight text-white">{value}</div>
     </div>
   );
 }
@@ -1046,7 +1050,7 @@ function BusinessMetaEditable() {
       >
         <Pencil className="w-3.5 h-3.5" />
       </button>
-      <div className="grid grid-cols-2 gap-x-8 gap-y-3 pr-6">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 pr-6">
         <Meta label="Business" value={bizName} />
         <Meta label="Location" value={BUSINESS.location} />
         <Meta label="Registration" value={abnDisplay} />
@@ -1067,5 +1071,61 @@ function ActionLink({ icon: Icon, label, testid, onClick }) {
       <Icon className="w-4 h-4 text-yellow-500 group-hover:text-yellow-400 transition-colors" strokeWidth={1.8} />
       <span className="font-display uppercase text-sm tracking-tight">{label}</span>
     </button>
+  );
+}
+
+function WorkflowsDropdown({ items }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <div className="relative" data-testid="manage-workflows">
+      <button
+        type="button"
+        data-testid="manage-workflows-toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className="w-full inline-flex items-center justify-between gap-3 h-12 px-4 rounded-lg border border-zinc-800 text-neutral-200 hover:bg-zinc-900 hover:border-zinc-700 transition-colors"
+      >
+        <span className="inline-flex items-center gap-3">
+          <FolderClock className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
+          <span className="font-display uppercase text-sm tracking-tight">Manage Workflows</span>
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div
+          data-testid="manage-workflows-panel"
+          className="mt-2 rounded-lg border border-zinc-800 bg-zinc-950 overflow-hidden"
+        >
+          {items.map((it) => (
+            <button
+              key={it.testid}
+              type="button"
+              data-testid={it.testid}
+              onClick={() => {
+                setOpen(false);
+                it.onClick && it.onClick();
+              }}
+              className="group w-full inline-flex items-center gap-3 h-11 px-4 border-b border-zinc-800/60 last:border-b-0 text-neutral-300 hover:bg-zinc-900 hover:text-white transition-colors"
+            >
+              <it.icon
+                className="w-4 h-4 text-yellow-500 group-hover:text-yellow-400 transition-colors"
+                strokeWidth={1.8}
+              />
+              <span className="font-display uppercase text-[13px] tracking-tight">{it.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
