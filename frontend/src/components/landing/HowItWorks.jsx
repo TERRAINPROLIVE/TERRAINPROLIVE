@@ -33,20 +33,10 @@ export default function HowItWorks() {
       className="relative py-24 sm:py-32 border-t border-neutral-900"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
-          <div className="md:col-span-4">
-            <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-              <span className="opacity-50">[</span> How It Works <span className="opacity-50">]</span>
-            </span>
-          </div>
-          <div className="md:col-span-7 md:col-start-6 text-neutral-400 leading-relaxed self-end">
-            Quote on your phone from the cab or review the pipeline on your
-            laptop. TerrainPRO kills the back-of-envelope hustle by building
-            precise, line-itemed estimates. Our adaptive AI constantly learns,
-            automatically tracking down live material rates from the closest
-            suppliers to your job location so your margins are always locked
-            in.
-          </div>
+        <div className="mb-16">
+          <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
+            <span className="opacity-50">[</span> How It Works <span className="opacity-50">]</span>
+          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
