@@ -36,7 +36,7 @@ export default function HowItWorks() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
           <div className="md:col-span-4">
             <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-              <span className="opacity-50">[</span> Process <span className="opacity-50">]</span>
+              <span className="opacity-50">[</span> How It Works <span className="opacity-50">]</span>
             </span>
           </div>
           <div className="md:col-span-7 md:col-start-6 text-neutral-400 leading-relaxed self-end">
