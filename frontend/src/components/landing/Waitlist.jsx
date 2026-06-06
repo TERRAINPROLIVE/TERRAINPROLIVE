@@ -71,7 +71,7 @@ export default function Waitlist() {
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
         <div className="mb-12">
           <span className="font-display uppercase text-4xl sm:text-5xl tracking-tight text-yellow-500">
-            <span className="opacity-50">[</span> Early Access <span className="opacity-50">]</span>
+            <span className="opacity-50">[</span> Contact <span className="opacity-50">]</span>
           </span>
           <p className="mt-4 text-neutral-400 max-w-xl leading-relaxed">
             Sign up free and we'll get you set up in your first week.
