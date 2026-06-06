@@ -67,9 +67,6 @@ export default function Header() {
             className="h-14 sm:h-20 w-auto object-contain shrink-0 select-none"
             draggable={false}
           />
-          <span className="font-mono text-[10px] sm:text-xs text-yellow-500 uppercase tracking-[0.25em] border-l border-yellow-500/30 pl-3 hidden sm:inline-block">
-            AI Estimator
-          </span>
         </a>
 
         {/* Right — Desktop horizontal nav (hover-pause float animation) */}
