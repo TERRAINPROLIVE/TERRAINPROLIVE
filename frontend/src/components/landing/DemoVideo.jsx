@@ -69,14 +69,6 @@ export default function DemoVideo() {
                 <span className="grid place-items-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#F5A623] text-black shadow-[0_10px_40px_-5px_rgba(245,166,35,0.65)] group-hover:scale-105 group-active:scale-95 transition-transform duration-200">
                   <Play className="w-8 h-8 sm:w-10 sm:h-10 ml-1" strokeWidth={2.6} fill="currentColor" />
                 </span>
-                <span className="absolute bottom-6 left-6 right-6 sm:left-8 sm:bottom-8 flex flex-col items-start gap-1">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-yellow-500">
-                    Demo // Quote in 10 mins
-                  </span>
-                  <span className="font-display uppercase text-xl sm:text-3xl font-bold text-white tracking-tight leading-[0.95]">
-                    Press play
-                  </span>
-                </span>
               </button>
             )}
 
