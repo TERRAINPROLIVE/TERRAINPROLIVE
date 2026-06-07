@@ -42,9 +42,9 @@ export default function DemoVideo() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.5 }}
-          className="relative mx-auto max-w-3xl rounded-lg overflow-hidden border border-zinc-800 border-l-2 border-t-2 border-l-yellow-500 border-t-yellow-500 bg-zinc-900/40 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)]"
+          className="relative rounded-lg overflow-hidden border border-zinc-800 border-l-2 border-t-2 border-l-yellow-500 border-t-yellow-500 bg-zinc-900/40 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)]"
         >
-          <div className="relative aspect-[4/3] bg-black">
+          <div className="relative aspect-video bg-black">
             <video
               ref={videoRef}
               src="/demo-quote.mp4"
