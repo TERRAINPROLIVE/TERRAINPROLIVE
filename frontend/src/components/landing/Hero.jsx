@@ -54,7 +54,7 @@ export default function Hero() {
           </button>
 
           <a
-            href="#how"
+            href="#demo-video"
             data-testid="hero-secondary-cta"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-3 py-4 px-8 rounded-lg border-2 border-white text-white font-black uppercase tracking-widest text-sm sm:text-base bg-transparent hover:bg-white/10 transition-all duration-200"
           >

@@ -5,6 +5,7 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import UseCases from "@/components/landing/UseCases";
 import Pricing from "@/components/landing/Pricing";
+import DemoVideo from "@/components/landing/DemoVideo";
 import Testimonials from "@/components/landing/Testimonials";
 import FAQ from "@/components/landing/FAQ";
 import Waitlist from "@/components/landing/Waitlist";
@@ -22,6 +23,7 @@ export default function Landing() {
         <Features />
         <UseCases />
         <Pricing />
+        <DemoVideo />
         <Testimonials />
         <FAQ />
         <Waitlist />
