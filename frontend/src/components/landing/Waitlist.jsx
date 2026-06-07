@@ -3,27 +3,12 @@ import axios from "axios";
 import { toast } from "sonner";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-
-const TRADES = [
-  { v: "earthmoving", l: "Earthmoving" },
-  { v: "concreting", l: "Concreting" },
-  { v: "landscaping", l: "Landscaping" },
-  { v: "civil", l: "Civil / Commercial" },
-];
 
 export default function Waitlist() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [trade, setTrade] = useState("");
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState(null);
 
@@ -42,12 +27,10 @@ export default function Waitlist() {
       await axios.post(`${API}/waitlist`, {
         email,
         name: name || null,
-        trade: trade || null,
       });
       toast.success("You're on the list. We'll be in touch soon.");
       setName("");
       setEmail("");
-      setTrade("");
       setCount((c) => (typeof c === "number" ? c + 1 : c));
     } catch (err) {
       toast.error(
@@ -74,7 +57,7 @@ export default function Waitlist() {
             <span className="opacity-50">[</span> Contact <span className="opacity-50">]</span>
           </span>
           <p className="mt-4 text-neutral-400 max-w-xl leading-relaxed">
-            Sign up free and we'll get you set up in your first week.
+            Sign up free and we&apos;ll get you set up in your first week.
             TerrainPRO is rolling out to Aussie crews now — early access
             pricing locked in for the first 500.
           </p>
@@ -84,19 +67,33 @@ export default function Waitlist() {
           <form
             onSubmit={submit}
             data-testid="waitlist-form"
-            className="grid grid-cols-1 sm:grid-cols-12 gap-3"
+            className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-5"
           >
-            <div className="sm:col-span-4">
+            <div className="sm:col-span-6">
+              <label
+                htmlFor="waitlist-name"
+                className="block font-mono text-[10px] uppercase tracking-[0.25em] text-yellow-500 mb-2"
+              >
+                Name
+              </label>
               <Input
+                id="waitlist-name"
                 data-testid="waitlist-name"
-                placeholder="Your name (optional)"
+                placeholder="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="h-12 bg-neutral-950 border-neutral-800 rounded-none focus-visible:ring-yellow-500 focus-visible:ring-1 focus-visible:border-yellow-500 text-sm"
               />
             </div>
-            <div className="sm:col-span-5">
+            <div className="sm:col-span-6">
+              <label
+                htmlFor="waitlist-email"
+                className="block font-mono text-[10px] uppercase tracking-[0.25em] text-yellow-500 mb-2"
+              >
+                Email Address
+              </label>
               <Input
+                id="waitlist-email"
                 data-testid="waitlist-email"
                 type="email"
                 required
@@ -105,27 +102,6 @@ export default function Waitlist() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-12 bg-neutral-950 border-neutral-800 rounded-none focus-visible:ring-yellow-500 focus-visible:ring-1 focus-visible:border-yellow-500 text-sm"
               />
-            </div>
-            <div className="sm:col-span-3">
-              <Select value={trade} onValueChange={setTrade}>
-                <SelectTrigger
-                  data-testid="waitlist-trade"
-                  className="h-12 bg-neutral-950 border-neutral-800 rounded-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500 text-sm"
-                >
-                  <SelectValue placeholder="Trade" />
-                </SelectTrigger>
-                <SelectContent className="bg-neutral-950 border-neutral-800 rounded-none">
-                  {TRADES.map((t) => (
-                    <SelectItem
-                      key={t.v}
-                      value={t.v}
-                      className="rounded-none focus:bg-yellow-500 focus:text-black"
-                    >
-                      {t.l}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="sm:col-span-12">
