@@ -262,10 +262,10 @@ export default function Welcome() {
 
         {/* Illustration circle */}
         <div
-          className="relative rounded-full overflow-hidden bg-[#181818] flex items-center justify-center shrink-0 mb-7"
+          className="relative rounded-full overflow-hidden bg-[#181818] flex items-center justify-center shrink-0 mb-6"
           style={{
-            width: "min(72vw, 300px)",
-            height: "min(72vw, 300px)",
+            width: "min(56vw, 220px)",
+            height: "min(56vw, 220px)",
             boxShadow: `0 0 0 1.5px rgba(245,166,35,0.12), 0 22px 64px rgba(0,0,0,0.85), 0 0 90px ${GOLD}1A`,
           }}
         >
@@ -336,14 +336,14 @@ export default function Welcome() {
           ))}
         </div>
 
-        {/* Primary CTA */}
+        {/* Primary CTA — always Free Trial */}
         <button
           type="button"
-          onClick={next}
+          onClick={() => navigate("/signup")}
           data-testid="welcome-cta"
           className="w-full inline-flex items-center justify-center gap-2 py-4 px-8 rounded-lg bg-[#F5A623] text-zinc-900 font-black uppercase tracking-widest text-sm shadow-[0_10px_30px_-5px_rgba(245,166,35,0.5)] hover:bg-[#ffb733] hover:shadow-[0_14px_38px_-4px_rgba(245,166,35,0.65)] active:scale-[0.98] transition-all duration-200"
         >
-          {isLast ? "Start Free Trial" : "Continue"}
+          Free Trial
           <ArrowRight className="w-4 h-4" strokeWidth={2.6} />
         </button>
 
