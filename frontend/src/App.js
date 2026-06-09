@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import Workspace from "@/pages/Workspace";
 import Directory from "@/pages/Directory";
 import PaymentSuccess from "@/pages/PaymentSuccess";
+import Welcome from "@/pages/Welcome";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
@@ -45,6 +46,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/welcome" element={<Welcome />} />
             <Route
               path="/payment/success"
               element={

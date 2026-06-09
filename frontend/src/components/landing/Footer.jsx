@@ -88,7 +88,7 @@ export default function Footer() {
             </p>
 
             <Link
-              to="/signup"
+              to="/welcome"
               data-testid="footer-cta"
               className="mt-7 inline-flex items-center gap-2 h-11 px-5 bg-[#ffb703] text-black font-black uppercase tracking-[0.18em] text-[11px] btn-industrial transition-all duration-150 hover:bg-[#ffc933] active:translate-y-[1px]"
             >

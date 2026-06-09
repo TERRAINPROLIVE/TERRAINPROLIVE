@@ -54,7 +54,7 @@ export default function Pricing() {
 
   const handleCta = async (tier) => {
     if (!user) {
-      navigate("/signup");
+      navigate("/welcome");
       return;
     }
     setBusy(tier.id);
@@ -142,7 +142,7 @@ export default function Pricing() {
                 </button>
               ) : (
                 <Link
-                  to="/signup"
+                  to="/welcome"
                   data-testid={`pricing-cta-${t.id}`}
                   className={`mt-8 inline-flex items-center justify-center h-12 font-semibold uppercase tracking-[0.15em] text-xs ${
                     t.highlight

@@ -45,7 +45,7 @@ export default function Header() {
 
   const goSignup = () => {
     setOpen(false);
-    navigate("/signup");
+    navigate("/welcome");
   };
 
   return (
@@ -90,7 +90,7 @@ export default function Header() {
           <button
             type="button"
             data-testid="desktop-nav-cta"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/welcome")}
             className="ml-2 inline-flex items-center gap-2 h-11 px-5 bg-yellow-500 text-black font-black uppercase tracking-[0.18em] text-[12px] btn-industrial transition-transform duration-150 hover:bg-yellow-400 active:translate-y-[1px]"
           >
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />

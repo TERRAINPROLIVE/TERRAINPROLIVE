@@ -45,7 +45,7 @@ export default function Hero() {
         >
           <button
             type="button"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/welcome")}
             data-testid="hero-primary-cta"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-3 py-4 px-8 rounded-lg bg-[#F5A623] text-zinc-900 font-black uppercase tracking-widest text-sm sm:text-base shadow-[0_10px_30px_-5px_rgba(245,166,35,0.5)] hover:bg-[#ffb733] hover:shadow-[0_14px_38px_-4px_rgba(245,166,35,0.65)] transition-all duration-200"
           >
