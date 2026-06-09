@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
 import SloganMarquee from "@/components/landing/SloganMarquee";
@@ -13,6 +16,15 @@ import Footer from "@/components/landing/Footer";
 import ChatBot from "@/components/landing/ChatBot";
 
 export default function Landing() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) return; // logged-in users see landing normally (or could redirect to dashboard)
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (isMobile) navigate("/welcome", { replace: true });
+  }, [navigate, user]);
+
   return (
     <div data-testid="landing-page" className="relative bg-[#0a0a0a] text-[#fafafa]">
       <Header />
