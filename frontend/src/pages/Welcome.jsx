@@ -127,25 +127,25 @@ const SLIDES = [
   {
     id: 0,
     eyebrow: "Step 01 // The Engine",
-    title: "Instant Quotes, Zero Guesswork",
+    title: "Instant Quotes",
     description:
-      "AI-powered estimates built for Aussie tradies. Get accurate job pricing in under 10 minutes — straight from the cab.",
+      "AI-powered estimates built for Aussie tradies. Pricing in under 10 minutes — straight from the cab.",
     illustration: <SlideOne />,
   },
   {
     id: 1,
     eyebrow: "Step 02 // The Inputs",
-    title: "Smart Inputs, Smarter Output",
+    title: "Smarter Inputs",
     description:
-      "Toggle job types, adjust scope, and let the engine handle rates, materials, and margins automatically. No spreadsheets.",
+      "Toggle jobs, adjust scope. The engine handles rates, materials and margins. No spreadsheets.",
     illustration: <SlideTwo />,
   },
   {
     id: 2,
     eyebrow: "Step 03 // The Wins",
-    title: "Win More Jobs, Faster",
+    title: "Win More Jobs",
     description:
-      "Send polished, line-itemed PDFs from site. Track what's Draft, Sent, Won or Lost — all in one rugged dashboard.",
+      "Send line-itemed PDFs from site. Track what's Draft, Sent, Won or Lost — all in one place.",
     illustration: <SlideThree />,
   },
 ];
@@ -309,11 +309,11 @@ export default function Welcome() {
         </div>
         <h1
           data-testid="welcome-title"
-          className="font-display uppercase text-[26px] font-bold tracking-tight leading-[0.95] text-white text-center mb-3 max-w-[18ch]"
+          className="font-display uppercase text-[28px] font-bold tracking-tight leading-[0.95] text-white text-center mb-3 min-h-[32px] flex items-center justify-center"
         >
           {slide.title}
         </h1>
-        <p className="text-[13px] leading-[1.6] text-white/55 text-center max-w-[28ch] min-h-[42px]">
+        <p className="text-[13px] leading-[1.55] text-white/55 text-center max-w-[28ch] min-h-[60px]">
           {slide.description}
         </p>
 
