@@ -9,9 +9,6 @@ import {
   UserPlus,
   Bell,
   ChevronDown,
-  Eye,
-  Send,
-  Download,
   Clock,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -116,25 +113,27 @@ export default function MobileDashboard() {
   const labourRate = user?.hourly_rate ? `$${user.hourly_rate}` : "$—";
 
   return (
-    <div data-testid="mobile-dashboard" className="lg:hidden bg-[#0a0a0a] text-white min-h-screen pb-10">
+    <div data-testid="mobile-dashboard" className="lg:hidden bg-[#0a0a0a] text-white min-h-screen pb-24">
       {/* Header */}
       <header className="px-4 pt-4 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
-          <img
-            src="/terrainpro-logo-full.png"
-            alt="TerrainPRO"
-            className="h-10 w-auto object-contain shrink-0"
-            draggable={false}
-          />
-          <button
-            type="button"
-            data-testid="mobile-business-switcher"
-            onClick={() => navigate("/dashboard")}
-            className="inline-flex items-center gap-1 font-display uppercase text-sm font-bold tracking-tight truncate text-white"
-          >
-            <span className="truncate max-w-[140px]">{businessName}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
-          </button>
+          <div className="w-9 h-9 bg-yellow-500 flex items-center justify-center rounded-sm shrink-0">
+            <span className="font-black text-black text-[11px] tracking-tight">TP</span>
+          </div>
+          <div className="flex flex-col leading-none min-w-0">
+            <span className="text-[10px] font-black text-yellow-500 tracking-tight italic">
+              TERRAINPRO
+            </span>
+            <button
+              type="button"
+              data-testid="mobile-business-switcher"
+              onClick={() => navigate("/dashboard")}
+              className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-white font-bold uppercase tracking-tight"
+            >
+              <span className="truncate max-w-[160px]">{businessName}</span>
+              <ChevronDown className="w-3 h-3 shrink-0" strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <button
@@ -275,6 +274,47 @@ export default function MobileDashboard() {
           />
         </div>
       </section>
+      {/* Bottom Tab Nav */}
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-black border-t border-zinc-800 h-16 flex justify-around items-center px-4 z-40">
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          data-testid="mobile-tab-home"
+          aria-label="Home"
+          className="flex flex-col items-center gap-1"
+        >
+          <span className="grid place-items-center w-7 h-7 rounded-md bg-yellow-500/20">
+            <span className="block w-1.5 h-1.5 rounded-full bg-yellow-500" />
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/quote")}
+          data-testid="mobile-tab-quote"
+          aria-label="New Quote"
+          className="flex items-center justify-center w-7 h-7 rounded-md border border-zinc-700 text-neutral-400 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/directory")}
+          data-testid="mobile-tab-directory"
+          aria-label="Directory"
+          className="flex items-center justify-center w-7 h-7 rounded-md border border-zinc-700 text-neutral-400 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+        >
+          <UserPlus className="w-4 h-4" strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          data-testid="mobile-tab-profile"
+          aria-label="Profile"
+          className="flex items-center justify-center w-7 h-7 rounded-md border border-zinc-700 text-neutral-400 hover:border-yellow-500 hover:text-yellow-500 transition-colors"
+        >
+          <Clock className="w-4 h-4" strokeWidth={2} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -322,60 +362,57 @@ function PipelineCell({ label, count, active }) {
 }
 
 function JobRow({ quote, onPdf, onSend, onView }) {
-  const scope = (quote.items || []).map((i) => i.label).slice(0, 2).join(", ") || "Quote";
+  const clientName =
+    quote.client?.name || quote.client_name || (typeof quote.client === "string" ? quote.client : null) || "Client";
+  const scope = (quote.items || []).map((i) => i.label).slice(0, 3).join(", ") || "Quote";
   const amount = fmtMoney(quote.total_low);
   const status = quote.status || "Draft";
 
-  return (
-    <div
-      data-testid={`mobile-job-${quote.id}`}
-      className="rounded-md bg-zinc-900/60 border border-zinc-800 px-4 py-3"
-    >
-      <div className="flex items-start justify-between gap-3 mb-1">
-        <h3 className="font-display uppercase text-base font-bold tracking-tight text-white truncate">
-          {quote.client?.name || "Client"}
-        </h3>
-        <span className="font-display text-base font-bold text-white whitespace-nowrap">{amount}</span>
-      </div>
-      <p className="text-[11px] text-neutral-400 leading-relaxed mb-3 truncate">{scope}</p>
+  // Buttons depend on status
+  const buttons =
+    status === "Draft"
+      ? [
+          { label: "Draft", primary: true, onClick: onView, testid: `mobile-job-draft-${quote.id}` },
+          { label: "Send", onClick: onSend, testid: `mobile-job-send-${quote.id}` },
+          { label: "PDF", onClick: onPdf, testid: `mobile-job-pdf-${quote.id}` },
+        ]
+      : [
+          { label: "View", onClick: onView, testid: `mobile-job-view-${quote.id}` },
+          { label: "PDF", onClick: onPdf, testid: `mobile-job-pdf-${quote.id}` },
+        ];
 
+  return (
+    <div data-testid={`mobile-job-${quote.id}`} className="bg-zinc-900/60 rounded-md p-4">
+      <div className="flex justify-between items-start mb-1">
+        <h3 className="text-white font-display uppercase tracking-tight font-bold text-lg leading-none">
+          {clientName}
+        </h3>
+        <span className="text-white font-display font-bold text-lg leading-none">{amount}</span>
+      </div>
+      <p className="text-neutral-400 text-[11px] mb-3 truncate">{scope}</p>
       <div className="flex items-center gap-2">
-        <span
-          className={`inline-block px-2 py-1 bg-zinc-800 font-mono text-[9px] uppercase tracking-[0.18em] font-bold rounded ${
-            STATUS_STYLES[status] || STATUS_STYLES.Draft
-          }`}
-        >
-          {status}
-        </span>
-        <div className="ml-auto flex items-center gap-1.5">
-          <RowAction icon={Eye} label="View" onClick={onView} testid={`mobile-job-view-${quote.id}`} />
-          {status === "Draft" && (
-            <RowAction icon={Send} label="Send" onClick={onSend} testid={`mobile-job-send-${quote.id}`} />
-          )}
-          <RowAction icon={Download} label="PDF" onClick={onPdf} testid={`mobile-job-pdf-${quote.id}`} primary />
-        </div>
+        <span className="text-white font-display font-bold text-base mr-auto">{amount}</span>
+        {buttons.map((btn) => (
+          <button
+            key={btn.label}
+            type="button"
+            onClick={btn.onClick}
+            data-testid={btn.testid}
+            className={`px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] rounded-sm border transition-colors ${
+              btn.primary
+                ? "bg-yellow-500 border-yellow-500 text-black hover:bg-yellow-400"
+                : "bg-zinc-800 border-zinc-700 text-neutral-300 hover:bg-zinc-700"
+            }`}
+          >
+            {btn.label}
+          </button>
+        ))}
       </div>
     </div>
   );
 }
 
-function RowAction({ icon: Icon, label, onClick, testid, primary }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      data-testid={testid}
-      className={`inline-flex items-center gap-1 px-2.5 py-1 border rounded font-mono text-[9px] uppercase tracking-[0.15em] font-bold transition-colors ${
-        primary
-          ? "bg-yellow-500 border-yellow-500 text-black hover:bg-yellow-400"
-          : "bg-zinc-800 border-zinc-700 text-neutral-300 hover:bg-zinc-700"
-      }`}
-    >
-      <Icon className="w-3 h-3" strokeWidth={2.2} />
-      {label}
-    </button>
-  );
-}
+function RowAction() { return null; } // unused placeholder kept for export compatibility
 
 function HealthTile({ value, label }) {
   return (
