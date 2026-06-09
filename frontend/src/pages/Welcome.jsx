@@ -36,17 +36,11 @@ function SlideOne() {
       <rect x="116" y="105" width="44" height="22" rx="11" fill={GOLD} />
       <rect x="120" y="112" width="36" height="8" rx="4" fill="#1A1A1A" />
       <rect x="40" y="248" width="72" height="48" rx="12" fill="#222" />
-      <rect x="48" y="256" width="28" height="6" rx="3" fill="#555" />
-      <rect x="48" y="268" width="50" height="10" rx="5" fill={GOLD} />
-      <rect x="48" y="282" width="36" height="6" rx="3" fill="#888" />
+      <text x="76" y="278" fill={GOLD} fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle">LANDSCAPING</text>
       <rect x="124" y="248" width="72" height="48" rx="12" fill="#222" />
-      <rect x="132" y="256" width="28" height="6" rx="3" fill="#555" />
-      <rect x="132" y="268" width="50" height="10" rx="5" fill={GOLD_LIGHT} />
-      <rect x="132" y="282" width="36" height="6" rx="3" fill="#888" />
+      <text x="160" y="278" fill={GOLD_LIGHT} fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle">EARTHMOVING</text>
       <rect x="208" y="248" width="72" height="48" rx="12" fill="#222" />
-      <rect x="216" y="256" width="28" height="6" rx="3" fill="#555" />
-      <rect x="216" y="268" width="50" height="10" rx="5" fill={GOLD} />
-      <rect x="216" y="282" width="36" height="6" rx="3" fill="#555" />
+      <text x="244" y="278" fill={GOLD} fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle">CONCRETING</text>
     </svg>
   );
 }
