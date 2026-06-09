@@ -226,7 +226,7 @@ export default function Welcome() {
     >
       <div className="w-full max-w-sm flex flex-col items-center flex-1">
         {/* Top bar: progress pills + skip */}
-        <div className="w-full flex items-center justify-between mb-7">
+        <div className="w-full flex items-center justify-between mb-6">
           <div className="flex gap-1.5 items-center">
             {SLIDES.map((_, i) => (
               <div
@@ -251,11 +251,11 @@ export default function Welcome() {
         </div>
 
         {/* Brand */}
-        <div className="mb-5">
+        <div className="mb-5 flex justify-center w-full">
           <img
             src="/terrainpro-logo-full.png"
             alt="TerrainPRO"
-            className="h-10 w-auto object-contain select-none"
+            className="h-16 w-auto object-contain select-none"
             draggable={false}
           />
         </div>
