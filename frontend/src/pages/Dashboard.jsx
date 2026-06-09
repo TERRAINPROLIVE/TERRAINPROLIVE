@@ -24,6 +24,7 @@ import {
   HardHat,
 } from "lucide-react";
 import AppShell from "@/components/AppShell";
+import MobileDashboard from "@/pages/MobileDashboard";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { generateQuotePdf } from "@/lib/quotePdf";
@@ -116,6 +117,11 @@ export default function Dashboard() {
         data-testid="business-dashboard"
         className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-8 pt-4 sm:pt-5 pb-6 sm:pb-10"
       >
+        {/* Mobile-only dashboard (matches mobile mockup design) */}
+        <MobileDashboard />
+
+        {/* Desktop dashboard — current full feature set */}
+        <div className="hidden lg:block">
         {/* 1. HEADER & IDENTITY BLOCK */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col gap-5 lg:grid lg:grid-cols-4 lg:gap-5 lg:items-start">
@@ -352,6 +358,7 @@ export default function Dashboard() {
             </div>
           </aside>
         </div>
+        </div>{/* /desktop dashboard */}
       </main>
 
       {selected && (
