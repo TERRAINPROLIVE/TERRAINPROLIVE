@@ -1223,7 +1223,6 @@ async def create_checkout(
     cancel_url = f"{origin}/dashboard?payment=cancelled"
 
     host_url = str(request.base_url)
-    stripe_checkout = _get_stripe_checkout(host_url)
     metadata = {
         "user_id": user["id"],
         "user_email": user["email"],
@@ -1231,14 +1230,14 @@ async def create_checkout(
         "plan_name": pkg["name"],
         "source": "terrainpro_subscription",
     }
-    checkout_req = CheckoutSessionRequest(
-        amount=pkg["amount"],
-        currency=pkg["currency"],
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{"price_data": {"currency": pkg["currency"], "product_data": {"name": pkg["name"]}, "unit_amount": int(pkg["amount"] * 100)}, "quantity": 1}],
+        mode="payment",
         success_url=success_url,
         cancel_url=cancel_url,
         metadata=metadata,
     )
-    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_req)
 
     now = datetime.now(timezone.utc)
     await db.payment_transactions.insert_one({
@@ -1258,7 +1257,7 @@ async def create_checkout(
         "updated_at": now.isoformat(),
     })
 
-    return {"url": session.url, "session_id": session.session_id}
+    return {"session_id": session.id, "url": session.url}
 
 
 async def _apply_successful_payment(txn: dict) -> dict:
