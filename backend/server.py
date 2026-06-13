@@ -10,7 +10,7 @@ import math
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional, Literal
-import uuid
+import uuidh
 from datetime import datetime, timezone, timedelta
 
 import bcrypt
@@ -1310,9 +1310,13 @@ async def get_payment_status(
     if txn["user_id"] != user["id"]:
         raise HTTPException(status_code=403, detail="Not your payment session")
 
-    host_url = str(request.base_url)
-    stripe_checkout = _get_stripe_checkout(host_url)
-    status_resp: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
+    session = stripe.checkout.Session.retrieve(session_id)
+return {
+    "status": session.status,
+    "payment_status": session.payment_status,
+    "amount_total": session.amount_total,
+    "currency": session.currency
+}
 
     now_iso = datetime.now(timezone.utc).isoformat()
     await db.payment_transactions.update_one(
