@@ -237,8 +237,8 @@ def _extract_json(text: str) -> dict:
 
 @api_router.post("/quote/generate", response_model=QuoteResponse)
 async def generate_quote(req: QuoteRequest):
-    if not EMERGENT_LLM_KEY:
-        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
 
     quote_id = str(uuid.uuid4())
     user_payload = {
@@ -251,22 +251,20 @@ async def generate_quote(req: QuoteRequest):
         "complexity": req.complexity,
     }
 
-    chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
-        session_id=f"quote-{quote_id}",
-        system_message=SYSTEM_PROMPT,
-    ).with_model("openai", "gpt-5.2")
-
-    user_msg = UserMessage(
-        text=(
-            "Generate a detailed AUD quote for the following job. Respond with JSON only.\n\n"
-            f"Job details:\n{json.dumps(user_payload, indent=2)}"
-        )
+    prompt = (
+        "Generate a detailed AUD quote for the following job. Respond with JSON only.\n\n"
+        f"Job details:\n{json.dumps(user_payload, indent=2)}"
     )
 
     try:
-        raw = await chat.send_message(user_msg)
-        data = _extract_json(raw if isinstance(raw, str) else str(raw))
+        ai_response = anthropic_client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = ai_response.content[0].text
+        data = _extract_json(raw)
     except Exception as e:
         logging.exception("LLM call failed")
         raise HTTPException(status_code=502, detail=f"AI estimator failed: {e}")
@@ -349,8 +347,8 @@ Rules:
 
 @api_router.post("/quote/multi-generate", response_model=QuoteResponse)
 async def multi_generate_quote(req: MultiQuoteRequest):
-    if not EMERGENT_LLM_KEY:
-        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
 
     quote_id = str(uuid.uuid4())
     payload = {
@@ -362,12 +360,6 @@ async def multi_generate_quote(req: MultiQuoteRequest):
         "labour_rate_aud_per_hour": req.labour_rate,
     }
 
-    chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
-        session_id=f"quote-multi-{quote_id}",
-        system_message=MULTI_SYSTEM_PROMPT,
-    ).with_model("openai", "gpt-5.2")
-
     rate_instruction = (
         f"IMPORTANT: This tradie's own labour rate is AUD ${req.labour_rate:.0f}/hr ex GST. "
         "Use THIS rate for all labour/crew line items (unit 'hrs' or 'day' = rate x 8) instead of generic defaults, "
@@ -376,19 +368,23 @@ async def multi_generate_quote(req: MultiQuoteRequest):
         else ""
     )
 
-    user_msg = UserMessage(
-        text=(
-            "Generate a consolidated AUD quote for the following customer covering ALL scopes. "
-            "Group line_items by scope using the job_type id. Factor in travel from the business "
-            "address to the customer's job site if both are provided. Respond with JSON only.\n\n"
-            + rate_instruction
-            + f"Brief:\n{json.dumps(payload, indent=2, default=str)}"
-        )
+    prompt = (
+        "Generate a consolidated AUD quote for the following customer covering ALL scopes. "
+        "Group line_items by scope using the job_type id. Factor in travel from the business "
+        "address to the customer's job site if both are provided. Respond with JSON only.\n\n"
+        + rate_instruction
+        + f"Brief:\n{json.dumps(payload, indent=2, default=str)}"
     )
 
     try:
-        raw = await chat.send_message(user_msg)
-        data = _extract_json(raw if isinstance(raw, str) else str(raw))
+        ai_response = anthropic_client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=MULTI_SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = ai_response.content[0].text
+        data = _extract_json(raw)
     except Exception as e:
         logging.exception("Multi-quote LLM call failed")
         raise HTTPException(status_code=502, detail=f"AI estimator failed: {e}")
@@ -567,16 +563,12 @@ DO NOT:
 
 @api_router.post("/chat/message", response_model=ChatResponse)
 async def chat_message(req: ChatRequest):
-    if not EMERGENT_LLM_KEY:
-        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
     if req.messages[-1].role != "user":
         raise HTTPException(status_code=400, detail="Last message must be from user")
 
-    chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
-        session_id=f"chat-{req.session_id}",
-        system_message=CHAT_SYSTEM_PROMPT,
-    ).with_model("openai", "gpt-5.2")
+    # Anthropic call is made below after building the prompt
 
     # Stateless: pass the whole conversation as one user message for context.
     convo_lines = []
@@ -596,8 +588,13 @@ async def chat_message(req: ChatRequest):
         prompt = latest
 
     try:
-        raw = await chat.send_message(UserMessage(text=prompt))
-        reply = raw if isinstance(raw, str) else str(raw)
+        ai_response = anthropic_client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=CHAT_SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        reply = ai_response.content[0].text
         # Strip any accidental role prefix
         for prefix in ("ASSISTANT:", "Assistant:", "assistant:"):
             if reply.lstrip().startswith(prefix):
@@ -1242,7 +1239,7 @@ async def create_checkout(
     now = datetime.now(timezone.utc)
     await db.payment_transactions.insert_one({
         "id": str(uuid.uuid4()),
-        "session_id": session.session_id,
+        "session_id": session.id,
         "user_id": user["id"],
         "user_email": user["email"],
         "package_id": req.package_id,
@@ -1346,17 +1343,17 @@ async def get_payment_status(
 async def stripe_webhook(request: Request):
     body = await request.body()
     signature = request.headers.get("Stripe-Signature", "")
-    host_url = str(request.base_url)
-    stripe_checkout = _get_stripe_checkout(host_url)
+    webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
     try:
-        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        event = stripe.Webhook.construct_event(body, signature, webhook_secret)
     except Exception as e:
         logger.error(f"Stripe webhook handle failed: {e}")
         raise HTTPException(status_code=400, detail="Webhook verification failed")
 
-    session_id = getattr(webhook_response, "session_id", None)
-    payment_status = getattr(webhook_response, "payment_status", None)
-    event_type = getattr(webhook_response, "event_type", None)
+    event_type = event.get("type")
+    session_obj = event.get("data", {}).get("object", {})
+    session_id = session_obj.get("id")
+    payment_status = session_obj.get("payment_status")
 
     if session_id:
         txn = await db.payment_transactions.find_one({"session_id": session_id})
