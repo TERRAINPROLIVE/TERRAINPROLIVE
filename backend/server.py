@@ -1311,12 +1311,12 @@ async def get_payment_status(
         raise HTTPException(status_code=403, detail="Not your payment session")
 
     session = stripe.checkout.Session.retrieve(session_id)
-return {
-    "status": session.status,
-    "payment_status": session.payment_status,
-    "amount_total": session.amount_total,
-    "currency": session.currency
-}
+    return {
+        "status": session.status,
+        "payment_status": session.payment_status,
+        "amount_total": session.amount_total,
+        "currency": session.currency
+    }
 
     now_iso = datetime.now(timezone.utc).isoformat()
     await db.payment_transactions.update_one(
