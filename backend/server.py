@@ -1202,10 +1202,8 @@ SUBSCRIPTION_PACKAGES = {
 }
 
 
-def _get_stripe_checkout(host_url: str) -> StripeCheckout:
-    api_key = os.environ["STRIPE_API_KEY"]
-    webhook_url = f"{host_url.rstrip('/')}/api/webhook/stripe"
-    return StripeCheckout(api_key=api_key, webhook_url=webhook_url)
+def get_webhook_url(host_url: str) -> str:
+        return f"{host_url.rstrip('/')}/api/webhook/stripe"
 
 
 class CheckoutCreateRequest(BaseModel):
