@@ -10,7 +10,7 @@ import math
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional, Literal
-import uuidh
+import uuid
 from datetime import datetime, timezone, timedelta
 
 import bcrypt
