@@ -9,38 +9,40 @@ const GOLD_DARK = "#C57F0E";
 function SlideOne() {
   return (
     <svg viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      <rect x="24" y="20" width="272" height="300" rx="20" fill="#1A1A1A" />
-      <rect x="24" y="20" width="272" height="300" rx="20" stroke="#2C2C2C" strokeWidth="1" />
-      <rect x="24" y="20" width="272" height="52" rx="20" fill="#222" />
-      <rect x="24" y="52" width="272" height="20" fill="#222" />
-      <circle cx="52" cy="46" r="12" fill={GOLD} opacity="0.18" />
-      <circle cx="52" cy="46" r="6" fill={GOLD} />
-      <rect x="72" y="40" width="80" height="8" rx="4" fill="#EFEFEF" />
-      <rect x="72" y="52" width="50" height="6" rx="3" fill="#666" />
-      <rect x="262" y="36" width="24" height="24" rx="8" fill="#2A2200" />
-      <path d="M270 48 L274 44 L278 48" stroke={GOLD} strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M270 52 L274 48 L278 52" stroke={GOLD} strokeWidth="1.5" strokeLinecap="round" />
-      <rect x="40" y="82" width="60" height="6" rx="3" fill="#555" />
-      <rect x="220" y="80" width="60" height="10" rx="5" fill="#2A2200" />
-      <rect x="232" y="82" width="36" height="6" rx="3" fill={GOLD} />
-      <rect x="44" y="200" width="28" height="20" rx="6" fill={GOLD} />
-      <rect x="44" y="160" width="28" height="40" rx="6" fill={GOLD} opacity="0.12" />
-      <rect x="84" y="165" width="28" height="55" rx="6" fill={GOLD} />
-      <rect x="84" y="140" width="28" height="25" rx="6" fill={GOLD} opacity="0.12" />
-      <rect x="124" y="140" width="28" height="80" rx="6" fill={GOLD_LIGHT} />
-      <rect x="124" y="120" width="28" height="20" rx="6" fill={GOLD_LIGHT} opacity="0.15" />
-      <rect x="164" y="115" width="28" height="105" rx="6" fill={GOLD_LIGHT} />
-      <rect x="164" y="100" width="28" height="15" rx="6" fill={GOLD_LIGHT} opacity="0.15" />
-      <rect x="204" y="148" width="28" height="72" rx="6" fill={GOLD} />
-      <rect x="244" y="122" width="28" height="98" rx="6" fill={GOLD} />
-      <rect x="116" y="105" width="44" height="22" rx="11" fill={GOLD} />
-      <rect x="120" y="112" width="36" height="8" rx="4" fill="#1A1A1A" />
-      <rect x="40" y="248" width="72" height="48" rx="12" fill="#222" />
-      <text x="76" y="278" fill={GOLD} fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle">LANDSCAPING</text>
-      <rect x="124" y="248" width="72" height="48" rx="12" fill="#222" />
-      <text x="160" y="278" fill={GOLD_LIGHT} fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle">EARTHMOVING</text>
-      <rect x="208" y="248" width="72" height="48" rx="12" fill="#222" />
-      <text x="244" y="278" fill={GOLD} fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle">CONCRETING</text>
+      <rect x="24" y="20" width="272" height="300" rx="20" fill="#141414" />
+      <rect x="24" y="20" width="272" height="300" rx="20" stroke="#2A2200" strokeWidth="1" />
+
+      {/* Title */}
+      <text x="160" y="62" fill="#FFFFFF" fontSize="13" fontWeight="800" fontFamily="Inter, sans-serif" textAnchor="middle" letterSpacing="0.4">WHY TRADIES CHOOSE</text>
+      <text x="160" y="84" fontSize="18" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle" letterSpacing="0.8">
+        <tspan fill="#FFFFFF">TERRAIN</tspan>
+        <tspan fill={GOLD}>PRO</tspan>
+      </text>
+
+      {/* Feature row 1: AI-POWERED QUOTES */}
+      <rect x="44" y="110" width="232" height="48" rx="12" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="0.8" />
+      <circle cx="68" cy="134" r="11" fill="#2A2200" />
+      <path d="M62 134 L68 128 L74 134 M68 128 L68 140" stroke={GOLD} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <text x="90" y="130" fill="#FFFFFF" fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" letterSpacing="0.3">AI-POWERED QUOTES</text>
+      <text x="90" y="144" fill="#888" fontSize="8" fontWeight="500" fontFamily="Inter, sans-serif">Accurate estimates under 10 minutes.</text>
+
+      {/* Feature row 2: BUILT FOR TRADIES */}
+      <rect x="44" y="166" width="232" height="48" rx="12" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="0.8" />
+      <circle cx="68" cy="190" r="11" fill="#2A2200" />
+      <path d="M64 192 L68 188 L72 192 M68 184 L68 196" stroke={GOLD} strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="68" cy="186" r="2" fill={GOLD} />
+      <text x="90" y="186" fill="#FFFFFF" fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" letterSpacing="0.3">BUILT FOR TRADIES</text>
+      <text x="90" y="200" fill="#888" fontSize="8" fontWeight="500" fontFamily="Inter, sans-serif">Simple, fast and hassle-free.</text>
+
+      {/* Feature row 3: LOCAL & RELIABLE */}
+      <rect x="44" y="222" width="232" height="48" rx="12" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="0.8" />
+      <circle cx="68" cy="246" r="11" fill="#2A2200" />
+      <path d="M68 240 L64 242 L64 248 L68 252 L72 248 L72 242 Z" stroke={GOLD} strokeWidth="1.4" strokeLinejoin="round" fill="none" />
+      <text x="90" y="242" fill="#FFFFFF" fontSize="9" fontWeight="900" fontFamily="Inter, sans-serif" letterSpacing="0.3">LOCAL & RELIABLE</text>
+      <text x="90" y="256" fill="#888" fontSize="8" fontWeight="500" fontFamily="Inter, sans-serif">Aussie support when you need it.</text>
+
+      {/* Gold accent line */}
+      <rect x="120" y="288" width="80" height="2" rx="1" fill={GOLD} opacity="0.5" />
     </svg>
   );
 }
@@ -48,32 +50,41 @@ function SlideOne() {
 function SlideTwo() {
   return (
     <svg viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      <rect x="24" y="20" width="272" height="300" rx="20" fill="#1A1A1A" />
-      <rect x="24" y="20" width="272" height="300" rx="20" stroke="#2C2C2C" strokeWidth="1" />
-      <rect x="40" y="36" width="80" height="10" rx="5" fill="#EFEFEF" />
-      <rect x="40" y="52" width="120" height="7" rx="3.5" fill="#666" />
-      <rect x="40" y="76" width="240" height="44" rx="12" fill="#222" />
-      <rect x="52" y="90" width="100" height="8" rx="4" fill="#EFEFEF" />
-      <rect x="52" y="102" width="70" height="6" rx="3" fill="#666" />
-      <rect x="238" y="88" width="36" height="20" rx="10" fill={GOLD} />
-      <circle cx="264" cy="98" r="8" fill="#1A1A1A" />
-      <rect x="40" y="130" width="240" height="44" rx="12" fill="#222" />
-      <rect x="52" y="144" width="90" height="8" rx="4" fill="#EFEFEF" />
-      <rect x="52" y="156" width="110" height="6" rx="3" fill="#666" />
-      <rect x="238" y="142" width="36" height="20" rx="10" fill="#333" />
-      <circle cx="247" cy="152" r="8" fill="#555" />
-      <rect x="40" y="184" width="240" height="44" rx="12" fill="#222" />
-      <rect x="52" y="198" width="76" height="8" rx="4" fill="#EFEFEF" />
-      <rect x="52" y="210" width="90" height="6" rx="3" fill="#666" />
-      <rect x="238" y="196" width="36" height="20" rx="10" fill={GOLD_LIGHT} />
-      <circle cx="264" cy="206" r="8" fill="#1A1A1A" />
-      <rect x="40" y="246" width="60" height="8" rx="4" fill="#555" />
-      <rect x="40" y="262" width="64" height="26" rx="13" fill="#2A2200" />
-      <rect x="50" y="272" width="44" height="6" rx="3" fill={GOLD} />
-      <rect x="112" y="262" width="72" height="26" rx="13" fill="#2A2200" />
-      <rect x="122" y="272" width="52" height="6" rx="3" fill={GOLD_LIGHT} />
-      <rect x="192" y="262" width="56" height="26" rx="13" fill="#252525" />
-      <rect x="202" y="272" width="36" height="6" rx="3" fill="#888" />
+      <rect x="24" y="20" width="272" height="300" rx="20" fill="#141414" />
+      <rect x="24" y="20" width="272" height="300" rx="20" stroke="#2A2200" strokeWidth="1" />
+
+      {/* Quote header */}
+      <text x="48" y="58" fill="#FFFFFF" fontSize="16" fontWeight="900" fontFamily="Inter, sans-serif" letterSpacing="0.8">YOUR QUOTE</text>
+
+      {/* Line items */}
+      <text x="48" y="98" fill="#DDD" fontSize="11" fontWeight="500" fontFamily="Inter, sans-serif">Landscaping</text>
+      <text x="272" y="98" fill="#FFF" fontSize="11" fontWeight="700" fontFamily="Inter, sans-serif" textAnchor="end">$1,450</text>
+      <line x1="48" y1="108" x2="272" y2="108" stroke="#2A2A2A" strokeWidth="0.7" />
+
+      <text x="48" y="128" fill="#DDD" fontSize="11" fontWeight="500" fontFamily="Inter, sans-serif">Earthmoving</text>
+      <text x="272" y="128" fill="#FFF" fontSize="11" fontWeight="700" fontFamily="Inter, sans-serif" textAnchor="end">$2,350</text>
+      <line x1="48" y1="138" x2="272" y2="138" stroke="#2A2A2A" strokeWidth="0.7" />
+
+      <text x="48" y="158" fill="#DDD" fontSize="11" fontWeight="500" fontFamily="Inter, sans-serif">Concreting</text>
+      <text x="272" y="158" fill="#FFF" fontSize="11" fontWeight="700" fontFamily="Inter, sans-serif" textAnchor="end">$1,200</text>
+      <line x1="48" y1="170" x2="272" y2="170" stroke="#2A2A2A" strokeWidth="0.7" />
+
+      {/* Total */}
+      <text x="48" y="200" fill={GOLD} fontSize="11" fontWeight="900" fontFamily="Inter, sans-serif" letterSpacing="0.4">TOTAL</text>
+      <text x="100" y="200" fill="#888" fontSize="9" fontWeight="500" fontFamily="Inter, sans-serif">(Incl. GST)</text>
+      <text x="272" y="202" fill={GOLD} fontSize="22" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="end" letterSpacing="0.5">$5,000</text>
+
+      {/* Badges */}
+      <circle cx="60" cy="232" r="6" fill="none" stroke={GOLD} strokeWidth="1.4" />
+      <path d="M57 232 L60 235 L63 230" stroke={GOLD} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <text x="72" y="235" fill="#DDD" fontSize="9" fontWeight="600" fontFamily="Inter, sans-serif">Fixed Price</text>
+      <circle cx="158" cy="232" r="6" fill="none" stroke={GOLD} strokeWidth="1.4" />
+      <path d="M155 232 L158 235 L161 230" stroke={GOLD} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <text x="170" y="235" fill="#DDD" fontSize="9" fontWeight="600" fontFamily="Inter, sans-serif">No Hidden Fees</text>
+
+      {/* CTA button */}
+      <rect x="48" y="258" width="224" height="38" rx="10" fill={GOLD} />
+      <text x="160" y="282" fill="#1A1A1A" fontSize="13" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle" letterSpacing="0.6">NEXT STEP →</text>
     </svg>
   );
 }
@@ -81,38 +92,31 @@ function SlideTwo() {
 function SlideThree() {
   return (
     <svg viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      <rect x="24" y="20" width="272" height="300" rx="20" fill="#1A1A1A" />
-      <rect x="24" y="20" width="272" height="300" rx="20" stroke="#2C2C2C" strokeWidth="1" />
-      <rect x="40" y="36" width="100" height="10" rx="5" fill="#EFEFEF" />
-      <rect x="40" y="52" width="70" height="7" rx="3.5" fill="#666" />
-      <rect x="260" y="32" width="28" height="28" rx="8" fill="#222" />
-      <rect x="266" y="41" width="16" height="2" rx="1" fill="#888" />
-      <rect x="269" y="46" width="10" height="2" rx="1" fill="#888" />
-      <rect x="271" y="51" width="6" height="2" rx="1" fill="#888" />
-      <rect x="40" y="76" width="240" height="64" rx="14" fill="#211A00" />
-      <rect x="40" y="76" width="4" height="64" rx="2" fill={GOLD} />
-      <rect x="52" y="88" width="110" height="9" rx="4.5" fill="#EFEFEF" />
-      <rect x="52" y="103" width="70" height="6" rx="3" fill="#666" />
-      <rect x="52" y="118" width="46" height="6" rx="3" fill="#555" />
-      <rect x="212" y="88" width="52" height="20" rx="10" fill={GOLD} />
-      <rect x="220" y="95" width="36" height="6" rx="3" fill="#1A1A1A" />
-      <rect x="40" y="152" width="240" height="64" rx="14" fill="#1E1A00" />
-      <rect x="40" y="152" width="4" height="64" rx="2" fill={GOLD_LIGHT} />
-      <rect x="52" y="164" width="130" height="9" rx="4.5" fill="#EFEFEF" />
-      <rect x="52" y="179" width="80" height="6" rx="3" fill="#666" />
-      <rect x="52" y="194" width="56" height="6" rx="3" fill="#555" />
-      <rect x="204" y="164" width="68" height="20" rx="10" fill={GOLD_LIGHT} />
-      <rect x="212" y="171" width="52" height="6" rx="3" fill="#1A1A1A" />
-      <rect x="40" y="228" width="240" height="64" rx="14" fill="#1E1A00" />
-      <rect x="40" y="228" width="4" height="64" rx="2" fill="#888" />
-      <rect x="52" y="240" width="95" height="9" rx="4.5" fill="#EFEFEF" />
-      <rect x="52" y="255" width="60" height="6" rx="3" fill="#666" />
-      <rect x="52" y="270" width="80" height="6" rx="3" fill="#555" />
-      <rect x="192" y="240" width="80" height="20" rx="10" fill="#333" />
-      <rect x="200" y="247" width="64" height="6" rx="3" fill="#AAA" />
-      <circle cx="272" cy="308" r="16" fill={GOLD} />
-      <line x1="272" y1="300" x2="272" y2="316" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" />
-      <line x1="264" y1="308" x2="280" y2="308" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" />
+      <rect x="24" y="20" width="272" height="300" rx="20" fill="#141414" />
+      <rect x="24" y="20" width="272" height="300" rx="20" stroke="#2A2200" strokeWidth="1" />
+
+      {/* Checkmark circle */}
+      <circle cx="160" cy="76" r="22" fill="none" stroke={GOLD} strokeWidth="2" />
+      <path d="M150 76 L158 84 L172 70" stroke={GOLD} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+
+      {/* Title */}
+      <text x="160" y="130" fill="#FFFFFF" fontSize="20" fontWeight="900" fontFamily="Inter, sans-serif" textAnchor="middle" letterSpacing="0.8">JOB CONFIRMED!</text>
+
+      {/* Description */}
+      <text x="160" y="160" fill="#999" fontSize="10" fontWeight="500" fontFamily="Inter, sans-serif" textAnchor="middle">We&apos;ve received your request</text>
+      <text x="160" y="174" fill="#999" fontSize="10" fontWeight="500" fontFamily="Inter, sans-serif" textAnchor="middle">and will be in touch soon.</text>
+
+      {/* Info card */}
+      <rect x="56" y="196" width="208" height="92" rx="10" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="0.8" />
+
+      <text x="74" y="222" fill="#888" fontSize="10" fontWeight="500" fontFamily="Inter, sans-serif">Job ID</text>
+      <text x="170" y="222" fill="#FFF" fontSize="11" fontWeight="800" fontFamily="Inter, sans-serif">TP-76845</text>
+
+      <text x="74" y="246" fill="#888" fontSize="10" fontWeight="500" fontFamily="Inter, sans-serif">Date</text>
+      <text x="170" y="246" fill="#FFF" fontSize="11" fontWeight="800" fontFamily="Inter, sans-serif">15 May 2024</text>
+
+      <text x="74" y="270" fill="#888" fontSize="10" fontWeight="500" fontFamily="Inter, sans-serif">Time</text>
+      <text x="170" y="270" fill="#FFF" fontSize="11" fontWeight="800" fontFamily="Inter, sans-serif">8:00 AM</text>
     </svg>
   );
 }
