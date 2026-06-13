@@ -17,13 +17,8 @@ import bcrypt
 import jwt
 import httpx
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-from emergentintegrations.payments.stripe.checkout import (
-    StripeCheckout,
-    CheckoutSessionRequest,
-    CheckoutSessionResponse,
-    CheckoutStatusResponse,
-)
+import anthropic
+import stripe
 
 
 ROOT_DIR = Path(__file__).parent
