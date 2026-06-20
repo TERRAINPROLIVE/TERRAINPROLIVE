@@ -1,0 +1,190 @@
+From 2837ddb08ed70f9a64f0b0abb5247dc9c2aebb8d Mon Sep 17 00:00:00 2001
+From: TerrainPRO <dev@terrainpro.com.au>
+Date: Sat, 20 Jun 2026 11:58:09 +0000
+Subject: [PATCH 1/3] backend: drop Emergent, route AI via _llm_complete, fix
+ /payments/status, default to Sonnet
+
+- Replace inline Anthropic calls with async _llm_complete helper (AsyncAnthropic);
+  route generate_quote, multi_generate_quote, chat_message through it
+- LLM_MODEL env var, default claude-sonnet-4-6
+- Fix get_payment_status: remove early return + undefined status_resp; endpoint
+  now updates the transaction and grants the subscription when paid
+- Remove litellm @ emergentagent.com wheel from requirements.txt
+---
+ backend/requirements.txt |  1 -
+ backend/server.py        | 62 +++++++++++++++++-----------------------
+ 2 files changed, 26 insertions(+), 37 deletions(-)
+
+diff --git a/backend/requirements.txt b/backend/requirements.txt
+index 105f16d..d0bdc0c 100644
+--- a/backend/requirements.txt
++++ b/backend/requirements.txt
+@@ -54,7 +54,6 @@ jq==1.11.0
+ jsonschema==4.26.0
+ jsonschema-specifications==2025.9.1
+ librt==0.11.0
+-litellm @ https://customer-assets.emergentagent.com/internal-asset/library/litellm-1.80.0-py3-none-any.whl#sha256=adf398c513273de9341f61822296c6b2145f7f2dc4a69daf3ac04829f5bde3f8
+ markdown-it-py==4.2.0
+ MarkupSafe==3.0.3
+ mccabe==0.7.0
+diff --git a/backend/server.py b/backend/server.py
+index 347d82d..864dd47 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -17,7 +17,7 @@ import bcrypt
+ import jwt
+ import httpx
+ 
+-import anthropic
++from anthropic import AsyncAnthropic
+ import stripe
+ 
+ 
+@@ -30,12 +30,26 @@ client = AsyncIOMotorClient(mongo_url)
+ db = client[os.environ['DB_NAME']]
+ 
+ ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
++LLM_MODEL = os.environ.get('LLM_MODEL', 'claude-sonnet-4-6')
+ 
+ STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY')
+ 
+ stripe.api_key = STRIPE_API_KEY
+ 
+-anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
++anthropic_client = AsyncAnthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
++
++
++async def _llm_complete(system_message: str, user_text: str, max_tokens: int = 4096) -> str:
++    """Single entry point for Anthropic chat completions used by the AI endpoints."""
++    if not anthropic_client:
++        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
++    message = await anthropic_client.messages.create(
++        model=LLM_MODEL,
++        max_tokens=max_tokens,
++        system=system_message,
++        messages=[{"role": "user", "content": user_text}],
++    )
++    return "".join(b.text for b in message.content if b.type == "text")
+ 
+ app = FastAPI(title="Tradesman AI Quoting API")
+ api_router = APIRouter(prefix="/api")
+@@ -257,13 +271,7 @@ async def generate_quote(req: QuoteRequest):
+     )
+ 
+     try:
+-        ai_response = anthropic_client.messages.create(
+-            model="claude-sonnet-4-6",
+-            max_tokens=4096,
+-            system=SYSTEM_PROMPT,
+-            messages=[{"role": "user", "content": prompt}]
+-        )
+-        raw = ai_response.content[0].text
++        raw = await _llm_complete(SYSTEM_PROMPT, prompt)
+         data = _extract_json(raw)
+     except Exception as e:
+         logging.exception("LLM call failed")
+@@ -377,13 +385,7 @@ async def multi_generate_quote(req: MultiQuoteRequest):
+     )
+ 
+     try:
+-        ai_response = anthropic_client.messages.create(
+-            model="claude-sonnet-4-6",
+-            max_tokens=4096,
+-            system=MULTI_SYSTEM_PROMPT,
+-            messages=[{"role": "user", "content": prompt}]
+-        )
+-        raw = ai_response.content[0].text
++        raw = await _llm_complete(MULTI_SYSTEM_PROMPT, prompt)
+         data = _extract_json(raw)
+     except Exception as e:
+         logging.exception("Multi-quote LLM call failed")
+@@ -588,13 +590,7 @@ async def chat_message(req: ChatRequest):
+         prompt = latest
+ 
+     try:
+-        ai_response = anthropic_client.messages.create(
+-            model="claude-sonnet-4-6",
+-            max_tokens=4096,
+-            system=CHAT_SYSTEM_PROMPT,
+-            messages=[{"role": "user", "content": prompt}]
+-        )
+-        reply = ai_response.content[0].text
++        reply = await _llm_complete(CHAT_SYSTEM_PROMPT, prompt)
+         # Strip any accidental role prefix
+         for prefix in ("ASSISTANT:", "Assistant:", "assistant:"):
+             if reply.lstrip().startswith(prefix):
+@@ -1308,32 +1304,26 @@ async def get_payment_status(
+         raise HTTPException(status_code=403, detail="Not your payment session")
+ 
+     session = stripe.checkout.Session.retrieve(session_id)
+-    return {
+-        "status": session.status,
+-        "payment_status": session.payment_status,
+-        "amount_total": session.amount_total,
+-        "currency": session.currency
+-    }
+ 
+     now_iso = datetime.now(timezone.utc).isoformat()
+     await db.payment_transactions.update_one(
+         {"session_id": session_id},
+         {"$set": {
+-            "status": status_resp.status,
+-            "payment_status": status_resp.payment_status,
++            "status": session.status,
++            "payment_status": session.payment_status,
+             "updated_at": now_iso,
+         }},
+     )
+ 
+-    if status_resp.payment_status == "paid" and not txn.get("subscription_granted"):
++    if session.payment_status == "paid" and not txn.get("subscription_granted"):
+         txn = await db.payment_transactions.find_one({"session_id": session_id})
+         await _apply_successful_payment(txn)
+ 
+     return {
+-        "status": status_resp.status,
+-        "payment_status": status_resp.payment_status,
+-        "amount_total": status_resp.amount_total,
+-        "currency": status_resp.currency,
++        "status": session.status,
++        "payment_status": session.payment_status,
++        "amount_total": session.amount_total,
++        "currency": session.currency,
+         "plan_name": txn.get("plan_name"),
+         "package_id": txn.get("package_id"),
+     }
+-- 
+2.43.0
+
+
+From e32364ea459bd6028be4d5d973020badcfc33d71 Mon Sep 17 00:00:00 2001
+From: TerrainPRO <dev@terrainpro.com.au>
+Date: Sat, 20 Jun 2026 12:13:45 +0000
+Subject: [PATCH 2/3] frontend: rehost hero image locally as WebP, drop
+ Emergent CDN reference
+
+- Add frontend/public/images/hero-bg.webp (optimized WebP, ~100KB, was 1.46MB PNG)
+- Point Hero.jsx HERO_BG to /images/hero-bg.webp
+- Update hero image URL in design_guidelines.json
+---
+ design_guidelines.json                   |   2 +-
+ frontend/public/images/hero-bg.webp      | Bin 0 -> 102720 bytes
+ frontend/src/components/landing/Hero.jsx |   3 +--
+ 3 files changed, 2 insertions(+), 3 deletions(-)
+ create mode 100644 frontend/public/images/hero-bg.webp
+
+diff --git a/design_guidelines.json b/design_guidelines.json
+index a28898f..bab7035 100644
+--- a/design_guidelines.json
++++ b/design_guidelines.json
+@@ -63,7 +63,7 @@
+   "media_assets": [
+     {
+       "category": "hero_background",
+-      "url": "https://static.prod-images.emergentagent.com/jobs/747abd9c-2a04-4e8d-97e7-67c6e970cdc3/images/b6feb06c1e22eb535e31a44dae30920128c69818aea25cf6f2f8021a10380ce0.png",
++      "url": "/images/hero-bg.webp",
+       "description": "Wide-angle photograph of a modern excavator on a misty construction site at dawn, cinematic lighting, dark and moody. Use with bg-black/50 overlay."
+     },
+     {
+--
+2.43.0
