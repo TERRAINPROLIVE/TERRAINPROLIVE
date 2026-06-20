@@ -7,6 +7,7 @@ import {
   Sparkles,
   Loader2,
   Check,
+  ChevronDown,
   Box,
   Leaf,
   Truck,
@@ -566,6 +567,10 @@ function Step1({
   const inputCls =
     "h-12 rounded-none bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 transition-colors focus-visible:border-yellow-500 focus-visible:ring-2 focus-visible:ring-yellow-500/20";
 
+  const [openTrades, setOpenTrades] = useState({});
+  const toggleTrade = (trade) =>
+    setOpenTrades((o) => ({ ...o, [trade]: !o[trade] }));
+
   return (
     <div className="space-y-10">
       {/* Customer */}
@@ -693,52 +698,77 @@ function Step1({
           </span>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-3">
           {JOB_GROUPS.map((group) => {
             const Icon = TRADE_ICON[group.trade] || Box;
+            const selectedInGroup = group.jobs.filter((j) =>
+              selectedJobIds.includes(j.id)
+            ).length;
+            const open = openTrades[group.trade] ?? selectedInGroup > 0;
             return (
-              <div key={group.trade}>
-                <div className="flex items-center gap-3 mb-4">
-                  <Icon
-                    className="w-4 h-4 text-yellow-500"
-                    strokeWidth={1.8}
-                  />
+              <div
+                key={group.trade}
+                className="rounded-lg border border-zinc-800 bg-zinc-950/40 overflow-hidden"
+              >
+                <button
+                  type="button"
+                  data-testid={`job-group-${group.trade}`}
+                  onClick={() => toggleTrade(group.trade)}
+                  aria-expanded={open}
+                  className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-zinc-900/60"
+                >
+                  <Icon className="w-4 h-4 text-yellow-500 shrink-0" strokeWidth={1.8} />
                   <span className="text-xs font-bold uppercase tracking-widest text-yellow-500">
                     {group.trade}
                   </span>
-                  <span className="h-px flex-1 bg-zinc-800" />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {group.jobs.map((j) => {
-                    const active = selectedJobIds.includes(j.id);
-                    return (
-                      <button
-                        key={j.id}
-                        type="button"
-                        data-testid={`job-chip-${j.id}`}
-                        onClick={() => toggleJob(j.id)}
-                        className={`group flex items-center justify-between gap-3 p-4 rounded-lg border text-left transition-colors ${
-                          active
-                            ? "bg-yellow-500/[0.02] border-yellow-500 text-white"
-                            : "bg-zinc-950/40 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                        }`}
-                      >
-                        <span className="text-sm font-semibold tracking-tight leading-snug">
-                          {j.label}
-                        </span>
-                        <span
-                          className={`shrink-0 w-5 h-5 grid place-items-center border transition-colors ${
+                  {selectedInGroup > 0 && (
+                    <span className="grid place-items-center min-w-[20px] h-5 px-1.5 rounded-full bg-yellow-500 text-black text-[11px] font-bold tabular-nums">
+                      {selectedInGroup}
+                    </span>
+                  )}
+                  <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+                    {group.jobs.length}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-neutral-500 shrink-0 transition-transform duration-200 ${
+                      open ? "rotate-180" : ""
+                    }`}
+                    strokeWidth={2}
+                  />
+                </button>
+                {open && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 pt-1">
+                    {group.jobs.map((j) => {
+                      const active = selectedJobIds.includes(j.id);
+                      return (
+                        <button
+                          key={j.id}
+                          type="button"
+                          data-testid={`job-chip-${j.id}`}
+                          onClick={() => toggleJob(j.id)}
+                          className={`group flex items-center justify-between gap-3 p-4 rounded-lg border text-left transition-colors ${
                             active
-                              ? "bg-yellow-500 border-yellow-500"
-                              : "border-zinc-700 group-hover:border-zinc-600"
+                              ? "bg-yellow-500/[0.02] border-yellow-500 text-white"
+                              : "bg-zinc-950/40 border-zinc-800 text-zinc-400 hover:border-zinc-700"
                           }`}
                         >
-                          {active && <Check className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                          <span className="text-sm font-semibold tracking-tight leading-snug">
+                            {j.label}
+                          </span>
+                          <span
+                            className={`shrink-0 w-5 h-5 grid place-items-center border transition-colors ${
+                              active
+                                ? "bg-yellow-500 border-yellow-500"
+                                : "border-zinc-700 group-hover:border-zinc-600"
+                            }`}
+                          >
+                            {active && <Check className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
