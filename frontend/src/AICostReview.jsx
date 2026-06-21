@@ -1,0 +1,112 @@
+/* eslint-disable */
+// BEDROCK — trade categories and job types
+export const TRADE_CATEGORIES = [
+  {
+    id: "landscaping",
+    label: "Landscaping",
+    icon: "Trees",
+    tagline: "Walls, turf, gardens & drainage",
+    jobTypes: [
+      { id: "retaining-wall", label: "Retaining Wall" },
+      { id: "turf", label: "Turf Installation" },
+      { id: "garden-bed", label: "Garden Bed Prep" },
+      { id: "drainage", label: "Drainage" },
+      { id: "paving", label: "Paving" },
+      { id: "mulch-soil", label: "Mulch / Soil" },
+      { id: "planting", label: "Planting" },
+      { id: "irrigation", label: "Irrigation" },
+      { id: "cleanup", label: "Site Clean Up" },
+      { id: "level-grade", label: "Level / Grade Yard" },
+    ],
+  },
+  {
+    id: "concreting",
+    label: "Concreting",
+    icon: "Square",
+    tagline: "Slabs, driveways & footings",
+    jobTypes: [
+      { id: "slab", label: "Concrete Slab" },
+      { id: "driveway", label: "Driveway" },
+      { id: "footpath", label: "Footpath" },
+      { id: "shed-pad", label: "Shed Pad" },
+      { id: "patio", label: "Patio / Alfresco" },
+      { id: "footings", label: "Footings" },
+      { id: "kerb", label: "Kerb / Edge" },
+      { id: "removal", label: "Concrete Removal" },
+      { id: "exposed", label: "Exposed Aggregate" },
+      { id: "pump", label: "Pump Required" },
+    ],
+  },
+  {
+    id: "earthmoving",
+    label: "Earthmoving",
+    icon: "Mountain",
+    tagline: "Cut, fill, trench & remove",
+    jobTypes: [
+      { id: "site-cut", label: "Site Cut" },
+      { id: "pad-prep", label: "Pad Preparation" },
+      { id: "trenching", label: "Trenching" },
+      { id: "footing-excav", label: "Footing Excavation" },
+      { id: "spoil-removal", label: "Spoil Removal" },
+      { id: "rock-breaking", label: "Rock Breaking" },
+      { id: "pool-excav", label: "Pool Excavation" },
+      { id: "driveway-prep", label: "Driveway Prep" },
+      { id: "drainage-trench", label: "Drainage Trench" },
+      { id: "final-trim", label: "Final Trim / Level" },
+    ],
+  },
+];
+
+// Smart measurement questions per job type
+export const JOB_QUESTIONS = {
+  "slab": [
+    { key: "area", label: "Area (m2)", type: "number", placeholder: "e.g. 48" },
+    { key: "thickness", label: "Thickness (mm)", type: "select", options: ["100mm", "125mm", "150mm", "175mm", "200mm"] },
+    { key: "mpa", label: "Concrete MPa", type: "select", options: ["20 MPa", "25 MPa", "32 MPa", "40 MPa"] },
+    { key: "mesh", label: "Mesh type", type: "select", options: ["SL62", "SL72", "SL82", "SL92", "No mesh"] },
+    { key: "excavation", label: "Excavation required", type: "toggle" },
+    { key: "formwork", label: "Formwork required", type: "toggle" },
+    { key: "pump", label: "Pump required", type: "toggle" },
+    { key: "finish", label: "Finish type", type: "select", options: ["Broom", "Trowel", "Exposed Agg", "Polished"] },
+    { key: "access", label: "Access type", type: "select", options: ["Easy", "Medium", "Tight"] },
+    { key: "spoil", label: "Spoil removal", type: "toggle" },
+  ],
+  "site-cut": [
+    { key: "area", label: "Area (m2)", type: "number", placeholder: "e.g. 220" },
+    { key: "depth", label: "Cut depth (m)", type: "number", placeholder: "e.g. 0.4" },
+    { key: "soil", label: "Soil type", type: "select", options: ["Sandy", "Clay", "Loam", "Rocky", "Fill"] },
+    { key: "slope", label: "Slope", type: "select", options: ["Flat", "Mild", "Moderate", "Steep"] },
+    { key: "machine", label: "Machine required", type: "select", options: ["1.7T Excavator", "3T Excavator", "5T Excavator", "Bobcat S70", "Skid Steer"] },
+    { key: "access", label: "Access type", type: "select", options: ["Easy", "Medium", "Tight"] },
+    { key: "spoilKept", label: "Spoil kept onsite", type: "toggle" },
+    { key: "truck", label: "Truck required", type: "toggle" },
+  ],
+  "retaining-wall": [
+    { key: "length", label: "Wall length (m)", type: "number", placeholder: "e.g. 12" },
+    { key: "height", label: "Wall height (m)", type: "number", placeholder: "e.g. 1.2" },
+    { key: "material", label: "Material type", type: "select", options: ["Treated Pine", "Hardwood Sleeper", "Concrete Sleeper", "Besser Block", "Natural Stone"] },
+    { key: "drainage", label: "Drainage required", type: "toggle" },
+    { key: "excavation", label: "Excavation required", type: "toggle" },
+    { key: "spoil", label: "Spoil removal", type: "toggle" },
+    { key: "access", label: "Access type", type: "select", options: ["Easy", "Medium", "Tight"] },
+    { key: "engineering", label: "Engineering required", type: "toggle" },
+  ],
+  "drainage": [
+    { key: "length", label: "Drainage length (m)", type: "number", placeholder: "e.g. 24" },
+    { key: "access", label: "Access type", type: "select", options: ["Easy", "Medium", "Tight"] },
+    { key: "machine", label: "Machine required", type: "toggle" },
+  ],
+  "drainage-trench": [
+    { key: "length", label: "Drainage trench length (m)", type: "number", placeholder: "e.g. 24" },
+    { key: "access", label: "Access type", type: "select", options: ["Easy", "Medium", "Tight"] },
+    { key: "machine", label: "Machine required", type: "toggle" },
+  ],
+  // Sensible defaults for everything else
+  "_default": [
+    { key: "area", label: "Area (m2)", type: "number", placeholder: "Enter area" },
+    { key: "access", label: "Access type", type: "select", options: ["Easy", "Medium", "Tight"] },
+    { key: "machine", label: "Machine required", type: "toggle" },
+    { key: "spoil", label: "Spoil / disposal", type: "toggle" },
+    { key: "notes", label: "Special notes", type: "text", placeholder: "Anything else?" },
+  ],
+};
