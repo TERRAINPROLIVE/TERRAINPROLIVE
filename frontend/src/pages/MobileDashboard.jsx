@@ -1,38 +1,55 @@
 import "./MobileDashboard.bedrock.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ArrowRight, ShieldAlert, Sparkles, Phone, Send, Clock, Settings, LogOut } from "lucide-react";
+import axios from "axios";
+import { Search, ArrowRight, ShieldAlert, Sparkles, Phone, Send, Clock, LogOut } from "lucide-react";
 import { CountUp } from "@/components/CountUp";
 import SwipeReveal from "@/components/SwipeReveal";
 import { ActivityRowSkeleton, StatSkeleton } from "@/components/Skeleton";
-import { USER, SNAPSHOT, RECENT_ACTIVITY, FOLLOWUPS, MARGIN_AT_RISK } from "@/data/mockData";
-import { useSavedQuotes } from "@/lib/quoteStore";
+import { useAuth } from "@/context/AuthContext";
 
-const fmtMoney = (n) => `$${n.toLocaleString("en-AU")}`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const fmtMoney = (n) => `$${Number(n || 0).toLocaleString("en-AU")}`;
+const STATUS_TAG = { Sent: "tag-amber", Won: "tag-green", Lost: "tag-red", Draft: "tag-mute" };
 
-/* ---------- Stat tile (Hero metrics) ---------- */
-function StatTile({ label, value, accent, delta, testid, isMoney, raw, large }) {
+function relTime(ts) {
+  const d = ts ? new Date(ts).getTime() : 0;
+  if (!d) return "";
+  const s = Math.floor((Date.now() - d) / 1000);
+  if (s < 60) return "just now";
+  const m = Math.floor(s / 60); if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60); if (h < 24) return `${h}h ago`;
+  const dd = Math.floor(h / 24); if (dd === 1) return "Yesterday";
+  if (dd < 7) return `${dd} days ago`;
+  const w = Math.floor(dd / 7); if (w < 5) return `${w}w ago`;
+  return new Date(ts).toLocaleDateString("en-AU", { day: "numeric", month: "short" });
+}
+function daysSince(ts) {
+  const d = ts ? new Date(ts).getTime() : 0;
+  return d ? Math.max(0, Math.floor((Date.now() - d) / 86400000)) : 0;
+}
+function jobLabel(q) {
+  const items = Array.isArray(q.items) ? q.items.map((i) => i.label).filter(Boolean) : [];
+  return items.length ? items.join(", ") : "Quote";
+}
+function quoteNo(q) {
+  const id = q.quote_number || q.id || q._id;
+  if (!id) return "";
+  return q.quote_number ? String(q.quote_number) : `#${String(id).slice(-4)}`;
+}
+function initials(name) {
+  return (name || "—").split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+}
+
+/* ---------- Stat tile ---------- */
+function StatTile({ label, accent, testid, isMoney, raw, large }) {
   return (
     <div className={`bedrock-card-elev ${large ? "p-4" : "px-3.5 py-3"} flex flex-col gap-1.5`} data-testid={testid}>
-      <div className="text-[10.5px] tracking-[0.16em] uppercase font-semibold" style={{ color: "var(--text-muted)" }}>
-        {label}
-      </div>
+      <div className="text-[10.5px] tracking-[0.16em] uppercase font-semibold" style={{ color: "var(--text-muted)" }}>{label}</div>
       <div className="flex items-baseline gap-1.5">
-        <span
-          className={`font-mono font-semibold leading-none ${large ? "text-[28px]" : "text-[22px]"}`}
-          style={{ color: accent || "var(--text)" }}
-        >
-          {raw !== undefined ? (
-            <CountUp value={raw} prefix={isMoney ? "$" : ""} />
-          ) : (
-            value
-          )}
+        <span className={`font-mono font-semibold leading-none ${large ? "text-[28px]" : "text-[22px]"}`} style={{ color: accent || "var(--text)" }}>
+          <CountUp value={raw} prefix={isMoney ? "$" : ""} />
         </span>
-        {delta && (
-          <span className="text-[10.5px] font-mono font-semibold" style={{ color: "var(--green)" }}>
-            {delta}
-          </span>
-        )}
       </div>
     </div>
   );
@@ -40,24 +57,11 @@ function StatTile({ label, value, accent, delta, testid, isMoney, raw, large }) 
 
 /* ---------- Recent activity row ---------- */
 function ActivityCard({ item }) {
-  const statusTag = {
-    "Sent": "tag-amber",
-    "Awaiting Approval": "tag-amber",
-    "Approved": "tag-green",
-  }[item.status] || "tag-mute";
-
+  const tag = STATUS_TAG[item.status] || "tag-mute";
   return (
-    <div
-      data-testid={`activity-${item.id}`}
-      className="bedrock-card hover-lift w-full text-left p-4 flex items-center gap-3"
-    >
-      <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-strong)" }}
-      >
-        <span className="font-display font-bold text-[13px]" style={{ color: "var(--gold-bright)" }}>
-          {item.client.split(" ").map(s => s[0]).slice(0, 2).join("")}
-        </span>
+    <div data-testid={`activity-${item.id}`} className="bedrock-card hover-lift w-full text-left p-4 flex items-center gap-3">
+      <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-strong)" }}>
+        <span className="font-display font-bold text-[13px]" style={{ color: "var(--gold-bright)" }}>{initials(item.client)}</span>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 min-w-0">
@@ -66,14 +70,12 @@ function ActivityCard({ item }) {
         </div>
         <div className="flex items-center justify-between gap-2 mt-0.5 min-w-0">
           <span className="text-[12px] truncate min-w-0" style={{ color: "var(--text-muted)" }}>
-            {item.quoteNo} · {item.job}
+            {[item.quoteNo, item.job].filter(Boolean).join(" · ")}
           </span>
         </div>
         <div className="flex items-center justify-between gap-2 mt-2">
-          <span className="font-mono font-semibold text-[15px]" style={{ color: "var(--gold-bright)" }}>
-            {fmtMoney(item.amount)}
-          </span>
-          <span className={`tag-pill ${statusTag}`}>{item.status}</span>
+          <span className="font-mono font-semibold text-[15px]" style={{ color: "var(--gold-bright)" }}>{fmtMoney(item.amount)}</span>
+          <span className={`tag-pill ${tag}`}>{item.status}</span>
         </div>
       </div>
     </div>
@@ -81,105 +83,104 @@ function ActivityCard({ item }) {
 }
 
 /* ---------- Follow-up row ---------- */
-function FollowupRow({ item, onNudge, onCall }) {
+function FollowupRow({ item }) {
   const riskTag = item.risk === "high" ? "tag-red" : "tag-amber";
   const ageColor = item.age >= 7 ? "var(--red)" : "var(--amber)";
   return (
     <div className="bedrock-card hover-lift p-4" data-testid={`followup-${item.id}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="font-mono font-semibold text-[11.5px] shrink-0" style={{ color: "var(--gold-bright)" }}>
-            {item.quoteNo}
-          </span>
+          {item.quoteNo && (
+            <span className="font-mono font-semibold text-[11.5px] shrink-0" style={{ color: "var(--gold-bright)" }}>{item.quoteNo}</span>
+          )}
           <span className={`tag-pill ${riskTag} shrink-0`}>{item.risk.toUpperCase()} RISK</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <Clock size={11} style={{ color: ageColor }} />
-          <span className="font-mono text-[10.5px] font-semibold" style={{ color: ageColor }}>
-            {item.age}d
-          </span>
+          <span className="font-mono text-[10.5px] font-semibold" style={{ color: ageColor }}>{item.age}d</span>
         </div>
       </div>
       <div className="flex items-center justify-between gap-2 mb-1.5 min-w-0">
         <span className="font-display font-semibold text-[14.5px] truncate min-w-0">{item.client}</span>
-        <span className="font-mono font-semibold text-[15px] shrink-0" style={{ color: "var(--gold-bright)" }}>
-          {fmtMoney(item.amount)}
-        </span>
+        <span className="font-mono font-semibold text-[15px] shrink-0" style={{ color: "var(--gold-bright)" }}>{fmtMoney(item.amount)}</span>
       </div>
-      <div className="text-[12px] mb-3 truncate" style={{ color: "var(--text-muted)" }}>
-        {item.job} · {item.note}
-      </div>
+      <div className="text-[12px] mb-3 truncate" style={{ color: "var(--text-muted)" }}>{item.job}</div>
       <div className="flex gap-2">
-        <button
-          onClick={onCall}
-          className="ghost-btn flex-1 rounded-lg py-2 text-[12px] font-semibold flex items-center justify-center gap-1.5"
-          data-testid={`followup-call-${item.id}`}
-        >
-          <Phone size={12} /> Call
-        </button>
-        <button
-          onClick={onNudge}
-          className="gold-btn flex-1 rounded-lg py-2 text-[12px] font-semibold flex items-center justify-center gap-1.5"
-          data-testid={`followup-nudge-${item.id}`}
-        >
-          <Send size={12} /> Nudge
-        </button>
+        <button className="ghost-btn flex-1 rounded-lg py-2 text-[12px] font-semibold flex items-center justify-center gap-1.5"><Phone size={12} /> Call</button>
+        <button className="gold-btn flex-1 rounded-lg py-2 text-[12px] font-semibold flex items-center justify-center gap-1.5"><Send size={12} /> Nudge</button>
       </div>
     </div>
   );
 }
 
-function TerrainProConsoleHeader() {
-  return (
-    <header className="tp-auto-header reveal reveal-1" data-testid="terrainpro-console-header">
-      <div className="tp-console-display-grid">
-        <div className="tp-heading-block">
-          <h1 className="console-title-primary">Alex W</h1>
-        </div>
-
-        <div className="tp-location-telemetry">
-          <div className="location-badge-wrap">
-            <span className="location-main-text">
-              Terrain Civil Group
-            </span>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-/* =========================================================== */
-
 export default function MobileDashboard() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("activity"); // activity | followup
-  const [logoutNotice, setLogoutNotice] = useState(false);
-  const savedQuotes = useSavedQuotes();
-  const savedRevenue = savedQuotes.reduce((sum, quote) => sum + quote.amount, 0);
-  const snapshot = {
-    ...SNAPSHOT,
-    quotesSent: SNAPSHOT.quotesSent + savedQuotes.length,
-    revenue: SNAPSHOT.revenue + savedRevenue,
-  };
-  const recentActivity = [
-    ...savedQuotes.slice(0, 3).map((quote) => ({
-      id: quote.id,
-      client: quote.client,
-      quoteNo: quote.id,
-      amount: quote.amount,
-      status: "Sent",
-      when: quote.age || "just now",
-      job: quote.scope || "Ground works",
-    })),
-    ...RECENT_ACTIVITY,
-  ].slice(0, 6);
+  const { user, logout } = useAuth();
+  const [quotes, setQuotes] = useState(null); // null = loading
+  const [tab, setTab] = useState("activity");
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 850);
-    return () => clearTimeout(t);
+    let cancelled = false;
+    axios
+      .get(`${API}/quotes`)
+      .then(({ data }) => { if (!cancelled) setQuotes(Array.isArray(data) ? data : []); })
+      .catch(() => { if (!cancelled) setQuotes([]); });
+    return () => { cancelled = true; };
   }, []);
+
+  const loading = quotes === null;
+  const list = quotes || [];
+
+  const snapshot = useMemo(() => {
+    const won = list.filter((q) => q.status === "Won");
+    return {
+      revenue: won.reduce((s, q) => s + (q.total_low || 0), 0),
+      jobsWon: won.length,
+      quotesSent: list.filter((q) => q.status && q.status !== "Draft").length,
+      awaiting: list.filter((q) => q.status === "Sent").length,
+    };
+  }, [quotes]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const recentActivity = useMemo(() => {
+    const sorted = [...list].sort(
+      (a, b) => new Date(b.updated_at || b.generated_at || 0) - new Date(a.updated_at || a.generated_at || 0)
+    );
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? sorted.filter((x) => `${x.client?.name || ""} ${jobLabel(x)}`.toLowerCase().includes(q))
+      : sorted;
+    return filtered.slice(0, 6).map((x) => ({
+      id: x.id || x._id,
+      client: x.client?.name || "Unnamed client",
+      quoteNo: quoteNo(x),
+      amount: x.total_low || 0,
+      status: x.status || "Draft",
+      when: relTime(x.updated_at || x.generated_at),
+      job: jobLabel(x),
+    }));
+  }, [quotes, query]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const followups = useMemo(() => {
+    return list
+      .filter((q) => q.status === "Sent")
+      .map((x) => {
+        const age = daysSince(x.generated_at || x.updated_at);
+        return {
+          id: x.id || x._id,
+          client: x.client?.name || "Unnamed client",
+          quoteNo: quoteNo(x),
+          amount: x.total_low || 0,
+          age,
+          risk: age >= 7 ? "high" : "medium",
+          job: jobLabel(x),
+        };
+      })
+      .sort((a, b) => b.age - a.age);
+  }, [quotes]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const businessName = user?.business_name || "Your business";
+  const displayName = user?.name || "—";
 
   return (
     <div className="px-6 pt-3 pb-6" data-testid="dashboard-page">
@@ -193,111 +194,66 @@ export default function MobileDashboard() {
           <button
             type="button"
             className="tp-top-action"
-            aria-label="Settings"
-            title="Settings"
-            data-testid="top-settings"
-            onClick={() => navigate("/settings")}
-          >
-            <Settings size={18} strokeWidth={2} />
-          </button>
-          <button
-            type="button"
-            className="tp-top-action"
             aria-label="Log out"
             title="Log out"
             data-testid="top-logout"
-            onClick={() => setLogoutNotice(true)}
+            onClick={() => { logout(); navigate("/login"); }}
           >
             <LogOut size={18} strokeWidth={2} />
           </button>
         </div>
       </div>
-      {logoutNotice && (
-        <div className="tp-logout-notice" role="status">
-          Local demo session remains active until account sign-in is connected.
-          <button type="button" onClick={() => setLogoutNotice(false)} aria-label="Dismiss sign-out notice">Dismiss</button>
-        </div>
-      )}
-      <TerrainProConsoleHeader />
 
-      {/* GREETING — compact */}
-      <div className="hidden">
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-[12px] font-mono tracking-[0.16em] uppercase" style={{ color: "var(--text-muted)" }}>
-            Good morning
-          </span>
-          <span className="font-display font-bold text-[22px] leading-none" data-testid="greeting">
-            {USER.name}<span style={{ color: "var(--gold-bright)" }}>.</span>
-          </span>
+      <header className="tp-auto-header reveal reveal-1" data-testid="terrainpro-console-header">
+        <div className="tp-console-display-grid">
+          <div className="tp-heading-block">
+            <h1 className="console-title-primary">{displayName}</h1>
+          </div>
+          <div className="tp-location-telemetry">
+            <div className="location-badge-wrap">
+              <span className="location-main-text">{businessName}</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* SEARCH — prominent */}
+      {/* SEARCH */}
       <div className="relative mb-5 mt-5 reveal reveal-2" data-testid="search-wrap">
-        <Search
-          className="lucide absolute left-4 top-1/2 -translate-y-1/2"
-          size={17}
-          style={{ color: "var(--text-muted)" }}
-        />
+        <Search className="lucide absolute left-4 top-1/2 -translate-y-1/2" size={17} style={{ color: "var(--text-muted)" }} />
         <input
           data-testid="search-input"
           className="input-field pl-11"
           placeholder="Search clients, quotes or jobs…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
         />
       </div>
 
-      {/* HERO METRIC — Business Snapshot at the top */}
+      {/* BUSINESS SNAPSHOT — from real quotes */}
       <section className="mb-4 reveal reveal-3" data-testid="snapshot-section">
         <div className="flex items-center justify-between mb-2.5">
           <h2 className="font-oswald font-extrabold text-[18px]" style={{ color: "var(--text)", letterSpacing: "0.015em" }}>
             Business Snapshot
           </h2>
-          <span className="text-[10px] font-mono tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
-            This week
-          </span>
+          <span className="text-[10px] font-mono tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>All time</span>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
           {loading ? (
-            <>
-              <StatSkeleton /><StatSkeleton /><StatSkeleton /><StatSkeleton />
-            </>
+            <><StatSkeleton /><StatSkeleton /><StatSkeleton /><StatSkeleton /></>
           ) : (
             <>
-              <StatTile
-                large
-                label="Revenue"
-                raw={snapshot.revenue}
-                isMoney
-                accent="var(--gold-bright)"
-                delta="+12.4%"
-                testid="stat-revenue"
-              />
-              <StatTile
-                large
-                label="Jobs Won"
-                raw={snapshot.jobsWon}
-                accent="var(--green)"
-                testid="stat-jobs-won"
-              />
-              <StatTile
-                label="Quotes Sent"
-                raw={snapshot.quotesSent}
-                testid="stat-quotes-sent"
-              />
-              <StatTile
-                label="Awaiting"
-                raw={snapshot.awaitingApproval}
-                accent="var(--amber)"
-                testid="stat-awaiting"
-              />
+              <StatTile large label="Revenue" raw={snapshot.revenue} isMoney accent="var(--gold-bright)" testid="stat-revenue" />
+              <StatTile large label="Jobs Won" raw={snapshot.jobsWon} accent="var(--green)" testid="stat-jobs-won" />
+              <StatTile label="Quotes Sent" raw={snapshot.quotesSent} testid="stat-quotes-sent" />
+              <StatTile label="Awaiting" raw={snapshot.awaiting} accent="var(--amber)" testid="stat-awaiting" />
             </>
           )}
         </div>
       </section>
 
-      {/* SUBGRADE AI WARNING BANNER */}
+      {/* SUBGRADE AI — links to the quote builder (no fabricated figure) */}
       <button
-        onClick={() => navigate("/subgrade")}
+        onClick={() => navigate("/quote")}
         data-testid="subgrade-banner"
         className="reveal reveal-4 w-full text-left mb-7 rounded-2xl overflow-hidden hover-lift-gold"
         style={{
@@ -309,65 +265,39 @@ export default function MobileDashboard() {
         <div className="flex items-center gap-3.5 p-4">
           <div
             className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 relative"
-            style={{
-              background: "linear-gradient(180deg, rgba(252,213,53,0.25), rgba(240,185,11,0.10))",
-              border: "1px solid rgba(252,213,53,0.40)",
-            }}
+            style={{ background: "linear-gradient(180deg, rgba(252,213,53,0.25), rgba(240,185,11,0.10))", border: "1px solid rgba(252,213,53,0.40)" }}
           >
             <ShieldAlert size={19} style={{ color: "var(--gold-bright)" }} />
-            <span
-              className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full pulse-dot"
-              style={{ background: "var(--red)", boxShadow: "0 0 6px var(--red)" }}
-            />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full pulse-dot" style={{ background: "var(--red)", boxShadow: "0 0 6px var(--red)" }} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="text-[9.5px] font-mono tracking-[0.20em] uppercase font-bold" style={{ color: "var(--gold-bright)" }}>
-                SUBGRADE&nbsp;AI
-              </span>
+              <span className="text-[9.5px] font-mono tracking-[0.20em] uppercase font-bold" style={{ color: "var(--gold-bright)" }}>SUBGRADE&nbsp;AI</span>
               <Sparkles size={10} style={{ color: "var(--gold-bright)" }} />
             </div>
             <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="font-mono font-bold text-[20px] leading-none" style={{ color: "var(--gold-bright)" }}>
-                <CountUp value={MARGIN_AT_RISK} prefix="$" duration={1400} />
-              </span>
-              <span className="text-[12.5px] font-medium" style={{ color: "var(--text)" }}>
-                unprotected margin detected
-              </span>
+              <span className="text-[13px] font-medium" style={{ color: "var(--text)" }}>Scan a quote for hidden costs</span>
             </div>
           </div>
           <ArrowRight size={18} style={{ color: "var(--gold-bright)" }} className="shrink-0" />
         </div>
       </button>
 
-      {/* LOWER SECTION — Tabs: Activity / Follow-up */}
+      {/* TABS — Recent Activity / Follow-up */}
       <section className="reveal reveal-5" data-testid="lower-tabs-section">
         <div className="flex items-center justify-between mb-3">
           <div className="bedrock-segmented" style={{ flex: "0 1 auto" }} data-testid="dash-tabs">
-            <button
-              type="button"
-              onClick={() => setTab("activity")}
-              className={`bedrock-segment ${tab === "activity" ? "active" : ""}`}
-              data-testid="tab-activity"
-            >
+            <button type="button" onClick={() => setTab("activity")} className={`bedrock-segment ${tab === "activity" ? "active" : ""}`} data-testid="tab-activity">
               Recent Activity
             </button>
-            <button
-              type="button"
-              onClick={() => setTab("followup")}
-              className={`bedrock-segment ${tab === "followup" ? "active" : ""}`}
-              data-testid="tab-followup"
-            >
+            <button type="button" onClick={() => setTab("followup")} className={`bedrock-segment ${tab === "followup" ? "active" : ""}`} data-testid="tab-followup">
               <span className="flex items-center gap-1.5">
                 Follow-up
                 <span
                   className="font-mono font-bold text-[9.5px] px-1.5 py-0.5 rounded-full"
-                  style={{
-                    background: tab === "followup" ? "rgba(0,0,0,0.15)" : "rgba(246,70,93,0.18)",
-                    color: tab === "followup" ? "#0A0A0B" : "var(--red)",
-                  }}
+                  style={{ background: tab === "followup" ? "rgba(0,0,0,0.15)" : "rgba(246,70,93,0.18)", color: tab === "followup" ? "#0A0A0B" : "var(--red)" }}
                 >
-                  {FOLLOWUPS.length}
+                  {followups.length}
                 </span>
               </span>
             </button>
@@ -377,11 +307,11 @@ export default function MobileDashboard() {
         {tab === "activity" && (
           <div className="space-y-2.5" data-testid="activity-list">
             {loading ? (
-              <>
-                <ActivityRowSkeleton />
-                <ActivityRowSkeleton />
-                <ActivityRowSkeleton />
-              </>
+              <><ActivityRowSkeleton /><ActivityRowSkeleton /><ActivityRowSkeleton /></>
+            ) : recentActivity.length === 0 ? (
+              <div className="bedrock-card p-6 text-center text-[13px]" style={{ color: "var(--text-muted)" }}>
+                No quotes yet — create one to see it here.
+              </div>
             ) : (
               recentActivity.map((item) => (
                 <SwipeReveal
@@ -389,21 +319,11 @@ export default function MobileDashboard() {
                   testid={`activity-swipe-${item.id}`}
                   actions={
                     <>
-                      <button
-                        className="swipe-action-btn gold"
-                        data-testid={`activity-call-${item.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Phone size={16} />
-                        <span>Call</span>
+                      <button className="swipe-action-btn gold" data-testid={`activity-call-${item.id}`} onClick={(e) => e.stopPropagation()}>
+                        <Phone size={16} /><span>Call</span>
                       </button>
-                      <button
-                        className="swipe-action-btn amber"
-                        data-testid={`activity-followup-${item.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Send size={16} />
-                        <span>Nudge</span>
+                      <button className="swipe-action-btn amber" data-testid={`activity-followup-${item.id}`} onClick={(e) => e.stopPropagation()}>
+                        <Send size={16} /><span>Nudge</span>
                       </button>
                     </>
                   }
@@ -418,15 +338,13 @@ export default function MobileDashboard() {
         {tab === "followup" && (
           <div className="space-y-2.5" data-testid="followup-list">
             {loading ? (
-              <>
-                <ActivityRowSkeleton />
-                <ActivityRowSkeleton />
-                <ActivityRowSkeleton />
-              </>
+              <><ActivityRowSkeleton /><ActivityRowSkeleton /></>
+            ) : followups.length === 0 ? (
+              <div className="bedrock-card p-6 text-center text-[13px]" style={{ color: "var(--text-muted)" }}>
+                Nothing awaiting follow-up.
+              </div>
             ) : (
-              FOLLOWUPS.map((item) => (
-                <FollowupRow key={item.id} item={item} onCall={() => {}} onNudge={() => {}} />
-              ))
+              followups.map((item) => <FollowupRow key={item.id} item={item} />)
             )}
           </div>
         )}
