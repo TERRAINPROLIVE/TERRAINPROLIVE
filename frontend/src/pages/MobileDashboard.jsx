@@ -1,530 +1,435 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "sonner";
-import {
-  Plus,
-  Search,
-  Camera,
-  UserPlus,
-  Clock,
-  LayoutDashboard,
-  Menu,
-  Users,
-  LogOut,
-  X,
-} from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { generateQuotePdf } from "@/lib/quotePdf";
+import { Search, ArrowRight, ShieldAlert, Sparkles, Phone, Send, Clock, Settings, LogOut } from "lucide-react";
+import { CountUp } from "@/components/CountUp";
+import SwipeReveal from "@/components/SwipeReveal";
+import { ActivityRowSkeleton, StatSkeleton } from "@/components/Skeleton";
+import { USER, SNAPSHOT, RECENT_ACTIVITY, FOLLOWUPS, MARGIN_AT_RISK } from "@/data/mockData";
+import { useSavedQuotes } from "@/lib/quoteStore";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const fmtMoney = (n) => `$${n.toLocaleString("en-AU")}`;
 
-const fmtMoney = (n) =>
-  typeof n === "number"
-    ? n.toLocaleString("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 })
-    : "—";
+/* ---------- Stat tile (Hero metrics) ---------- */
+function StatTile({ label, value, accent, delta, testid, isMoney, raw, large }) {
+  return (
+    <div className={`bedrock-card-elev ${large ? "p-4" : "px-3.5 py-3"} flex flex-col gap-1.5`} data-testid={testid}>
+      <div className="text-[10.5px] tracking-[0.16em] uppercase font-semibold" style={{ color: "var(--text-muted)" }}>
+        {label}
+      </div>
+      <div className="flex items-baseline gap-1.5">
+        <span
+          className={`font-mono font-semibold leading-none ${large ? "text-[28px]" : "text-[22px]"}`}
+          style={{ color: accent || "var(--text)" }}
+        >
+          {raw !== undefined ? (
+            <CountUp value={raw} prefix={isMoney ? "$" : ""} />
+          ) : (
+            value
+          )}
+        </span>
+        {delta && (
+          <span className="text-[10.5px] font-mono font-semibold" style={{ color: "var(--green)" }}>
+            {delta}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
-const STATUS_STYLES = {
-  Draft: "text-yellow-500",
-  Sent: "text-blue-300",
-  Won: "text-green-300",
-  Lost: "text-red-300",
-};
-
-export default function MobileDashboard() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [quotes, setQuotes] = useState(null);
-  const [query, setQuery] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    axios
-      .get(`${API}/quotes`)
-      .then(({ data }) => {
-        if (!cancelled) setQuotes(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {
-        if (!cancelled) setQuotes([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // KPI calc from real data
-  const kpis = useMemo(() => {
-    const list = quotes || [];
-    const active = list.filter((q) => q.status === "Draft" || q.status === "Sent");
-    const won = list.filter((q) => q.status === "Won");
-    const pendingTotal = active.reduce((sum, q) => sum + (q.total_low || 0), 0);
-    const decided = won.length + list.filter((q) => q.status === "Lost").length;
-    const conversion = decided > 0 ? Math.round((won.length / decided) * 100) : 0;
-    return {
-      active: active.length,
-      won: won.length,
-      pending: pendingTotal,
-      conversion,
-    };
-  }, [quotes]);
-
-  const pipeline = useMemo(() => {
-    const list = quotes || [];
-    const by = (s) => list.filter((q) => q.status === s).length;
-    return {
-      Enquiries: 0, // no enquiry system yet
-      Draft: by("Draft"),
-      Sent: by("Sent"),
-      Approval: 0, // no Awaiting Approval status
-      Won: by("Won"),
-    };
-  }, [quotes]);
-
-  const recentJobs = useMemo(() => {
-    const list = quotes || [];
-    const sorted = [...list].sort((a, b) => {
-      const ad = new Date(a.updated_at || a.generated_at || 0).getTime();
-      const bd = new Date(b.updated_at || b.generated_at || 0).getTime();
-      return bd - ad;
-    });
-    const filtered = query
-      ? sorted.filter((q) => {
-          const blob = `${q.client?.name || ""} ${q.items?.map((i) => i.label).join(" ") || ""}`.toLowerCase();
-          return blob.includes(query.toLowerCase());
-        })
-      : sorted;
-    return filtered.slice(0, 4);
-  }, [quotes, query]);
-
-  const handlePdf = async (q) => {
-    try {
-      await generateQuotePdf(q, user);
-      toast.success("PDF saved");
-    } catch (e) {
-      toast.error("Couldn't generate PDF");
-    }
-  };
-
-  const businessName = user?.business_name || "Your Business";
-  const firstName = user?.name?.split(" ")[0] || "Tradie";
-  const initials = (user?.name || "T")
-    .split(" ")
-    .map((s) => s[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-  const labourRate = user?.hourly_rate ? `$${user.hourly_rate}` : "$—";
+/* ---------- Recent activity row ---------- */
+function ActivityCard({ item }) {
+  const statusTag = {
+    "Sent": "tag-amber",
+    "Awaiting Approval": "tag-amber",
+    "Approved": "tag-green",
+  }[item.status] || "tag-mute";
 
   return (
-    <div data-testid="mobile-dashboard" className="lg:hidden bg-[#0a0a0a] text-white min-h-screen pb-24">
-      {/* Header */}
-      {/* Header — brand + profile (Bybit-style) */}
-      <header className="px-4 pt-4 pb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 bg-yellow-500 flex items-center justify-center rounded-lg shrink-0">
-            <span className="font-black text-black text-[11px] tracking-tight">TP</span>
-          </div>
-          <div className="flex items-baseline gap-1.5 min-w-0">
-            <span className="text-base font-black text-white tracking-tight italic truncate">
-              TERRAINPRO
-            </span>
-            <span className="text-sm text-neutral-500 font-medium shrink-0">Quotes</span>
-          </div>
+    <div
+      data-testid={`activity-${item.id}`}
+      className="bedrock-card hover-lift w-full text-left p-4 flex items-center gap-3"
+    >
+      <div
+        className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-strong)" }}
+      >
+        <span className="font-display font-bold text-[13px]" style={{ color: "var(--gold-bright)" }}>
+          {item.client.split(" ").map(s => s[0]).slice(0, 2).join("")}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <span className="font-oswald text-[14.5px] font-semibold truncate min-w-0">{item.client}</span>
+          <span className="font-mono text-[10.5px] shrink-0" style={{ color: "var(--text-muted)" }}>{item.when}</span>
         </div>
-        <button
-          type="button"
-          data-testid="mobile-avatar"
-          onClick={() => setProfileOpen(true)}
-          aria-label="Profile menu"
-          aria-expanded={profileOpen}
-          className="relative w-10 h-10 rounded-full border border-zinc-700 bg-zinc-900 grid place-items-center font-display uppercase text-xs font-bold tracking-tight text-yellow-500 shrink-0"
-        >
-          {initials}
-          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-[#0a0a0a]" />
-        </button>
-      </header>
+        <div className="flex items-center justify-between gap-2 mt-0.5 min-w-0">
+          <span className="text-[12px] truncate min-w-0" style={{ color: "var(--text-muted)" }}>
+            {item.quoteNo} · {item.job}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-2 mt-2">
+          <span className="font-mono font-semibold text-[15px]" style={{ color: "var(--gold-bright)" }}>
+            {fmtMoney(item.amount)}
+          </span>
+          <span className={`tag-pill ${statusTag}`}>{item.status}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      {/* Greeting + business (Bybit split card) */}
-      <div className="px-4 pb-4">
-        <div
-          className="flex items-stretch bg-[#161616] rounded-2xl overflow-hidden"
-          data-testid="mobile-greeting-card"
+/* ---------- Follow-up row ---------- */
+function FollowupRow({ item, onNudge, onCall }) {
+  const riskTag = item.risk === "high" ? "tag-red" : "tag-amber";
+  const ageColor = item.age >= 7 ? "var(--red)" : "var(--amber)";
+  return (
+    <div className="bedrock-card hover-lift p-4" data-testid={`followup-${item.id}`}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-mono font-semibold text-[11.5px] shrink-0" style={{ color: "var(--gold-bright)" }}>
+            {item.quoteNo}
+          </span>
+          <span className={`tag-pill ${riskTag} shrink-0`}>{item.risk.toUpperCase()} RISK</span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <Clock size={11} style={{ color: ageColor }} />
+          <span className="font-mono text-[10.5px] font-semibold" style={{ color: ageColor }}>
+            {item.age}d
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-2 mb-1.5 min-w-0">
+        <span className="font-display font-semibold text-[14.5px] truncate min-w-0">{item.client}</span>
+        <span className="font-mono font-semibold text-[15px] shrink-0" style={{ color: "var(--gold-bright)" }}>
+          {fmtMoney(item.amount)}
+        </span>
+      </div>
+      <div className="text-[12px] mb-3 truncate" style={{ color: "var(--text-muted)" }}>
+        {item.job} · {item.note}
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={onCall}
+          className="ghost-btn flex-1 rounded-lg py-2 text-[12px] font-semibold flex items-center justify-center gap-1.5"
+          data-testid={`followup-call-${item.id}`}
         >
-          <div className="flex-1 min-w-0 px-4 py-4">
-            <p className="text-sm text-neutral-500">G'day,</p>
-            <p className="text-2xl font-black text-white tracking-tight truncate">{firstName}</p>
-          </div>
-          <div className="w-px bg-zinc-800/80 my-3 shrink-0" />
-          <div className="flex-1 min-w-0 px-4 py-4 flex flex-col items-end justify-center text-right">
-            <p className="text-base font-bold text-white truncate max-w-full">{businessName}</p>
-            <span className="mt-1.5 inline-block bg-zinc-800/70 rounded-lg px-2.5 py-1 font-mono text-[11px] tracking-wider text-neutral-400 truncate max-w-full">
-              {user?.abn ? `ABN ${user.abn}` : "ABN —"}
+          <Phone size={12} /> Call
+        </button>
+        <button
+          onClick={onNudge}
+          className="gold-btn flex-1 rounded-lg py-2 text-[12px] font-semibold flex items-center justify-center gap-1.5"
+          data-testid={`followup-nudge-${item.id}`}
+        >
+          <Send size={12} /> Nudge
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TerrainProConsoleHeader() {
+  return (
+    <header className="tp-auto-header reveal reveal-1" data-testid="terrainpro-console-header">
+      <div className="tp-console-display-grid">
+        <div className="tp-heading-block">
+          <h1 className="console-title-primary">Alex W</h1>
+        </div>
+
+        <div className="tp-location-telemetry">
+          <div className="location-badge-wrap">
+            <span className="location-main-text">
+              Terrain Civil Group
             </span>
           </div>
         </div>
       </div>
+    </header>
+  );
+}
 
-      {/* Profile menu (opens from avatar) */}
-      {profileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" data-testid="mobile-profile-overlay">
+/* =========================================================== */
+
+export default function MobileDashboard() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("activity"); // activity | followup
+  const [logoutNotice, setLogoutNotice] = useState(false);
+  const savedQuotes = useSavedQuotes();
+  const savedRevenue = savedQuotes.reduce((sum, quote) => sum + quote.amount, 0);
+  const snapshot = {
+    ...SNAPSHOT,
+    quotesSent: SNAPSHOT.quotesSent + savedQuotes.length,
+    revenue: SNAPSHOT.revenue + savedRevenue,
+  };
+  const recentActivity = [
+    ...savedQuotes.slice(0, 3).map((quote) => ({
+      id: quote.id,
+      client: quote.client,
+      quoteNo: quote.id,
+      amount: quote.amount,
+      status: "Sent",
+      when: quote.age || "just now",
+      job: quote.scope || "Ground works",
+    })),
+    ...RECENT_ACTIVITY,
+  ].slice(0, 6);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 850);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="px-6 pt-3 pb-6" data-testid="dashboard-page">
+      {/* HEADER */}
+      <div className="tp-topbar reveal reveal-1">
+        <div className="tp-page-brand" data-testid="terrainpro-brand">
+          <span className="brand-primary">TERRAIN</span>
+          <span className="brand-secondary">PRO</span>
+        </div>
+        <div className="tp-top-actions" aria-label="Account controls">
           <button
             type="button"
-            aria-label="Close profile menu"
-            onClick={() => setProfileOpen(false)}
-            className="absolute inset-0 bg-black/60"
-          />
-          <div className="absolute right-4 top-16 w-60 bg-[#161616] border border-zinc-800 rounded-2xl overflow-hidden">
-            <div className="flex items-center gap-3 p-4 border-b border-zinc-800">
-              <span className="w-10 h-10 rounded-full bg-zinc-800 border border-yellow-500/40 grid place-items-center font-display uppercase text-sm font-bold text-yellow-500 shrink-0">
-                {initials}
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{firstName}</p>
-                <p className="text-[11px] text-neutral-400 truncate">{businessName}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setProfileOpen(false);
-                navigate("/directory");
-              }}
-              data-testid="mobile-profile-clients"
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-900 transition-colors"
-            >
-              <Users className="w-4 h-4 text-neutral-300" strokeWidth={1.8} />
-              <span className="text-[13px] text-neutral-200">Clients</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setProfileOpen(false);
-                logout();
-                navigate("/login");
-              }}
-              data-testid="mobile-profile-logout"
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-900 transition-colors border-t border-zinc-800"
-            >
-              <LogOut className="w-4 h-4 text-neutral-300" strokeWidth={1.8} />
-              <span className="text-[13px] text-neutral-200">Log out</span>
-            </button>
-          </div>
+            className="tp-top-action"
+            aria-label="Settings"
+            title="Settings"
+            data-testid="top-settings"
+            onClick={() => navigate("/settings")}
+          >
+            <Settings size={18} strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            className="tp-top-action"
+            aria-label="Log out"
+            title="Log out"
+            data-testid="top-logout"
+            onClick={() => setLogoutNotice(true)}
+          >
+            <LogOut size={18} strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+      {logoutNotice && (
+        <div className="tp-logout-notice" role="status">
+          Local demo session remains active until account sign-in is connected.
+          <button type="button" onClick={() => setLogoutNotice(false)} aria-label="Dismiss sign-out notice">Dismiss</button>
         </div>
       )}
+      <TerrainProConsoleHeader />
 
-      {/* Search */}
-      <div className="px-4 pb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-          <input
-            data-testid="mobile-search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search quotes, clients, jobs…"
-            className="w-full h-10 pl-10 pr-3 bg-zinc-900 border border-zinc-800 rounded-none text-[13px] text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500"
-          />
+      {/* GREETING — compact */}
+      <div className="hidden">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="text-[12px] font-mono tracking-[0.16em] uppercase" style={{ color: "var(--text-muted)" }}>
+            Good morning
+          </span>
+          <span className="font-display font-bold text-[22px] leading-none" data-testid="greeting">
+            {USER.name}<span style={{ color: "var(--gold-bright)" }}>.</span>
+          </span>
         </div>
       </div>
 
-      {/* KPI strip */}
-      <div className="grid grid-cols-4 border-y border-zinc-800 mb-5">
-        <KpiCell label="Active Quotes" value={kpis.active} />
-        <KpiCell label="Jobs Won" value={kpis.won} />
-        <KpiCell label="Pending" value={fmtMoney(kpis.pending)} />
-        <KpiCell label="Conversion" value={`${kpis.conversion}%`} gold />
+      {/* SEARCH — prominent */}
+      <div className="relative mb-5 mt-5 reveal reveal-2" data-testid="search-wrap">
+        <Search
+          className="lucide absolute left-4 top-1/2 -translate-y-1/2"
+          size={17}
+          style={{ color: "var(--text-muted)" }}
+        />
+        <input
+          data-testid="search-input"
+          className="input-field pl-11"
+          placeholder="Search clients, quotes or jobs…"
+        />
       </div>
 
-      {/* Action Hub */}
-      <section className="px-4 mb-6">
-        <SectionLabel>Action Hub</SectionLabel>
-        <button
-          type="button"
-          onClick={() => navigate("/quote")}
-          data-testid="mobile-new-quote"
-          className="w-full inline-flex items-center justify-center gap-2 h-14 bg-yellow-500 text-black font-black uppercase tracking-widest text-sm rounded-none active:scale-[0.98] transition-transform mt-3"
-        >
-          <Plus className="w-5 h-5" strokeWidth={3.5} />
-          Start New Quote
-        </button>
-        <div className="grid grid-cols-2 gap-3 mt-3">
-          <button
-            type="button"
-            data-testid="mobile-upload-photos"
-            onClick={() => toast.info("Site photo uploads — coming soon")}
-            className="inline-flex items-center justify-center gap-2 h-11 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-neutral-300 font-bold uppercase tracking-[0.18em] text-[10px] rounded-none transition-colors"
-          >
-            <Camera className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
-            Upload Site Photos
-          </button>
-          <button
-            type="button"
-            data-testid="mobile-create-client"
-            onClick={() => navigate("/quote")}
-            className="inline-flex items-center justify-center gap-2 h-11 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-neutral-300 font-bold uppercase tracking-[0.18em] text-[10px] rounded-none transition-colors"
-          >
-            <UserPlus className="w-4 h-4 text-yellow-500" strokeWidth={1.8} />
-            Create Client
-          </button>
+      {/* HERO METRIC — Business Snapshot at the top */}
+      <section className="mb-4 reveal reveal-3" data-testid="snapshot-section">
+        <div className="flex items-center justify-between mb-2.5">
+          <h2 className="font-oswald font-extrabold text-[18px]" style={{ color: "var(--text)", letterSpacing: "0.015em" }}>
+            Business Snapshot
+          </h2>
+          <span className="text-[10px] font-mono tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
+            This week
+          </span>
         </div>
-      </section>
-
-      {/* Work Pipeline */}
-      <section className="mb-6">
-        <SectionLabel className="px-4">Work Pipeline</SectionLabel>
-        <div className="mt-3 grid grid-cols-5 border-y border-zinc-800">
-          <PipelineCell label="New Enquiries" count={pipeline.Enquiries} />
-          <PipelineCell label="Draft Quotes" count={pipeline.Draft} active />
-          <PipelineCell label="Sent Quotes" count={pipeline.Sent} />
-          <PipelineCell label="Awaiting Approval" count={pipeline.Approval} />
-          <PipelineCell label="Won Jobs" count={pipeline.Won} />
-        </div>
-      </section>
-
-      {/* Recent Jobs */}
-      <section className="px-4 mb-6">
-        <SectionLabel>Recent Jobs</SectionLabel>
-        <div className="mt-3 space-y-3">
-          {quotes === null ? (
-            <div className="text-center text-xs text-neutral-500 py-10">Loading…</div>
-          ) : recentJobs.length === 0 ? (
-            <div className="text-center text-xs text-neutral-500 py-10">
-              No quotes yet — tap Start New Quote above.
-            </div>
+        <div className="grid grid-cols-2 gap-2.5">
+          {loading ? (
+            <>
+              <StatSkeleton /><StatSkeleton /><StatSkeleton /><StatSkeleton />
+            </>
           ) : (
-            recentJobs.map((q) => (
-              <JobRow
-                key={q.id}
-                quote={q}
-                onPdf={() => handlePdf(q)}
-                onSend={() => toast.info("Email quote — coming soon")}
-                onView={() => navigate("/dashboard")}
+            <>
+              <StatTile
+                large
+                label="Revenue"
+                raw={snapshot.revenue}
+                isMoney
+                accent="var(--gold-bright)"
+                delta="+12.4%"
+                testid="stat-revenue"
               />
-            ))
+              <StatTile
+                large
+                label="Jobs Won"
+                raw={snapshot.jobsWon}
+                accent="var(--green)"
+                testid="stat-jobs-won"
+              />
+              <StatTile
+                label="Quotes Sent"
+                raw={snapshot.quotesSent}
+                testid="stat-quotes-sent"
+              />
+              <StatTile
+                label="Awaiting"
+                raw={snapshot.awaitingApproval}
+                accent="var(--amber)"
+                testid="stat-awaiting"
+              />
+            </>
           )}
         </div>
       </section>
 
-      {/* Business Health */}
-      <section className="px-4 pb-6">
-        <SectionLabel>Business Health</SectionLabel>
-        <div className="mt-3 grid grid-cols-2 gap-px bg-zinc-800 rounded-none overflow-hidden">
-          <HealthTile
-            value={
-              <span className="flex items-baseline gap-1">
-                <span className="text-yellow-500">{labourRate}</span>
-                <span className="text-neutral-500 text-xs">/hr</span>
-              </span>
-            }
-            label="Labour Rate"
-          />
-          <HealthTile
-            value={
-              <span className="flex items-center gap-2">
-                <span className="grid place-items-center w-6 h-6 rounded-none border-2 border-yellow-500">
-                  <Clock className="w-3 h-3 text-yellow-500" strokeWidth={2.4} />
-                </span>
-                <span className="text-white">10 mins</span>
-              </span>
-            }
-            label="Avg Quote Time"
-          />
-        </div>
-      </section>
-      {/* Bottom Tab Nav — Pipeline · New · Menu */}
-      <nav
-        className="fixed bottom-0 left-0 right-0 lg:hidden bg-black border-t border-zinc-800 h-16 grid grid-cols-3 z-40"
-        data-testid="mobile-bottom-nav"
+      {/* SUBGRADE AI WARNING BANNER */}
+      <button
+        onClick={() => navigate("/subgrade")}
+        data-testid="subgrade-banner"
+        className="reveal reveal-4 w-full text-left mb-7 rounded-2xl overflow-hidden hover-lift-gold"
+        style={{
+          background: "linear-gradient(90deg, rgba(240,185,11,0.10) 0%, rgba(240,185,11,0.04) 60%, rgba(0,0,0,0.20) 100%)",
+          border: "1px solid rgba(252,213,53,0.30)",
+          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 20px -8px rgba(240,185,11,0.30)",
+        }}
       >
-        <button
-          type="button"
-          onClick={() => navigate("/dashboard")}
-          data-testid="mobile-tab-pipeline"
-          aria-label="Pipeline"
-          aria-current="page"
-          className="flex flex-col items-center justify-center gap-1 border-t-2 border-t-transparent text-neutral-500 hover:text-yellow-500 transition-colors"
-        >
-          <LayoutDashboard className="w-6 h-6" strokeWidth={1.8} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] font-semibold">Pipeline</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate("/quote")}
-          data-testid="mobile-tab-new"
-          aria-label="New quote"
-          className="flex flex-col items-center justify-center gap-1 bg-yellow-500 text-black hover:bg-yellow-400 transition-colors"
-        >
-          <Plus className="w-6 h-6" strokeWidth={2.5} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] font-semibold">New</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          data-testid="mobile-tab-menu"
-          aria-label="Menu"
-          aria-expanded={menuOpen}
-          className="flex flex-col items-center justify-center gap-1 border-t-2 border-t-transparent text-neutral-500 hover:text-yellow-500 transition-colors"
-        >
-          <Menu className="w-6 h-6" strokeWidth={1.8} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] font-semibold">Menu</span>
-        </button>
-      </nav>
-
-      {/* Menu sheet — slides up from the Menu tab */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" data-testid="mobile-menu-overlay">
-          <button
-            type="button"
-            aria-label="Close menu"
-            onClick={() => setMenuOpen(false)}
-            className="absolute inset-0 bg-black/70"
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-[#0a0a0a] border-t-2 border-t-yellow-500 pb-[env(safe-area-inset-bottom)]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-              <span className="font-display uppercase text-base tracking-tight text-white">Menu</span>
-              <button
-                type="button"
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close"
-                className="text-neutral-400 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" strokeWidth={2} />
-              </button>
+        <div className="flex items-center gap-3.5 p-4">
+          <div
+            className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 relative"
+            style={{
+              background: "linear-gradient(180deg, rgba(252,213,53,0.25), rgba(240,185,11,0.10))",
+              border: "1px solid rgba(252,213,53,0.40)",
+            }}
+          >
+            <ShieldAlert size={19} style={{ color: "var(--gold-bright)" }} />
+            <span
+              className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full pulse-dot"
+              style={{ background: "var(--red)", boxShadow: "0 0 6px var(--red)" }}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-[9.5px] font-mono tracking-[0.20em] uppercase font-bold" style={{ color: "var(--gold-bright)" }}>
+                SUBGRADE&nbsp;AI
+              </span>
+              <Sparkles size={10} style={{ color: "var(--gold-bright)" }} />
             </div>
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="font-mono font-bold text-[20px] leading-none" style={{ color: "var(--gold-bright)" }}>
+                <CountUp value={MARGIN_AT_RISK} prefix="$" duration={1400} />
+              </span>
+              <span className="text-[12.5px] font-medium" style={{ color: "var(--text)" }}>
+                unprotected margin detected
+              </span>
+            </div>
+          </div>
+          <ArrowRight size={18} style={{ color: "var(--gold-bright)" }} className="shrink-0" />
+        </div>
+      </button>
+
+      {/* LOWER SECTION — Tabs: Activity / Follow-up */}
+      <section className="reveal reveal-5" data-testid="lower-tabs-section">
+        <div className="flex items-center justify-between mb-3">
+          <div className="bedrock-segmented" style={{ flex: "0 1 auto" }} data-testid="dash-tabs">
             <button
               type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                navigate("/directory");
-              }}
-              data-testid="mobile-menu-clients"
-              className="w-full flex items-center gap-3 px-5 py-4 border-b border-zinc-800 text-left hover:bg-zinc-900 transition-colors"
+              onClick={() => setTab("activity")}
+              className={`bedrock-segment ${tab === "activity" ? "active" : ""}`}
+              data-testid="tab-activity"
             >
-              <Users className="w-5 h-5 text-yellow-500" strokeWidth={1.8} />
-              <span className="font-mono text-xs uppercase tracking-[0.15em] text-white">Clients</span>
+              Recent Activity
             </button>
             <button
               type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                logout();
-                navigate("/login");
-              }}
-              data-testid="mobile-menu-logout"
-              className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-zinc-900 transition-colors"
+              onClick={() => setTab("followup")}
+              className={`bedrock-segment ${tab === "followup" ? "active" : ""}`}
+              data-testid="tab-followup"
             >
-              <LogOut className="w-5 h-5 text-neutral-400" strokeWidth={1.8} />
-              <span className="font-mono text-xs uppercase tracking-[0.15em] text-neutral-300">Log out</span>
+              <span className="flex items-center gap-1.5">
+                Follow-up
+                <span
+                  className="font-mono font-bold text-[9.5px] px-1.5 py-0.5 rounded-full"
+                  style={{
+                    background: tab === "followup" ? "rgba(0,0,0,0.15)" : "rgba(246,70,93,0.18)",
+                    color: tab === "followup" ? "#0A0A0B" : "var(--red)",
+                  }}
+                >
+                  {FOLLOWUPS.length}
+                </span>
+              </span>
             </button>
           </div>
         </div>
-      )}
-    </div>
-  );
-}
 
-function SectionLabel({ children, className = "" }) {
-  return (
-    <div
-      className={`text-center font-mono text-[10px] uppercase tracking-[0.3em] font-bold text-neutral-500 ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
+        {tab === "activity" && (
+          <div className="space-y-2.5" data-testid="activity-list">
+            {loading ? (
+              <>
+                <ActivityRowSkeleton />
+                <ActivityRowSkeleton />
+                <ActivityRowSkeleton />
+              </>
+            ) : (
+              recentActivity.map((item) => (
+                <SwipeReveal
+                  key={item.id}
+                  testid={`activity-swipe-${item.id}`}
+                  actions={
+                    <>
+                      <button
+                        className="swipe-action-btn gold"
+                        data-testid={`activity-call-${item.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Phone size={16} />
+                        <span>Call</span>
+                      </button>
+                      <button
+                        className="swipe-action-btn amber"
+                        data-testid={`activity-followup-${item.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Send size={16} />
+                        <span>Nudge</span>
+                      </button>
+                    </>
+                  }
+                >
+                  <ActivityCard item={item} />
+                </SwipeReveal>
+              ))
+            )}
+          </div>
+        )}
 
-function KpiCell({ label, value, gold }) {
-  return (
-    <div className="py-3 px-1 flex flex-col items-center justify-center border-r border-zinc-800 last:border-r-0">
-      <div
-        className={`font-display font-bold tracking-tight leading-none text-lg sm:text-xl ${
-          gold ? "text-yellow-500" : "text-white"
-        }`}
-      >
-        {value}
-      </div>
-      <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.15em] font-bold text-neutral-500 text-center leading-tight">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function PipelineCell({ label, count, active }) {
-  return (
-    <div
-      className={`flex flex-col items-center justify-between py-2.5 px-1 border-r border-zinc-800 last:border-r-0 ${
-        active ? "bg-zinc-900 border-b-2 border-b-yellow-500" : ""
-      }`}
-    >
-      <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.1em] font-bold text-neutral-500 text-center leading-tight">
-        {label}
-      </div>
-      <div className="mt-1 font-display text-lg font-bold text-yellow-500">{count}</div>
-    </div>
-  );
-}
-
-function JobRow({ quote, onPdf, onSend, onView }) {
-  const clientName =
-    quote.client?.name || quote.client_name || (typeof quote.client === "string" ? quote.client : null) || "Client";
-  const scope = (quote.items || []).map((i) => i.label).slice(0, 3).join(", ") || "Quote";
-  const amount = fmtMoney(quote.total_low);
-  const status = quote.status || "Draft";
-
-  // Buttons depend on status
-  const buttons =
-    status === "Draft"
-      ? [
-          { label: "Draft", primary: true, onClick: onView, testid: `mobile-job-draft-${quote.id}` },
-          { label: "Send", onClick: onSend, testid: `mobile-job-send-${quote.id}` },
-          { label: "PDF", onClick: onPdf, testid: `mobile-job-pdf-${quote.id}` },
-        ]
-      : [
-          { label: "View", onClick: onView, testid: `mobile-job-view-${quote.id}` },
-          { label: "PDF", onClick: onPdf, testid: `mobile-job-pdf-${quote.id}` },
-        ];
-
-  return (
-    <div data-testid={`mobile-job-${quote.id}`} className="bg-zinc-900/60 rounded-none p-4">
-      <div className="flex justify-between items-start mb-1">
-        <h3 className="text-white font-display uppercase tracking-tight font-bold text-lg leading-none">
-          {clientName}
-        </h3>
-        <span className="text-white font-display font-bold text-lg leading-none">{amount}</span>
-      </div>
-      <p className="text-neutral-400 text-[11px] mb-3 truncate">{scope}</p>
-      <div className="flex items-center justify-end gap-2">
-        {buttons.map((btn) => (
-          <button
-            key={btn.label}
-            type="button"
-            onClick={btn.onClick}
-            data-testid={btn.testid}
-            className={`px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] rounded-none border transition-colors ${
-              btn.primary
-                ? "bg-yellow-500 border-yellow-500 text-black hover:bg-yellow-400"
-                : "bg-zinc-800 border-zinc-700 text-neutral-300 hover:bg-zinc-700"
-            }`}
-          >
-            {btn.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function RowAction() { return null; } // unused placeholder kept for export compatibility
-
-function HealthTile({ value, label }) {
-  return (
-    <div className="bg-zinc-900 p-4">
-      <div className="font-display text-2xl font-bold tracking-tight leading-none">{value}</div>
-      <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.18em] font-bold text-neutral-500">
-        {label}
-      </div>
+        {tab === "followup" && (
+          <div className="space-y-2.5" data-testid="followup-list">
+            {loading ? (
+              <>
+                <ActivityRowSkeleton />
+                <ActivityRowSkeleton />
+                <ActivityRowSkeleton />
+              </>
+            ) : (
+              FOLLOWUPS.map((item) => (
+                <FollowupRow key={item.id} item={item} onCall={() => {}} onNudge={() => {}} />
+              ))
+            )}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
