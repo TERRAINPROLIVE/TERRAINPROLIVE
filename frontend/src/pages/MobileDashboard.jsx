@@ -1,3 +1,4 @@
+import "./MobileDashboard.bedrock.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ArrowRight, ShieldAlert, Sparkles, Phone, Send, Clock, Settings, LogOut } from "lucide-react";
